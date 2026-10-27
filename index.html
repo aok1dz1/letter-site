@@ -39,6 +39,7 @@ button{cursor:pointer}
 .env-right{z-index:4;background:var(--rose-dark);clip-path:polygon(100% 0,50% 57%,100% 100%);pointer-events:none}
 .env-flap{z-index:5;background:var(--rose-light);clip-path:polygon(0 0,100% 0,50% 58%);transform-origin:50% 0;transform:rotateX(0deg);backface-visibility:hidden;transition:transform .55s var(--ease);pointer-events:none}
 .seal{position:absolute;z-index:6;left:50%;top:57%;transform:translate(-50%,-50%);width:37px;height:37px;border-radius:50%;background:#f8f2e9;border:1px solid #d4b89e;display:grid;place-items:center;color:#bd9d7d;font-size:17px;transition:opacity .2s ease,transform .35s var(--ease);pointer-events:none}
+.seal span{font-family:Georgia,"Times New Roman",serif;font-variant-emoji:text;font-size:20px;font-weight:400;color:#bd9d7d;line-height:1}
 .seal span{line-height:1}
 .open-hint,.preview-footer{font-size:9px;letter-spacing:.2em;color:#b5a89d;text-align:center}
 .open-hint{margin:0 0 16px}
@@ -166,7 +167,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
             <span class="env-pocket"></span>
             <span class="env-left"></span><span class="env-right"></span>
             <span class="env-flap"></span>
-            <span class="seal"><span>✳</span></span>
+            <span class="seal"><span aria-hidden="true">✧︎</span></span>
           </button>
           <p class="open-hint" id="openHint">НАЖМИ НА КОНВЕРТ</p>
         </div>
@@ -227,7 +228,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
           <span class="peek-rule"></span>
           <span class="peek-copy" id="recipientPeekCopy">Есть вещи, которые хочется сказать.</span>
         </span>
-        <span class="env-pocket"></span><span class="env-left"></span><span class="env-right"></span><span class="env-flap"></span><span class="seal"><span>✳</span></span>
+        <span class="env-pocket"></span><span class="env-left"></span><span class="env-right"></span><span class="env-flap"></span><span class="seal"><span aria-hidden="true">✧︎</span></span>
       </button>
       <p class="recipient-hint" id="recipientHint">НАЖМИ, ЧТОБЫ ОТКРЫТЬ</p>
     </section>
