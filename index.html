@@ -151,6 +151,30 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .full-letter:before,.full-letter:after{display:none!important;content:none!important}
 .letter-divider:before,.letter-divider:after{display:none!important;content:none!important}
 
+
+/* User-selected background image and personal floating photos */
+.visual-settings{border:1px solid #efcad7;background:rgba(255,255,255,.28);padding:12px 14px}
+.visual-settings>summary{cursor:pointer;list-style:none;position:relative;padding:2px 22px 2px 0;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8e6272}
+.visual-settings>summary::-webkit-details-marker{display:none}
+.visual-settings>summary:after{content:"+";position:absolute;right:0;top:0;font-size:16px;line-height:12px;color:#b86f88}
+.visual-settings[open]>summary:after{content:"−"}
+.visual-settings-body{display:grid;gap:13px;margin-top:15px}
+.visual-settings input[type=file]{font-size:12px;letter-spacing:normal;text-transform:none;padding:9px;background:rgba(255,253,251,.8);max-width:100%}
+.file-help{font-size:10px;line-height:1.55;letter-spacing:normal;text-transform:none;color:#a68d94;margin:0}
+.background-preview{height:86px;background-size:cover;background-position:center;border:1px solid #efcad7;box-shadow:0 4px 12px rgba(83,32,52,.06)}
+.personal-photo-previews{display:flex;flex-wrap:wrap;gap:8px}
+.personal-photo-thumb{position:relative;width:54px;height:68px;padding:3px;background:#fff;border:1px solid #e9bfce;box-shadow:0 2px 8px rgba(83,32,52,.08);cursor:pointer}
+.personal-photo-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.personal-photo-thumb span{position:absolute;top:-6px;right:-6px;width:19px;height:19px;border-radius:50%;background:#54283a;color:#fff;font-size:15px;line-height:18px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.image-status{font-size:10px;line-height:1.5;color:#a65f79;margin:0}
+.recipient-view{background-size:cover;background-position:center;background-repeat:no-repeat}
+.recipient-view.has-photo-background{background-color:#fff0f5}
+.floating-photos{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+.floating-photo{position:absolute;display:block;width:clamp(82px,10vw,145px);aspect-ratio:3/4;object-fit:cover;padding:5px 5px 17px;background:#fffdfb;border:1px solid rgba(235,207,218,.9);border-radius:2px;box-shadow:0 12px 30px rgba(74,25,45,.15);opacity:.97;transform:rotate(var(--photo-tilt,0deg))}
+.recipient-topline{z-index:2}
+.recipient-envelope-wrap{position:relative;z-index:2}
+@media(max-width:700px){.floating-photo{width:clamp(48px,13vw,72px);padding:3px 3px 10px;box-shadow:0 7px 17px rgba(74,25,45,.15)}}
+
 </style>
 </head>
 <body>
@@ -212,6 +236,29 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
               </select>
             </label>
           </div>
+          <details class="visual-settings">
+            <summary>Фон и личные фото</summary>
+            <div class="visual-settings-body">
+              <label>Фон экрана получателя
+                <select id="backgroundMode">
+                  <option value="color">Текущий розовый градиент</option>
+                  <option value="image">Моя фотография</option>
+                </select>
+              </label>
+              <label id="backgroundUploadWrap" hidden>Фотография на фон
+                <input id="backgroundUpload" type="file" accept="image/*">
+                <span class="file-help">Фото подгонится под размер экрана без искажения.</span>
+              </label>
+              <div id="backgroundPreview" class="background-preview" hidden></div>
+              <label>Личные фото вокруг конверта
+                <input id="personalPhotos" type="file" accept="image/*" multiple>
+                <span class="file-help">До 6 фото — они появятся в случайных свободных местах вокруг конверта.</span>
+              </label>
+              <div id="personalPhotoPreviews" class="personal-photo-previews"></div>
+              <p class="file-help">Изображения будут сжаты и добавлены в ссылку. Любой, у кого есть ссылка, сможет увидеть эти фото.</p>
+              <p id="imageStatus" class="image-status" aria-live="polite"></p>
+            </div>
+          </details>
           <div class="actions">
             <button type="button" class="button button-secondary" id="refresh">Обновить вид</button>
             <button type="submit" class="button button-primary">Создать ссылку ↗</button>
@@ -228,6 +275,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   </main>
 
   <main id="recipientView" class="recipient-view" hidden>
+    <div id="floatingPhotos" class="floating-photos" aria-hidden="true"></div>
     <div class="recipient-topline"><span id="recipientHeader">ПИСЬМО ДЛЯ ТЕБЯ</span><button id="closeLetter" class="close-letter" type="button" aria-label="Закрыть письмо" hidden>×</button></div>
     <section class="recipient-envelope-wrap" id="recipientWrap">
       <p class="recipient-caption" id="recipientCaption">Кто-то приготовил для тебя несколько слов</p>
@@ -269,6 +317,8 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   const previewEnvelope = $('envelope');
   const closeButton = $('closeLetter');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let selectedBackgroundImage = '';
+  let selectedPersonalPhotos = [];
   let opening = false;
   let opened = false;
   let activeEnvelope = null;
@@ -290,7 +340,10 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       title: fields.title?.value.trim() || 'Несколько важных слов',
       message: fields.message?.value.trim() || '',
       signature: fields.signature?.value.trim() || '',
-      theme: fields.theme?.value || 'rose'
+      theme: fields.theme?.value || 'rose',
+      backgroundMode: $('backgroundMode')?.value === 'image' && selectedBackgroundImage ? 'image' : 'color',
+      backgroundImage: $('backgroundMode')?.value === 'image' ? selectedBackgroundImage : '',
+      floatingPhotos: selectedPersonalPhotos.slice(0, 6)
     };
   }
 
@@ -333,30 +386,185 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     recipientView.style.setProperty('--rose-dark', ({rose:'#ce5a83',blush:'#dc7e9d',berry:'#96345c'})[data.theme] || '#ce5a83');
     recipientView.style.setProperty('--rose-mid', ({rose:'#ec8cac',blush:'#f0a6bc',berry:'#d87596'})[data.theme] || '#ec8cac');
     recipientView.style.setProperty('--rose-light', ({rose:'#ffc1d4',blush:'#ffd5e0',berry:'#f1b1c8'})[data.theme] || '#ffc1d4');
+    const backgroundImage = safeImageData(data.backgroundImage, 140000);
+    if (data.backgroundMode === 'image' && backgroundImage) {
+      recipientView.classList.add('has-photo-background');
+      recipientView.style.backgroundImage = 'linear-gradient(rgba(255,240,245,.14), rgba(255,240,245,.18)), url("' + backgroundImage + '")';
+      recipientView.style.backgroundSize = 'cover';
+      recipientView.style.backgroundPosition = 'center center';
+      recipientView.style.backgroundRepeat = 'no-repeat';
+    } else {
+      recipientView.classList.remove('has-photo-background');
+      recipientView.style.removeProperty('background-image');
+      recipientView.style.removeProperty('background-size');
+      recipientView.style.removeProperty('background-position');
+      recipientView.style.removeProperty('background-repeat');
+    }
+    renderFloatingPhotos(Array.isArray(data.floatingPhotos) ? data.floatingPhotos : []);
   }
 
-  function encodeData(data) {
-    const bytes = new TextEncoder().encode(JSON.stringify(data));
+  function bytesToUrlBase64(bytes) {
     let binary = '';
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    for (let i = 0; i < bytes.length; i += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    }
+    return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/g, '');
   }
-  function decodeData(encoded) {
+
+  function urlBase64ToBytes(value) {
+    const base64 = value.replaceAll('-', '+').replaceAll('_', '/');
+    const binary = atob(base64 + '='.repeat((4 - base64.length % 4) % 4));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  async function encodeData(data) {
+    const raw = new TextEncoder().encode(JSON.stringify(data));
+    if ('CompressionStream' in window && 'DecompressionStream' in window) {
+      try {
+        const stream = new Blob([raw]).stream().pipeThrough(new CompressionStream('gzip'));
+        const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+        if (compressed.length < raw.length) return 'gz_' + bytesToUrlBase64(compressed);
+      } catch (_) {}
+    }
+    return 'raw_' + bytesToUrlBase64(raw);
+  }
+
+  function safeImageData(value, maxLength = 30000) {
+    if (typeof value !== 'string' || value.length > maxLength) return '';
+    const supported = value.startsWith('data:image/webp;base64,') ||
+      value.startsWith('data:image/jpeg;base64,') ||
+      value.startsWith('data:image/png;base64,');
+    if (!supported) return '';
+    const payload = value.slice(value.indexOf(',') + 1);
+    return /^[A-Za-z0-9+/=]+$/.test(payload) ? value : '';
+  }
+
+  async function decodeData(encoded) {
     try {
-      const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-      const binary = atob(base64 + '='.repeat((4 - base64.length % 4) % 4));
-      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      let bytes;
+      if (encoded.startsWith('gz_')) {
+        bytes = urlBase64ToBytes(encoded.slice(3));
+        if (!('DecompressionStream' in window)) return null;
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+        bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+      } else if (encoded.startsWith('raw_')) {
+        bytes = urlBase64ToBytes(encoded.slice(4));
+      } else {
+        bytes = urlBase64ToBytes(encoded);
+      }
       const data = JSON.parse(new TextDecoder().decode(bytes));
       if (typeof data.message !== 'string' || typeof data.title !== 'string') return null;
       return {
-        recipient: String(data.recipient || '').slice(0,80),
-        headerText: String(data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ').slice(0,80),
-        title: String(data.title || 'Несколько важных слов').slice(0,100),
-        message: String(data.message || '').slice(0,5000),
-        signature: String(data.signature || '').slice(0,100),
-        theme: ['rose','blush','berry'].includes(data.theme) ? data.theme : 'rose'
+        recipient: String(data.recipient || '').slice(0, 80),
+        headerText: String(data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ').slice(0, 80),
+        title: String(data.title || 'Несколько важных слов').slice(0, 100),
+        message: String(data.message || '').slice(0, 5000),
+        signature: String(data.signature || '').slice(0, 100),
+        theme: ['rose','blush','berry'].includes(data.theme) ? data.theme : 'rose',
+        backgroundMode: data.backgroundMode === 'image' ? 'image' : 'color',
+        backgroundImage: safeImageData(data.backgroundImage, 140000),
+        floatingPhotos: Array.isArray(data.floatingPhotos)
+          ? data.floatingPhotos.slice(0, 6).map(image => safeImageData(image, 24000)).filter(Boolean)
+          : []
       };
     } catch (_) { return null; }
+  }
+
+  async function compressImageFile(file, maxSide, quality) {
+    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Выбери файл изображения.');
+    let source;
+    let revokeUrl = '';
+    try {
+      if ('createImageBitmap' in window) {
+        source = await createImageBitmap(file);
+      } else {
+        revokeUrl = URL.createObjectURL(file);
+        source = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = revokeUrl;
+        });
+      }
+      const width = source.width || source.naturalWidth;
+      const height = source.height || source.naturalHeight;
+      const scale = Math.min(1, maxSide / Math.max(width, height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
+      const context = canvas.getContext('2d', { alpha: false });
+      if (!context) throw new Error('Не удалось обработать изображение.');
+      context.fillStyle = '#fff8fa';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(source, 0, 0, canvas.width, canvas.height);
+      if (source.close) source.close();
+      let result = canvas.toDataURL('image/webp', quality);
+      if (!result.startsWith('data:image/webp;')) result = canvas.toDataURL('image/jpeg', quality);
+      return result;
+    } finally {
+      if (revokeUrl) URL.revokeObjectURL(revokeUrl);
+    }
+  }
+
+  function renderPhotoPreviews() {
+    const tray = $('personalPhotoPreviews');
+    if (!tray) return;
+    tray.replaceChildren();
+    selectedPersonalPhotos.forEach((src, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'personal-photo-thumb';
+      button.title = 'Удалить фотографию';
+      const image = document.createElement('img');
+      image.src = src;
+      image.alt = '';
+      const remove = document.createElement('span');
+      remove.textContent = '×';
+      button.append(image, remove);
+      button.addEventListener('click', () => {
+        selectedPersonalPhotos = selectedPersonalPhotos.filter((_, itemIndex) => itemIndex !== index);
+        renderPhotoPreviews();
+        $('imageStatus').textContent = selectedPersonalPhotos.length
+          ? 'Выбрано фото: ' + selectedPersonalPhotos.length + '. Нажми на миниатюру, чтобы удалить её.'
+          : 'Личные фотографии удалены.';
+      });
+      tray.append(button);
+    });
+  }
+
+  function renderFloatingPhotos(photos) {
+    const layer = $('floatingPhotos');
+    if (!layer) return;
+    layer.replaceChildren();
+    const validPhotos = photos.map(src => safeImageData(src, 24000)).filter(Boolean).slice(0, 6);
+    const mobile = window.innerWidth <= 700;
+    const slots = mobile ? [
+      { left: '3%', top: '17%' }, { left: '79%', top: '20%' },
+      { left: '1%', top: '42%' }, { left: '81%', top: '45%' },
+      { left: '5%', top: '77%' }, { left: '76%', top: '79%' }
+    ] : [
+      { left: '6%', top: '14%' }, { left: '78%', top: '16%' },
+      { left: '3%', top: '42%' }, { left: '82%', top: '43%' },
+      { left: '8%', top: '76%' }, { left: '77%', top: '78%' }
+    ];
+    for (let i = slots.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [slots[i], slots[j]] = [slots[j], slots[i]];
+    }
+    validPhotos.forEach((src, index) => {
+      const img = document.createElement('img');
+      img.className = 'floating-photo';
+      img.src = src;
+      img.alt = '';
+      img.loading = 'eager';
+      img.decoding = 'async';
+      img.style.left = slots[index].left;
+      img.style.top = slots[index].top;
+      img.style.setProperty('--photo-tilt', (Math.round((Math.random() * 18 - 9) * 10) / 10) + 'deg');
+      layer.append(img);
+    });
   }
 
   function getTargetRect() {
@@ -499,11 +707,76 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   // Preview editor interactions
   function updatePreview() { paintPreview(getData()); }
-  ['recipient','headerText','title','message','signature','theme'].forEach(id => {
+  ['recipient','headerText','title','message','signature','theme','backgroundMode'].forEach(id => {
     $(id)?.addEventListener('input', updatePreview);
     $(id)?.addEventListener('change', updatePreview);
   });
   $('refresh')?.addEventListener('click', updatePreview);
+
+  function syncBackgroundControls() {
+    const isImageMode = $('backgroundMode')?.value === 'image';
+    $('backgroundUploadWrap').hidden = !isImageMode;
+    $('backgroundPreview').hidden = !(isImageMode && selectedBackgroundImage);
+    if (isImageMode && !selectedBackgroundImage) {
+      $('imageStatus').textContent = 'Выбери фото для фона.';
+    } else if (!isImageMode) {
+      $('imageStatus').textContent = selectedPersonalPhotos.length
+        ? 'Фон — розовый градиент. Личных фото: ' + selectedPersonalPhotos.length + '.'
+        : '';
+    }
+  }
+
+  function renderBackgroundPreview() {
+    const preview = $('backgroundPreview');
+    if (selectedBackgroundImage && $('backgroundMode')?.value === 'image') {
+      preview.hidden = false;
+      preview.style.backgroundImage = 'url("' + selectedBackgroundImage + '")';
+    } else {
+      preview.hidden = true;
+      preview.style.removeProperty('background-image');
+    }
+  }
+
+  $('backgroundMode')?.addEventListener('change', () => {
+    syncBackgroundControls();
+    renderBackgroundPreview();
+    updatePreview();
+  });
+
+  $('backgroundUpload')?.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    $('imageStatus').textContent = 'Обрабатываю фоновое фото…';
+    try {
+      selectedBackgroundImage = await compressImageFile(file, 1000, 0.58);
+      $('backgroundMode').value = 'image';
+      syncBackgroundControls();
+      renderBackgroundPreview();
+      $('imageStatus').textContent = 'Фотофон добавлен. При создании ссылки он будет подогнан под экран.';
+      updatePreview();
+    } catch (error) {
+      $('imageStatus').textContent = error?.message || 'Не удалось загрузить фотофон.';
+    }
+  });
+
+  $('personalPhotos')?.addEventListener('change', async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const limited = files.slice(0, 6);
+    $('imageStatus').textContent = 'Обрабатываю личные фотографии…';
+    try {
+      selectedPersonalPhotos = await Promise.all(limited.map(file => compressImageFile(file, 260, 0.55)));
+      renderPhotoPreviews();
+      $('imageStatus').textContent = 'Готово: ' + selectedPersonalPhotos.length + ' фото. Их расположение выберется случайно при открытии письма.';
+    } catch (error) {
+      selectedPersonalPhotos = [];
+      renderPhotoPreviews();
+      $('imageStatus').textContent = error?.message || 'Не удалось обработать фотографии.';
+    }
+    if (files.length > 6) $('imageStatus').textContent += ' Использованы первые 6 файлов.';
+    updatePreview();
+  });
+
   previewEnvelope?.addEventListener('click', () => openLetter(previewEnvelope));
   recipientEnvelope?.addEventListener('click', () => openLetter(recipientEnvelope));
   closeButton?.addEventListener('click', closeLetterView);
@@ -518,7 +791,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     }
   });
 
-  form?.addEventListener('submit', (event) => {
+  form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const data = getData();
     if (!data.message) {
@@ -532,14 +805,34 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       $('copyLink').disabled = true;
       return;
     }
-    // Always create share links on the stable public Production domain,
-    // never on a temporary Vercel deployment/preview URL.
-    const url = new URL('https://letter-site-sand.vercel.app/');
-    url.searchParams.set('letter', encodeData(data));
-    $('shareUrl').value = url.toString();
+    if (data.backgroundMode === 'image' && !data.backgroundImage) {
+      $('imageStatus').textContent = 'Сначала выбери фото для фона или переключи фон обратно на розовый градиент.';
+      $('backgroundMode').focus();
+      return;
+    }
     $('shareResult').hidden = false;
-    $('copyLink').disabled = false;
-    $('copyLink').textContent = 'Копировать';
+    $('shareUrl').value = 'Подготавливаю ссылку…';
+    $('copyLink').disabled = true;
+    $('copyLink').textContent = 'Подготовка…';
+    try {
+      const encoded = await encodeData(data);
+      if (encoded.length > 180000) {
+        $('shareUrl').value = '';
+        $('copyLink').textContent = 'Слишком много данных';
+        $('imageStatus').textContent = 'Ссылка получилась слишком большой. Убери часть личных фото или выбери фотофоны меньшего размера.';
+        return;
+      }
+      const url = new URL('https://letter-site-sand.vercel.app/');
+      url.hash = 'letter=' + encoded;
+      $('shareUrl').value = url.toString();
+      $('copyLink').disabled = false;
+      $('copyLink').textContent = 'Копировать';
+      $('imageStatus').textContent = 'Ссылка готова. Фон и личные фотографии включены в неё.';
+    } catch (error) {
+      $('shareUrl').value = '';
+      $('copyLink').textContent = 'Ошибка';
+      $('imageStatus').textContent = 'Не удалось создать ссылку. Попробуй уменьшить количество изображений.';
+    }
   });
   $('copyLink')?.addEventListener('click', async () => {
     const value = $('shareUrl').value;
@@ -554,15 +847,28 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     }
   });
 
+  syncBackgroundControls();
+  renderBackgroundPreview();
+  renderPhotoPreviews();
+
   const params = new URLSearchParams(window.location.search);
-  const encoded = params.get('letter');
-  const shared = encoded ? decodeData(encoded) : null;
-  if (shared) {
-    window.letterData = shared;
+  const hashParams = new URLSearchParams(window.location.hash.slice(1));
+  const encoded = hashParams.get('letter') || params.get('letter');
+  if (encoded) {
     builder.hidden = true;
     recipientView.hidden = false;
-    fillLetter(shared);
-    document.title = shared.recipient ? `Письмо для ${shared.recipient}` : 'Письмо для тебя';
+    decodeData(encoded).then(shared => {
+      if (shared) {
+        window.letterData = shared;
+        fillLetter(shared);
+        document.title = shared.recipient ? 'Письмо для ' + shared.recipient : 'Письмо для тебя';
+      } else {
+        builder.hidden = false;
+        recipientView.hidden = true;
+        document.title = 'Письмо для тебя';
+        paintPreview(getData());
+      }
+    });
   } else {
     paintPreview(getData());
   }
