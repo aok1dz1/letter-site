@@ -191,6 +191,9 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
           <label>Имя получателя
             <input id="recipient" maxlength="80" placeholder="Например, Анна" autocomplete="off">
           </label>
+          <label>Шапка письма
+            <input id="headerText" maxlength="80" value="ПИСЬМО ДЛЯ ТЕБЯ" placeholder="Например, ПИСЬМО ДЛЯ ТЕБЯ">
+          </label>
           <label>Заголовок письма
             <input id="title" maxlength="100" value="Несколько важных слов">
           </label>
@@ -225,7 +228,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   </main>
 
   <main id="recipientView" class="recipient-view" hidden>
-    <div class="recipient-topline"><span>ПИСЬМО ДЛЯ ТЕБЯ</span><button id="closeLetter" class="close-letter" type="button" aria-label="Закрыть письмо" hidden>×</button></div>
+    <div class="recipient-topline"><span id="recipientHeader">ПИСЬМО ДЛЯ ТЕБЯ</span><button id="closeLetter" class="close-letter" type="button" aria-label="Закрыть письмо" hidden>×</button></div>
     <section class="recipient-envelope-wrap" id="recipientWrap">
       <p class="recipient-caption" id="recipientCaption">Кто-то приготовил для тебя несколько слов</p>
       <button class="envelope recipient-envelope" id="recipientEnvelope" type="button" aria-label="Открыть письмо">
@@ -244,7 +247,6 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     <div class="letter-overlay" id="letterOverlay" aria-hidden="true">
       <article class="full-letter" id="fullLetter" aria-label="Текст письма">
         <div class="letter-decoration letter-decoration-top" aria-hidden="true"></div>
-        <p class="letter-eyebrow">A LITTLE NOTE, JUST FOR YOU</p>
         <h1 id="fullTitle">Несколько важных слов</h1>
         <p class="to-line" id="toLine"></p>
         <div class="letter-divider"><span>✦</span></div>
@@ -284,6 +286,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   function getData() {
     return {
       recipient: fields.recipient?.value.trim() || '',
+      headerText: $('headerText')?.value.trim() || 'ПИСЬМО ДЛЯ ТЕБЯ',
       title: fields.title?.value.trim() || 'Несколько важных слов',
       message: fields.message?.value.trim() || '',
       signature: fields.signature?.value.trim() || '',
@@ -316,6 +319,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   }
 
   function fillLetter(data) {
+    setText('recipientHeader', data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ');
     setText('fullTitle', data.title);
     setText('toLine', data.recipient ? `Для ${data.recipient}` : '');
     setText('fullMessage', data.message);
@@ -346,6 +350,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       if (typeof data.message !== 'string' || typeof data.title !== 'string') return null;
       return {
         recipient: String(data.recipient || '').slice(0,80),
+        headerText: String(data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ').slice(0,80),
         title: String(data.title || 'Несколько важных слов').slice(0,100),
         message: String(data.message || '').slice(0,5000),
         signature: String(data.signature || '').slice(0,100),
@@ -494,7 +499,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   // Preview editor interactions
   function updatePreview() { paintPreview(getData()); }
-  ['recipient','title','message','signature','theme'].forEach(id => {
+  ['recipient','headerText','title','message','signature','theme'].forEach(id => {
     $(id)?.addEventListener('input', updatePreview);
     $(id)?.addEventListener('change', updatePreview);
   });
