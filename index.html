@@ -748,6 +748,10 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     { x: 13, y: 18 }, { x: 87, y: 20 }, { x: 7, y: 45 },
     { x: 93, y: 47 }, { x: 15, y: 78 }, { x: 85, y: 81 }
   ];
+  const PREVIOUS_DEFAULT_PHOTO_POSITIONS = [
+    { x: 7, y: 43 }, { x: 93, y: 43 }, { x: 7, y: 60 },
+    { x: 93, y: 60 }, { x: 13, y: 78 }, { x: 87, y: 78 }
+  ];
   const DEFAULT_PHOTO_POSITIONS = [
     { x: 7, y: 54 }, { x: 93, y: 54 }, { x: 7, y: 68 },
     { x: 93, y: 68 }, { x: 13, y: 82 }, { x: 87, y: 82 }
@@ -881,10 +885,17 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     layer.replaceChildren();
     const validPhotos = Array.isArray(photos) ? photos.map(normalizePhoto).filter(photo => photo.src).slice(0, 6) : [];
     validPhotos.forEach((photo, index) => {
-      const legacy = LEGACY_PHOTO_POSITIONS[index];
-      const isLegacyDefault = legacy && Math.abs(photo.x - legacy.x) < .1 && Math.abs(photo.y - legacy.y) < .1;
-      // Reposition old default layouts away from the greeting on narrow screens.
-      if (isLegacyDefault) {
+      const defaultCandidates = [
+        LEGACY_PHOTO_POSITIONS[index],
+        PREVIOUS_DEFAULT_PHOTO_POSITIONS[index],
+        DEFAULT_PHOTO_POSITIONS[index]
+      ].filter(Boolean);
+      const isGeneratedDefault = defaultCandidates.some(slot =>
+        Math.abs(photo.x - slot.x) < .1 && Math.abs(photo.y - slot.y) < .1
+      );
+      // Reposition generated defaults away from the greeting on mobile and desktop;
+      // only hand-placed, non-default coordinates remain untouched.
+      if (isGeneratedDefault) {
         photo.x = RECIPIENT_PHOTO_POSITIONS[index].x;
         photo.y = RECIPIENT_PHOTO_POSITIONS[index].y;
       }
@@ -1132,12 +1143,14 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       fill: 'forwards'
     });
 
-    try { await activeAnimation.finished; } catch (_) {}
-    activeAnimation = null;
+    const completedOpenAnimation = activeAnimation;
+    try { await completedOpenAnimation.finished; } catch (_) {}
+    if (activeAnimation === completedOpenAnimation) activeAnimation = null;
     setFlightGeometry(target);
     fullLetter.style.opacity = '1';
     fullLetter.style.transform = 'none';
     fullLetter.style.overflow = 'auto';
+    completedOpenAnimation?.cancel();
     opened = true;
     opening = false;
     if (bottomClose) bottomClose.disabled = false;
@@ -1170,8 +1183,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       easing: 'cubic-bezier(.4,0,.7,.2)',
       fill: 'forwards'
     });
-    try { await activeAnimation.finished; } catch (_) {}
-    activeAnimation = null;
+    const completedCloseAnimation = activeAnimation;
+    try { await completedCloseAnimation.finished; } catch (_) {}
+    if (activeAnimation === completedCloseAnimation) activeAnimation = null;
+    fullLetter.style.opacity = '0';
+    fullLetter.style.transform = 'translateY(10px) scale(.985)';
+    completedCloseAnimation?.cancel();
 
     overlay.classList.remove('is-visible');
     overlay.setAttribute('aria-hidden', 'true');
