@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff0f5">
+  <title>Письмо для тебя</title>
+  <meta name="description" content="Красивое письмо, которое открывается прямо из конверта.">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#fff0f5;--bg2:#fff7f8;--paper:#fffdfb;--paper-edge:#ead9d6;--ink:#3e202d;--muted:#9a687a;--rose:#e7789e;--rose-dark:#ce5a83;--rose-light:#ffc1d4;--rose-mid:#ec8cac;--berry:#ad426b;--shadow:0 28px 70px rgba(113,48,73,.14);--ease:cubic-bezier(.22,.8,.22,1)}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"DM Sans",sans-serif}
+body{background:radial-gradient(ellipse at 50% 12%,#fff8fa 0%,var(--bg) 68%,#ffeaf1 100%)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+.app{min-height:100vh;display:grid;grid-template-columns:minmax(440px,1.06fr) minmax(390px,.94fr);gap:clamp(28px,5vw,88px);align-items:center;max-width:1440px;margin:0 auto;padding:clamp(24px,5vw,72px)}
+.preview-panel{display:flex;justify-content:center;min-width:0}
+.preview-paper{position:relative;width:min(100%,650px);min-height:650px;aspect-ratio: .88;background:#f8f4ed;border:1px solid #e5d9cb;border-radius:3px;display:flex;flex-direction:column;align-items:center;padding:clamp(34px,5vw,70px) 28px 24px;overflow:hidden}
+.corner{position:absolute;width:120px;height:120px;border:1px solid #e8dfd2;border-radius:50%;pointer-events:none}
+.corner-top{top:-38px;left:-8px}.corner-bottom{bottom:-55px;right:-40px}
+.preview-heading{text-align:center;position:relative;z-index:1}
+.eyebrow{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#a65f79;margin:0 0 18px}
+.preview-heading h1,.editor-content h2,.full-letter h1{font-family:"Playfair Display",Georgia,serif;font-weight:400;letter-spacing:-.04em}
+.preview-heading h1{font-size:clamp(30px,3.5vw,43px);line-height:1.13;margin:0 0 12px}
+.intro{font-size:13px;line-height:1.7;color:var(--muted);margin:0}
+.envelope-stage{width:min(100%,390px);height:300px;position:relative;display:flex;align-items:center;justify-content:center;margin:auto 0 12px;perspective:1100px}
+.envelope{--env-height:205px;position:relative;overflow:hidden;display:block;border:0;background:transparent;padding:0;width:min(100%,350px);height:var(--env-height);isolation:isolate;perspective:1000px;filter:drop-shadow(0 22px 22px rgba(89,37,57,.12));transition:filter .35s ease,transform .35s ease;outline-offset:8px}
+.envelope:hover{filter:drop-shadow(0 26px 26px rgba(89,37,57,.16))}
+.env-back,.env-pocket,.env-left,.env-right,.env-flap,.letter-peek{position:absolute;inset:0;display:block}
+.env-back{background:var(--rose-light);border:1px solid rgba(148,52,86,.12);z-index:1}
+.letter-peek{left:8%;width:84%;height:100%;top:0;bottom:auto;background:var(--paper);border:1px solid #f0dce3;box-shadow:0 3px 12px rgba(83,32,52,.07);z-index:2;padding:14px 12px 10px;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden;transform:translateY(0) scale(.985);transform-origin:50% 100%;transition:transform .62s cubic-bezier(.2,.72,.2,1);pointer-events:none}
+.peek-topline{font-size:6px;letter-spacing:.22em;color:#ad6e83;margin:4px 0 10px}
+.peek-title{font-family:"Playfair Display",Georgia,serif;font-size:17px;line-height:1.2;color:var(--ink)}
+.peek-rule{width:28px;height:1px;background:#e4a6bb;margin:10px auto}
+.peek-copy{font-family:"Playfair Display",Georgia,serif;font-size:9px;line-height:1.55;color:#755360;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.env-pocket{z-index:3;inset:0;background:var(--rose);clip-path:polygon(0 0,50% 57%,100% 0,100% 100%,0 100%);pointer-events:none}
+.env-left{z-index:4;background:var(--rose-mid);clip-path:polygon(0 0,50% 57%,0 100%);pointer-events:none}
+.env-right{z-index:4;background:var(--rose-dark);clip-path:polygon(100% 0,50% 57%,100% 100%);pointer-events:none}
+.env-flap{z-index:5;background:var(--rose-light);clip-path:polygon(0 0,100% 0,50% 58%);transform-origin:50% 0;transform:rotateX(0deg);backface-visibility:hidden;transition:transform .55s var(--ease);pointer-events:none}
+.seal{position:absolute;z-index:6;left:50%;top:57%;transform:translate(-50%,-50%);width:37px;height:37px;border-radius:50%;background:#f8f2e9;border:1px solid #d4b89e;display:grid;place-items:center;color:#bd9d7d;font-size:17px;transition:opacity .2s ease,transform .35s var(--ease);pointer-events:none}
+.seal span{line-height:1}
+.open-hint,.preview-footer{font-size:9px;letter-spacing:.2em;color:#b5a89d;text-align:center}
+.open-hint{margin:0 0 16px}
+.preview-footer{display:none!important;margin:16px 0 0;font-weight:600}
+.editor-panel{min-width:0;display:flex;justify-content:center}
+.editor-content{width:min(100%,470px)}
+.editor-content>.eyebrow{margin-bottom:14px}
+.editor-content h2{font-size:clamp(38px,4.2vw,53px);line-height:1.04;margin:0 0 18px}
+.editor-lead{color:var(--muted);font-size:13px;line-height:1.75;max-width:410px;margin:0 0 28px}
+#letterForm{display:grid;gap:16px}
+label{display:grid;gap:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8e6272}
+input,textarea,select{width:100%;border:1px solid #efcad7;background:rgba(255,253,251,.72);border-radius:0;color:var(--ink);padding:13px 14px;outline:none;letter-spacing:normal;text-transform:none;font-size:13px;transition:border-color .2s,box-shadow .2s}
+textarea{resize:vertical;min-height:120px;line-height:1.7}
+input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3px rgba(217,124,155,.12)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.button{border:1px solid #efcad7;padding:12px 16px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;min-height:43px;transition:transform .2s,background .2s,border-color .2s}
+.button:active{transform:translateY(1px)}
+.button-secondary{background:transparent;color:var(--ink)}
+.button-secondary:hover{background:#fff7f9}
+.button-primary{background:#3e202d;border-color:#3e202d;color:#fff}
+.button-primary:hover{background:#5b2b40}
+.footnote{font-size:10px;line-height:1.7;color:#a68d94;margin:24px 0 0}
+.share-result{margin-top:8px;padding:15px;border:1px solid #efcad7;background:rgba(255,255,255,.55)}
+.share-result p{font-size:12px;margin:0 0 10px;color:var(--ink)}
+.share-row{display:flex;gap:8px}.share-row input{min-width:0;font-size:11px}.share-row .button{white-space:nowrap}
+.share-result small{display:block;margin-top:9px;font-size:10px;line-height:1.5;color:#a68d94}
+
+/* Recipient mode */
+.recipient-view{min-height:100svh;position:relative;overflow:hidden;padding:clamp(18px,4vw,40px);display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 25%,#fff9fb 0%,#fff0f5 65%,#ffe9f0 100%);isolation:isolate}
+.recipient-topline{position:absolute;top:28px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:.3em;color:#b07a8d}
+.close-letter{position:fixed;top:20px;right:24px;width:42px;height:42px;border:1px solid #efcad7;background:rgba(255,253,251,.85);color:var(--ink);font-size:26px;line-height:1;z-index:30;border-radius:50%;box-shadow:0 4px 18px rgba(83,32,52,.08)}
+.recipient-envelope-wrap{width:min(100%,500px);display:flex;flex-direction:column;align-items:center;transition:opacity .35s ease,transform .35s ease}
+.recipient-caption{font-family:"Playfair Display",Georgia,serif;font-size:clamp(25px,5vw,36px);text-align:center;line-height:1.2;margin:0 0 42px;max-width:420px}
+.recipient-envelope{width:min(100%,420px);height:clamp(190px,48vw,250px);--env-height:250px;flex:none;overflow:hidden}
+.recipient-envelope .letter-peek{top:-7%;height:112%;transform:translateY(28px) scale(.985);padding:14px 16px 10px}
+.recipient-envelope .peek-topline{font-size:7px;margin:8px 0 13px}
+.recipient-envelope .peek-title{font-size:clamp(18px,4vw,24px)}
+.recipient-envelope .peek-copy{font-size:11px}
+.recipient-envelope .seal{width:40px;height:40px}
+.recipient-hint{font-size:9px;letter-spacing:.22em;color:#b38b99;margin:28px 0 0}
+
+/* Staged flight: envelope remains a single stable object; the readable letter is a separate sheet that morphs to a viewport-sized page. */
+.recipient-view.is-opening .recipient-envelope .env-flap{transform:rotateX(180deg);z-index:2}
+.recipient-view.is-opening .recipient-envelope .seal{opacity:0;transform:translate(-50%,-50%) scale(.7)}
+.recipient-view.is-opening .recipient-envelope .letter-peek{transform:translateY(-48px) scale(1);z-index:2}
+.recipient-view.is-opening .recipient-hint,.recipient-view.is-opening .recipient-caption{opacity:0;transition:opacity .25s}
+.letter-overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:clamp(14px,4vw,48px);background:rgba(255,239,245,0);opacity:0;visibility:hidden;pointer-events:none;transition:background .45s ease,opacity .35s ease,visibility 0s linear .7s}
+.letter-overlay.is-visible{opacity:1;visibility:visible;pointer-events:auto;background:rgba(255,239,245,.97);transition:background .45s ease,opacity .35s ease,visibility 0s}
+.full-letter{position:relative;width:min(100%,760px);max-height:min(86svh,980px);overflow:auto;overscroll-behavior:contain;background:var(--paper);border:1px solid #ecd9df;box-shadow:0 24px 90px rgba(104,43,67,.15);padding:clamp(30px,6vw,76px) clamp(24px,8vw,92px);text-align:center;opacity:0;transform:translateY(28px) scale(.88);transform-origin:50% 10%;border-radius:2px;scrollbar-color:#e6a6bd transparent;scrollbar-width:thin}
+.full-letter:before,.full-letter:after{content:"";position:absolute;left:clamp(12px,2.5vw,24px);right:clamp(12px,2.5vw,24px);height:1px;background:#f0e2e5}
+.full-letter:before{top:12px}.full-letter:after{bottom:12px}
+.letter-overlay.is-visible .full-letter{animation:sheet-arrive .78s var(--ease) both}
+@keyframes sheet-arrive{0%{opacity:0;transform:translateY(34px) scale(.86)}55%{opacity:1;transform:translateY(-5px) scale(1.012)}78%{transform:translateY(2px) scale(.997)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.letter-decoration{color:#e4a1b8;letter-spacing:.18em;font-size:14px}
+.letter-decoration-top{margin-bottom:22px}
+.letter-eyebrow{font-size:9px;letter-spacing:.28em;color:#b06e87;text-transform:uppercase;margin:0 0 18px}
+.full-letter h1{font-size:clamp(30px,5vw,48px);line-height:1.12;margin:0 auto 16px;max-width:570px}
+.to-line{font-size:13px;color:#a3657c;margin:0 0 20px}
+.letter-divider{display:flex;align-items:center;gap:15px;justify-content:center;color:#d99ab0;margin:20px auto 26px;max-width:220px}
+.letter-divider:before,.letter-divider:after{content:"";height:1px;background:#ecd4dd;flex:1}
+.full-message{font-family:"Playfair Display",Georgia,serif;font-size:clamp(17px,2.3vw,21px);line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;color:#563541;text-align:left;max-width:560px;margin:0 auto}
+.full-signature{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:20px;color:#a35e79;text-align:right;max-width:560px;margin:28px auto 34px;white-space:pre-wrap;overflow-wrap:anywhere}
+
+.recipient-view.theme-blush{--rose:#ed9bb4;--rose-dark:#dc7e9d;--rose-mid:#f0a6bc;--rose-light:#ffd5e0}
+.recipient-view.theme-berry{--rose:#bf527a;--rose-dark:#96345c;--rose-mid:#d87596;--rose-light:#f1b1c8}
+.recipient-view.theme-rose{--rose:#e7789e;--rose-dark:#ce5a83;--rose-mid:#ec8cac;--rose-light:#ffc1d4}
+@media(max-width:900px){.app{grid-template-columns:1fr;gap:34px;padding:22px}.preview-paper{min-height:580px;width:min(100%,560px)}.editor-content{width:min(100%,560px)}.editor-content h2{font-size:44px}.envelope-stage{height:270px}.envelope{width:min(100%,350px)}}
+@media(max-width:520px){.app{padding:12px;gap:28px}.preview-paper{min-height:520px;padding:38px 18px 20px}.preview-heading h1{font-size:32px}.envelope-stage{height:235px;width:100%}.envelope{width:min(100%,320px);height:185px}.editor-content{padding:10px 7px 28px}.editor-content h2{font-size:40px}.form-row{grid-template-columns:1fr}.actions .button{flex:1}.recipient-view{padding:18px}.recipient-caption{margin-bottom:36px}.recipient-envelope{height:clamp(180px,52vw,230px)}.full-letter{max-height:88svh;padding:34px 23px}.full-message{font-size:17px;line-height:1.8}.close-letter{top:12px;right:12px;width:38px;height:38px}.desktop-only{display:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+.preview-paper.is-opening .env-flap{transform:rotateX(180deg);z-index:2}
+.preview-paper.is-opening .seal{opacity:0;transform:translate(-50%,-50%) scale(.7)}
+.preview-paper.is-opening .letter-peek{transform:translateY(-48px) scale(1);z-index:2}
+
+
+/* Smooth, staged letter flight */
+.recipient-view.is-opening .recipient-envelope .env-flap,
+.preview-paper.is-opening .env-flap{transform:rotateX(180deg);z-index:2}
+.recipient-view.is-opening .recipient-envelope .seal,
+.preview-paper.is-opening .seal{opacity:0;transform:translate(-50%,-50%) scale(.72)}
+/* The sheet remains behind the pocket; only its top edge emerges from the envelope. */
+.recipient-view.is-opening .recipient-envelope .letter-peek,
+.preview-paper.is-opening .letter-peek{transform:translateY(-48px) scale(1);z-index:2}
+.letter-overlay{transition:background .55s ease,opacity .35s ease,visibility 0s linear .8s}
+.letter-overlay.is-visible{transition:background .55s ease,opacity .35s ease,visibility 0s}
+.letter-bottom-actions{opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .5s}
+.letter-overlay.is-visible .letter-bottom-actions{opacity:1;visibility:visible;transition:opacity .3s ease .5s,visibility 0s}
+.full-letter{transform-origin:top left;will-change:transform,left,top;width:min(100%,760px);height:min(86svh,980px);max-height:none;overflow:hidden}
+.letter-overlay.is-visible .full-letter{animation:none}
+.letter-bottom-actions{position:fixed;left:0;right:0;bottom:max(16px,env(safe-area-inset-bottom));z-index:26;display:flex;justify-content:center;pointer-events:none;padding:0 16px}
+.letter-bottom-actions .button{pointer-events:auto;min-width:180px;padding:14px 22px;box-shadow:0 8px 28px rgba(62,32,45,.16)}
+@media(max-width:520px){.full-letter{height:80svh;max-height:none}.letter-bottom-actions{bottom:max(12px,env(safe-area-inset-bottom))}.letter-bottom-actions .button{min-height:44px}}
+
+
+/* Regression fix: closed sheet is constrained to the envelope box, so no paper edge can leak out below. */
+.envelope:not(.is-opening) .letter-peek{top:0!important;height:100%!important;transform:translateY(0) scale(.985)!important}
+.envelope:not(.is-opening) .env-back{z-index:1}
+.envelope:not(.is-opening) .letter-peek{z-index:2}
+.envelope:not(.is-opening) .env-pocket{z-index:3}
+.envelope:not(.is-opening) .env-left,.envelope:not(.is-opening) .env-right{z-index:4}
+.envelope:not(.is-opening) .env-flap{z-index:5}
+
+</style>
+</head>
+<body>
+  <main id="builder" class="app">
+    <section class="preview-panel" aria-label="Предпросмотр письма">
+      <div class="preview-paper">
+        <span class="corner corner-top"></span><span class="corner corner-bottom"></span>
+        <div class="preview-heading">
+          <p class="eyebrow">A LITTLE NOTE, JUST FOR YOU</p>
+          <h1 id="previewTitle">Несколько важных слов</h1>
+          <p class="intro">Иногда самое главное хочется сказать<br class="desktop-only"> лично. Открой письмо.</p>
+        </div>
+        <div class="envelope-stage">
+          <button class="envelope" id="envelope" type="button" aria-label="Открыть письмо">
+            <span class="env-back"></span>
+            <span class="letter-peek" id="letterPeek">
+              <span class="peek-topline">A LITTLE NOTE, JUST FOR YOU</span>
+              <span class="peek-title" id="peekTitle">Несколько важных слов</span>
+              <span class="peek-rule"></span>
+              <span class="peek-copy" id="peekCopy">Есть вещи, которые не всегда получается сказать вслух.</span>
+            </span>
+            <span class="env-pocket"></span>
+            <span class="env-left"></span><span class="env-right"></span>
+            <span class="env-flap"></span>
+            <span class="seal"><span>✳</span></span>
+          </button>
+          <p class="open-hint" id="openHint">НАЖМИ НА КОНВЕРТ</p>
+        </div>
+        <p class="preview-footer">MADE WITH CARE · A PRIVATE LETTER</p>
+      </div>
+    </section>
+    <section class="editor-panel">
+      <div class="editor-content">
+        <p class="eyebrow">A NOTE TO SOMEONE</p>
+        <h2>Скажи это<br>по-особенному.</h2>
+        <p class="editor-lead">Напиши личное письмо, посмотри, как оно открывается, и создай ссылку для одного человека.</p>
+        <form id="letterForm">
+          <label>Имя получателя
+            <input id="recipient" maxlength="80" placeholder="Например, Анна" autocomplete="off">
+          </label>
+          <label>Заголовок письма
+            <input id="title" maxlength="100" value="Несколько важных слов">
+          </label>
+          <label>Текст письма
+            <textarea id="message" rows="5" maxlength="5000">Есть вещи, которые не всегда получается сказать вслух. Поэтому я решил написать тебе это письмо.</textarea>
+          </label>
+          <div class="form-row">
+            <label>Подпись
+              <input id="signature" maxlength="100" placeholder="С теплом, …">
+            </label>
+            <label>Цвет конверта
+              <select id="theme">
+                <option value="rose">Яркая роза</option>
+                <option value="blush">Нежный румянец</option>
+                <option value="berry">Ягодный</option>
+              </select>
+            </label>
+          </div>
+          <div class="actions">
+            <button type="button" class="button button-secondary" id="refresh">Обновить вид</button>
+            <button type="submit" class="button button-primary">Создать ссылку ↗</button>
+          </div>
+          <div id="shareResult" class="share-result" hidden>
+            <p>Твоя ссылка готова</p>
+            <div class="share-row"><input id="shareUrl" readonly aria-label="Ссылка на письмо"><button type="button" id="copyLink" class="button button-primary">Копировать</button></div>
+            <small>Открой ссылку в отдельной вкладке, чтобы проверить версию для получателя.</small>
+          </div>
+        </form>
+        <p class="footnote">Ссылка хранит текст письма в адресе браузера. Не используй её для секретной информации. Для постоянного публичного сервиса потребуется серверное хранение.</p>
+      </div>
+    </section>
+  </main>
+
+  <main id="recipientView" class="recipient-view" hidden>
+    <div class="recipient-topline"><span>ПИСЬМО ДЛЯ ТЕБЯ</span><button id="closeLetter" class="close-letter" type="button" aria-label="Закрыть письмо" hidden>×</button></div>
+    <section class="recipient-envelope-wrap" id="recipientWrap">
+      <p class="recipient-caption" id="recipientCaption">Кто-то приготовил для тебя несколько слов</p>
+      <button class="envelope recipient-envelope" id="recipientEnvelope" type="button" aria-label="Открыть письмо">
+        <span class="env-back"></span>
+        <span class="letter-peek">
+          <span class="peek-topline">A LITTLE NOTE, JUST FOR YOU</span>
+          <span class="peek-title" id="recipientPeekTitle">Несколько важных слов</span>
+          <span class="peek-rule"></span>
+          <span class="peek-copy" id="recipientPeekCopy">Есть вещи, которые хочется сказать.</span>
+        </span>
+        <span class="env-pocket"></span><span class="env-left"></span><span class="env-right"></span><span class="env-flap"></span><span class="seal"><span>✳</span></span>
+      </button>
+      <p class="recipient-hint" id="recipientHint">НАЖМИ, ЧТОБЫ ОТКРЫТЬ</p>
+    </section>
+  </main>
+    <div class="letter-overlay" id="letterOverlay" aria-hidden="true">
+      <article class="full-letter" id="fullLetter" aria-label="Текст письма">
+        <div class="letter-decoration letter-decoration-top">✳</div>
+        <p class="letter-eyebrow">A LITTLE NOTE, JUST FOR YOU</p>
+        <h1 id="fullTitle">Несколько важных слов</h1>
+        <p class="to-line" id="toLine"></p>
+        <div class="letter-divider"><span>✦</span></div>
+        <div class="full-message" id="fullMessage"></div>
+        <p class="full-signature" id="fullSignature"></p>
+      </article>
+      <div class="letter-bottom-actions">
+        <button id="closeLetterBottom" class="button button-primary" type="button">Закрыть письмо</button>
+      </div>
+    </div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const builder = $('builder');
+  const recipientView = $('recipientView');
+  const form = $('letterForm');
+  const overlay = $('letterOverlay');
+  const fullLetter = $('fullLetter');
+  const recipientEnvelope = $('recipientEnvelope');
+  const previewEnvelope = $('envelope');
+  const closeButton = $('closeLetter');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let opening = false;
+  let opened = false;
+  let activeEnvelope = null;
+  let originRect = null;
+  let activeAnimation = null;
+
+  const fields = {
+    recipient: $('recipient'),
+    title: $('title'),
+    message: $('message'),
+    signature: $('signature'),
+    theme: $('theme')
+  };
+
+  function getData() {
+    return {
+      recipient: fields.recipient?.value.trim() || '',
+      title: fields.title?.value.trim() || 'Несколько важных слов',
+      message: fields.message?.value.trim() || '',
+      signature: fields.signature?.value.trim() || '',
+      theme: fields.theme?.value || 'rose'
+    };
+  }
+
+  function setText(id, value) {
+    const el = $(id);
+    if (el) el.textContent = value || '';
+  }
+
+  function paintPreview(data) {
+    setText('previewTitle', data.title);
+    setText('peekTitle', data.title);
+    setText('peekCopy', data.message);
+    const preview = document.querySelector('.preview-paper');
+    if (preview) preview.dataset.theme = data.theme;
+    document.documentElement.dataset.theme = data.theme;
+    const themeMap = {
+      rose: ['#e7789e','#ce5a83','#ec8cac','#ffc1d4'],
+      blush: ['#ed9bb4','#dc7e9d','#f0a6bc','#ffd5e0'],
+      berry: ['#bf527a','#96345c','#d87596','#f1b1c8']
+    };
+    const [rose, dark, mid, light] = themeMap[data.theme] || themeMap.rose;
+    preview?.style.setProperty('--rose', rose);
+    preview?.style.setProperty('--rose-dark', dark);
+    preview?.style.setProperty('--rose-mid', mid);
+    preview?.style.setProperty('--rose-light', light);
+  }
+
+  function fillLetter(data) {
+    setText('fullTitle', data.title);
+    setText('toLine', data.recipient ? `Для ${data.recipient}` : '');
+    setText('fullMessage', data.message);
+    setText('fullSignature', data.signature);
+    setText('recipientCaption', data.recipient ? `${data.recipient}, для тебя есть письмо` : 'Кто-то приготовил для тебя несколько слов');
+    setText('recipientPeekTitle', data.title);
+    setText('recipientPeekCopy', data.message);
+    recipientView.classList.remove('theme-rose', 'theme-blush', 'theme-berry');
+    recipientView.classList.add(`theme-${data.theme}`);
+    recipientView.style.setProperty('--rose', ({rose:'#e7789e',blush:'#ed9bb4',berry:'#bf527a'})[data.theme] || '#e7789e');
+    recipientView.style.setProperty('--rose-dark', ({rose:'#ce5a83',blush:'#dc7e9d',berry:'#96345c'})[data.theme] || '#ce5a83');
+    recipientView.style.setProperty('--rose-mid', ({rose:'#ec8cac',blush:'#f0a6bc',berry:'#d87596'})[data.theme] || '#ec8cac');
+    recipientView.style.setProperty('--rose-light', ({rose:'#ffc1d4',blush:'#ffd5e0',berry:'#f1b1c8'})[data.theme] || '#ffc1d4');
+  }
+
+  function encodeData(data) {
+    const bytes = new TextEncoder().encode(JSON.stringify(data));
+    let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
+  function decodeData(encoded) {
+    try {
+      const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+      const binary = atob(base64 + '='.repeat((4 - base64.length % 4) % 4));
+      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      const data = JSON.parse(new TextDecoder().decode(bytes));
+      if (typeof data.message !== 'string' || typeof data.title !== 'string') return null;
+      return {
+        recipient: String(data.recipient || '').slice(0,80),
+        title: String(data.title || 'Несколько важных слов').slice(0,100),
+        message: String(data.message || '').slice(0,5000),
+        signature: String(data.signature || '').slice(0,100),
+        theme: ['rose','blush','berry'].includes(data.theme) ? data.theme : 'rose'
+      };
+    } catch (_) { return null; }
+  }
+
+  function getTargetRect() {
+    const pad = window.innerWidth <= 520 ? 14 : Math.min(48, Math.max(22, window.innerWidth * .04));
+    const maxWidth = Math.min(760, window.innerWidth - pad * 2);
+    const maxHeight = Math.min(window.innerHeight * .86, 980);
+    return {
+      left: (window.innerWidth - maxWidth) / 2,
+      top: (window.innerHeight - maxHeight) / 2,
+      width: maxWidth,
+      height: maxHeight
+    };
+  }
+
+  function setFlightGeometry(rect) {
+    Object.assign(fullLetter.style, {
+      position: 'fixed',
+      margin: '0',
+      left: `${rect.left}px`,
+      top: `${rect.top}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+      maxHeight: 'none',
+      zIndex: '22'
+    });
+  }
+
+  function clearFlightGeometry() {
+    ['position','margin','left','top','width','height','maxHeight','zIndex','opacity','transform','overflow'].forEach(k => fullLetter.style.removeProperty(k));
+  }
+
+  async function openLetter(envelope) {
+    if (opening || opened) return;
+    opening = true;
+    activeEnvelope = envelope;
+    const recipientMode = envelope === recipientEnvelope;
+    const peek = envelope.querySelector('.letter-peek');
+    if (!peek) { opening = false; return; }
+
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, reduceMotion ? 0 : ms));
+
+    // Stage 1: open the flap; the paper remains behind the pocket, so it can only emerge through the top.
+    envelope.classList.add('is-opening');
+    if (recipientMode) recipientView.classList.add('is-opening');
+    else document.querySelector('.preview-paper')?.classList.add('is-opening');
+    await wait(260);
+
+    // Measure the sheet after its small physical lift. The full-size letter will fly from this exact point.
+    const measured = peek.getBoundingClientRect();
+    const start = {
+      left: measured.left,
+      top: measured.top,
+      width: Math.max(measured.width, 1),
+      height: Math.max(measured.height, 1)
+    };
+    originRect = { ...start };
+    fillLetter(getDataFromCurrentView());
+    const target = getTargetRect();
+
+    // Make the page full-sized in layout first, then animate only transform (GPU-friendly, no text reflow).
+    setFlightGeometry(target);
+    fullLetter.style.transformOrigin = 'top left';
+    fullLetter.style.overflow = 'hidden';
+    fullLetter.style.opacity = '1';
+    const sx = start.width / target.width;
+    const sy = start.height / target.height;
+    const startTransform = `translate(${start.left - target.left}px, ${start.top - target.top}px) scale(${sx}, ${sy})`;
+
+    overlay.classList.add('is-visible');
+    overlay.setAttribute('aria-hidden', 'false');
+    closeButton.hidden = false;
+    const bottomClose = $('closeLetterBottom');
+    if (bottomClose) bottomClose.disabled = true;
+
+    // Commit the exact start pose before the flight.
+    fullLetter.style.transform = startTransform;
+    fullLetter.getBoundingClientRect();
+    activeAnimation = fullLetter.animate([
+      { transform: startTransform, borderRadius: '1px', boxShadow: '0 4px 16px rgba(104,43,67,.08)' },
+      { transform: `translate(${start.left - target.left - 8}px, ${start.top - target.top - 12}px) scale(${sx * 1.015}, ${sy * 1.02})`, offset: .18, borderRadius: '2px', boxShadow: '0 14px 42px rgba(104,43,67,.12)' },
+      { transform: 'translate(0px, 0px) scale(1, 1)', borderRadius: '2px', boxShadow: '0 24px 90px rgba(104,43,67,.15)' }
+    ], { duration: reduceMotion ? 1 : 1180, easing: 'cubic-bezier(.18,.72,.18,1)', fill: 'forwards' });
+
+    try { await activeAnimation.finished; } catch (_) {}
+    activeAnimation = null;
+    setFlightGeometry(target);
+    fullLetter.style.transform = 'none';
+    fullLetter.style.opacity = '1';
+    fullLetter.style.overflow = 'auto';
+    fullLetter.scrollTop = 0;
+    opened = true;
+    opening = false;
+    if (bottomClose) bottomClose.disabled = false;
+    if (recipientMode) $('recipientHint').textContent = 'ПИСЬМО ОТКРЫТО';
+    fullLetter.focus?.({ preventScroll: true });
+  }
+
+  function getDataFromCurrentView() {
+    if (!recipientView.hidden) return window.letterData || getData();
+    return getData();
+  }
+
+  async function closeLetterView() {
+    if (!opened || opening || !activeEnvelope) return;
+    opening = true;
+    const destination = originRect || activeEnvelope.getBoundingClientRect();
+    const target = getTargetRect();
+
+    if (activeAnimation) activeAnimation.cancel();
+    setFlightGeometry(target);
+    fullLetter.style.transformOrigin = 'top left';
+    fullLetter.style.overflow = 'hidden';
+    fullLetter.style.transform = 'none';
+    fullLetter.getBoundingClientRect();
+
+    const sx = destination.width / target.width;
+    const sy = destination.height / target.height;
+    const endTransform = `translate(${destination.left - target.left}px, ${destination.top - target.top}px) scale(${sx}, ${sy})`;
+    activeAnimation = fullLetter.animate([
+      { transform: 'translate(0px, 0px) scale(1, 1)', opacity: 1, borderRadius: '2px' },
+      { transform: `translate(${destination.left - target.left - 5}px, ${destination.top - target.top - 8}px) scale(${sx * 1.02}, ${sy * 1.02})`, offset: .22, opacity: 1, borderRadius: '2px' },
+      { transform: endTransform, opacity: .98, borderRadius: '1px' }
+    ], { duration: reduceMotion ? 1 : 820, easing: 'cubic-bezier(.55,.04,.75,.25)', fill: 'forwards' });
+
+    try { await activeAnimation.finished; } catch (_) {}
+    activeAnimation = null;
+    overlay.classList.remove('is-visible');
+    overlay.setAttribute('aria-hidden', 'true');
+    closeButton.hidden = true;
+    clearFlightGeometry();
+    activeEnvelope.classList.remove('is-opening');
+    recipientView.classList.remove('is-opening');
+    document.querySelector('.preview-paper')?.classList.remove('is-opening');
+    if (!recipientView.hidden) $('recipientHint').textContent = 'НАЖМИ, ЧТОБЫ ОТКРЫТЬ';
+    opened = false;
+    opening = false;
+    activeEnvelope = null;
+    originRect = null;
+  }
+
+  // Preview editor interactions
+  function updatePreview() { paintPreview(getData()); }
+  ['recipient','title','message','signature','theme'].forEach(id => {
+    $(id)?.addEventListener('input', updatePreview);
+    $(id)?.addEventListener('change', updatePreview);
+  });
+  $('refresh')?.addEventListener('click', updatePreview);
+  previewEnvelope?.addEventListener('click', () => openLetter(previewEnvelope));
+  recipientEnvelope?.addEventListener('click', () => openLetter(recipientEnvelope));
+  closeButton?.addEventListener('click', closeLetterView);
+  $('closeLetterBottom')?.addEventListener('click', closeLetterView);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && opened) closeLetterView();
+  });
+  window.addEventListener('resize', () => {
+    if (opened && !opening) {
+      const target = getTargetRect();
+      setFlightGeometry(target);
+    }
+  });
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const data = getData();
+    if (!data.message) {
+      fields.message.focus();
+      return;
+    }
+    if (window.location.protocol === 'file:') {
+      $('shareUrl').value = 'Сначала опубликуй сайт на Vercel, затем создай ссылку на его https:// адресе.';
+      $('shareResult').hidden = false;
+      $('copyLink').textContent = 'Нужен опубликованный сайт';
+      $('copyLink').disabled = true;
+      return;
+    }
+    const url = new URL(window.location.pathname, window.location.origin);
+    url.searchParams.set('letter', encodeData(data));
+    $('shareUrl').value = url.toString();
+    $('shareResult').hidden = false;
+    $('copyLink').disabled = false;
+    $('copyLink').textContent = 'Копировать';
+  });
+  $('copyLink')?.addEventListener('click', async () => {
+    const value = $('shareUrl').value;
+    try {
+      await navigator.clipboard.writeText(value);
+      $('copyLink').textContent = 'Скопировано ✓';
+    } catch (_) {
+      $('shareUrl').focus();
+      $('shareUrl').select();
+      document.execCommand('copy');
+      $('copyLink').textContent = 'Скопировано ✓';
+    }
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('letter');
+  const shared = encoded ? decodeData(encoded) : null;
+  if (shared) {
+    window.letterData = shared;
+    builder.hidden = true;
+    recipientView.hidden = false;
+    fillLetter(shared);
+    document.title = shared.recipient ? `Письмо для ${shared.recipient}` : 'Письмо для тебя';
+  } else {
+    paintPreview(getData());
+  }
+})();
+</script>
+</body>
+</html>
