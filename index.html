@@ -143,6 +143,14 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .envelope:not(.is-opening) .env-left,.envelope:not(.is-opening) .env-right{z-index:4}
 .envelope:not(.is-opening) .env-flap{z-index:5}
 
+
+/* Decorative star is drawn with CSS, never rendered as a platform emoji. */
+.letter-decoration-top{font-size:0!important;color:var(--rose)!important;width:30px;height:30px;margin:0 auto 18px;display:block}
+.letter-decoration-top:before{content:"";display:block;width:26px;height:26px;margin:2px auto;background:var(--rose);clip-path:polygon(50% 0%,61% 36%,100% 50%,61% 61%,50% 100%,39% 61%,0% 50%,39% 36%);opacity:.72}
+.full-letter{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+.full-letter:before,.full-letter:after{display:none!important;content:none!important}
+.letter-divider:before,.letter-divider:after{display:none!important;content:none!important}
+
 </style>
 </head>
 <body>
@@ -235,7 +243,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   </main>
     <div class="letter-overlay" id="letterOverlay" aria-hidden="true">
       <article class="full-letter" id="fullLetter" aria-label="Текст письма">
-        <div class="letter-decoration letter-decoration-top">✳</div>
+        <div class="letter-decoration letter-decoration-top" aria-hidden="true"></div>
         <p class="letter-eyebrow">A LITTLE NOTE, JUST FOR YOU</p>
         <h1 id="fullTitle">Несколько важных слов</h1>
         <p class="to-line" id="toLine"></p>
