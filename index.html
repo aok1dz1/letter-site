@@ -117,6 +117,8 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
 
 /* Smooth, staged letter flight */
+.recipient-view.is-opening .recipient-envelope .letter-peek > *,
+.preview-paper.is-opening .letter-peek > *{opacity:0!important;transition:opacity .18s ease}
 .recipient-view.is-opening .recipient-envelope .env-flap,
 .preview-paper.is-opening .env-flap{transform:rotateX(180deg);z-index:2}
 .recipient-view.is-opening .recipient-envelope .seal,
@@ -232,9 +234,9 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .floating-photo-frame{pointer-events:auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:left,top;transition:filter .55s cubic-bezier(.22,.8,.22,1),box-shadow .55s ease}
 .floating-photo-frame:active{cursor:grabbing}
 .floating-photo-frame .floating-photo-image{pointer-events:none;-webkit-user-drag:none}
-.recipient-view.is-opening .floating-photos{filter:blur(.2px);opacity:1}
-.letter-overlay{background:rgba(255,239,245,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background 1s cubic-bezier(.22,.8,.22,1),opacity .65s ease,backdrop-filter 1s ease,-webkit-backdrop-filter 1s ease,visibility 0s linear .8s}
-.letter-overlay.is-visible{background:rgba(255,239,245,.76);backdrop-filter:blur(.8px);-webkit-backdrop-filter:blur(.8px);transition:background 1s cubic-bezier(.22,.8,.22,1),opacity .65s ease,backdrop-filter 1s ease,-webkit-backdrop-filter 1s ease,visibility 0s}
+.recipient-view.is-opening .floating-photos{filter:blur(.25px);opacity:1}
+.letter-overlay{background:rgba(255,239,245,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background 1.15s cubic-bezier(.22,.8,.22,1),opacity .7s ease,backdrop-filter 1.15s ease,-webkit-backdrop-filter 1.15s ease,visibility 0s linear .8s}
+.letter-overlay.is-visible{background:rgba(255,239,245,.28);backdrop-filter:blur(1.1px);-webkit-backdrop-filter:blur(1.1px);transition:background 1.15s cubic-bezier(.22,.8,.22,1),opacity .7s ease,backdrop-filter 1.15s ease,-webkit-backdrop-filter 1.15s ease,visibility 0s}
 @media(max-width:700px){
   .recipient-view{min-height:100svh;min-height:100dvh;padding-top:max(86px,calc(env(safe-area-inset-top) + 58px));padding-bottom:max(100px,calc(env(safe-area-inset-bottom) + 80px))}
   .recipient-topline{top:max(28px,calc(env(safe-area-inset-top) + 12px));font-size:9px}
@@ -253,7 +255,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   .floating-photo-frame.frame-polaroid{padding:3px 3px 10px}
   .floating-photo-frame.frame-film{padding:6px 4px}
   .floating-photo-frame.frame-gold{padding:3px}
-  .letter-overlay.is-visible{background:rgba(255,239,245,.76)}
+  .letter-overlay.is-visible{background:rgba(255,239,245,.28)}
   .photo-lightbox{padding:max(16px,env(safe-area-inset-top)) 14px max(20px,env(safe-area-inset-bottom))}
 }
 .photo-lightbox{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;background:rgba(255,241,246,.985);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .42s cubic-bezier(.22,.8,.22,1),visibility 0s linear .45s}
@@ -270,6 +272,29 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .photo-lightbox-hint{font-size:10px;letter-spacing:.15em;color:#a97789;text-align:center;margin:0}
 @media(max-width:520px){.photo-lightbox-media{max-width:95vw;max-height:84svh;padding:6px}.photo-lightbox-media img{max-width:calc(95vw - 12px);max-height:calc(84svh - 12px)}.photo-lightbox-media.frame-polaroid{padding:6px 6px 24px}}
 @media(prefers-reduced-motion:reduce){.photo-lightbox,.photo-lightbox-media,.floating-photos,.floating-photo-frame,.letter-overlay{transition-duration:.01ms!important}}
+
+
+/* Crop mask clips the pixels of the image itself; the frame is a separate decorative layer. */
+.photo-crop-mask{position:relative;display:block;flex:1 1 auto;width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;align-self:stretch}
+.photo-crop-mask>.floating-photo-image{display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:cover;flex:none}
+.photo-crop-mask.crop-portrait{aspect-ratio:3/4}
+.photo-crop-mask.crop-landscape{aspect-ratio:4/3;flex:0 0 auto;height:auto;max-height:100%;margin:auto 0}
+.photo-crop-mask.crop-soft{border-radius:22%}
+.photo-crop-mask.crop-circle{aspect-ratio:1/1;width:100%;height:auto;flex:0 0 auto;max-height:100%;border-radius:50%;margin:auto 0}
+.photo-crop-mask.crop-oval{aspect-ratio:.78/1;width:100%;height:auto;flex:0 0 auto;max-height:100%;border-radius:50%;margin:auto 0}
+.photo-crop-mask.crop-arch{border-radius:50% 50% 5px 5px}
+.photo-crop-mask.crop-heart{aspect-ratio:1/1;width:100%;height:auto;flex:0 0 auto;max-height:100%;clip-path:polygon(50% 100%,8% 58%,0 39%,2% 22%,12% 9%,28% 4%,40% 10%,50% 23%,60% 10%,72% 4%,88% 9%,98% 22%,100% 39%,92% 58%);margin:auto 0}
+.photo-crop-mask.crop-stamp{clip-path:polygon(0 0,100% 0,100% 8%,94% 8%,94% 17%,100% 17%,100% 83%,94% 83%,94% 92%,100% 92%,100% 100%,0 100%,0 92%,6% 92%,6% 83%,0 83%,0 17%,6% 17%,6% 8%,0 8%)}
+.floating-photo-frame[data-crop="landscape"]:not(.frame-polaroid),.photo-stage-item[data-crop="landscape"]{aspect-ratio:4/3}
+.floating-photo-frame[data-crop="circle"]:not(.frame-polaroid),.floating-photo-frame[data-crop="heart"]:not(.frame-polaroid),.photo-stage-item[data-crop="circle"],.photo-stage-item[data-crop="heart"]{aspect-ratio:1/1}
+.floating-photo-frame[data-crop="oval"]:not(.frame-polaroid),.photo-stage-item[data-crop="oval"]{aspect-ratio:.78/1}
+.floating-photo-frame[data-crop="arch"]:not(.frame-polaroid),.floating-photo-frame[data-crop="stamp"]:not(.frame-polaroid),.photo-stage-item[data-crop="arch"],.photo-stage-item[data-crop="stamp"]{aspect-ratio:3/4}
+.floating-photo-frame[data-crop="heart"]:not(.frame-polaroid){clip-path:polygon(50% 100%,8% 58%,0 39%,2% 22%,12% 9%,28% 4%,40% 10%,50% 23%,60% 10%,72% 4%,88% 9%,98% 22%,100% 39%,92% 58%)}
+.floating-photo-frame[data-crop="stamp"]:not(.frame-polaroid){clip-path:polygon(0 0,100% 0,100% 8%,94% 8%,94% 17%,100% 17%,100% 83%,94% 83%,94% 92%,100% 92%,100% 100%,0 100%,0 92%,6% 92%,6% 83%,0 83%,0 17%,6% 17%,6% 8%,0 8%)}
+.floating-photo-frame[data-crop="circle"]:not(.frame-polaroid){border-radius:50%}
+.floating-photo-frame[data-crop="oval"]:not(.frame-polaroid){border-radius:50%}
+.floating-photo-frame[data-crop="arch"]:not(.frame-polaroid){border-radius:50% 50% 5px 5px}
+.photo-stage-item[data-crop="circle"],.photo-stage-item[data-crop="oval"],.photo-stage-item[data-crop="arch"]{overflow:hidden}
 
 </style>
 </head>
@@ -329,6 +354,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
                 <option value="rose">Яркая роза</option>
                 <option value="blush">Нежный румянец</option>
                 <option value="berry">Ягодный</option>
+                <option value="lavender">Лавандовый</option>
+                <option value="sage">Шалфей</option>
+                <option value="peach">Персиковый</option>
+                <option value="sky">Небесный</option>
+                <option value="champagne">Шампань</option>
+                <option value="midnight">Лунный</option>
               </select>
             </label>
           </div>
@@ -525,7 +556,13 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     const themeMap = {
       rose: ['#e7789e','#ce5a83','#ec8cac','#ffc1d4'],
       blush: ['#ed9bb4','#dc7e9d','#f0a6bc','#ffd5e0'],
-      berry: ['#bf527a','#96345c','#d87596','#f1b1c8']
+      berry: ['#bf527a','#96345c','#d87596','#f1b1c8'],
+      lavender: ['#aa9bd8','#8070b6','#c3b6e9','#e7e0fa'],
+      sage: ['#9bbda7','#688d76','#b9d4bf','#e0eee3'],
+      peach: ['#f0a17f','#cf7659','#f5b49a','#fbd9c9'],
+      sky: ['#8bbce0','#548fb9','#b4d8f1','#e0f2fc'],
+      champagne: ['#d0b07a','#a98950','#e6d1a6','#f7ecd4'],
+      midnight: ['#8e8fbf','#5c5e8d','#b1b1d7','#e3e3f2']
     };
     const [rose, dark, mid, light] = themeMap[data.theme] || themeMap.rose;
     preview?.style.setProperty('--rose', rose);
@@ -544,12 +581,24 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     setText('recipientCaption', data.recipient ? `${data.recipient}, для тебя есть письмо` : 'Кто-то приготовил для тебя несколько слов');
     setText('recipientPeekTitle', data.title);
     setText('recipientPeekCopy', data.message);
-    recipientView.classList.remove('theme-rose', 'theme-blush', 'theme-berry');
-    recipientView.classList.add(`theme-${data.theme}`);
-    recipientView.style.setProperty('--rose', ({rose:'#e7789e',blush:'#ed9bb4',berry:'#bf527a'})[data.theme] || '#e7789e');
-    recipientView.style.setProperty('--rose-dark', ({rose:'#ce5a83',blush:'#dc7e9d',berry:'#96345c'})[data.theme] || '#ce5a83');
-    recipientView.style.setProperty('--rose-mid', ({rose:'#ec8cac',blush:'#f0a6bc',berry:'#d87596'})[data.theme] || '#ec8cac');
-    recipientView.style.setProperty('--rose-light', ({rose:'#ffc1d4',blush:'#ffd5e0',berry:'#f1b1c8'})[data.theme] || '#ffc1d4');
+    recipientView.classList.remove('theme-rose', 'theme-blush', 'theme-berry', 'theme-lavender', 'theme-sage', 'theme-peach', 'theme-sky', 'theme-champagne', 'theme-midnight');
+    const palette = {
+      rose: ['#e7789e','#ce5a83','#ec8cac','#ffc1d4'],
+      blush: ['#ed9bb4','#dc7e9d','#f0a6bc','#ffd5e0'],
+      berry: ['#bf527a','#96345c','#d87596','#f1b1c8'],
+      lavender: ['#aa9bd8','#8070b6','#c3b6e9','#e7e0fa'],
+      sage: ['#9bbda7','#688d76','#b9d4bf','#e0eee3'],
+      peach: ['#f0a17f','#cf7659','#f5b49a','#fbd9c9'],
+      sky: ['#8bbce0','#548fb9','#b4d8f1','#e0f2fc'],
+      champagne: ['#d0b07a','#a98950','#e6d1a6','#f7ecd4'],
+      midnight: ['#8e8fbf','#5c5e8d','#b1b1d7','#e3e3f2']
+    };
+    const [themeRose, themeDark, themeMid, themeLight] = palette[data.theme] || palette.rose;
+    recipientView.classList.add(`theme-${palette[data.theme] ? data.theme : 'rose'}`);
+    recipientView.style.setProperty('--rose', themeRose);
+    recipientView.style.setProperty('--rose-dark', themeDark);
+    recipientView.style.setProperty('--rose-mid', themeMid);
+    recipientView.style.setProperty('--rose-light', themeLight);
     const backgroundImage = safeImageData(data.backgroundImage, 140000);
     if (data.backgroundMode === 'image' && backgroundImage) {
       recipientView.classList.add('has-photo-background');
@@ -627,7 +676,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         title: String(data.title || 'Несколько важных слов').slice(0, 100),
         message: String(data.message || '').slice(0, 5000),
         signature: String(data.signature || '').slice(0, 100),
-        theme: ['rose','blush','berry'].includes(data.theme) ? data.theme : 'rose',
+        theme: ['rose','blush','berry','lavender','sage','peach','sky','champagne','midnight'].includes(data.theme) ? data.theme : 'rose',
         backgroundMode: data.backgroundMode === 'image' ? 'image' : 'color',
         backgroundImage: safeImageData(data.backgroundImage, 140000),
         floatingPhotos: Array.isArray(data.floatingPhotos)
@@ -700,15 +749,15 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     { x: 93, y: 47 }, { x: 15, y: 78 }, { x: 85, y: 81 }
   ];
   const DEFAULT_PHOTO_POSITIONS = [
-    { x: 7, y: 43 }, { x: 93, y: 43 }, { x: 7, y: 60 },
-    { x: 93, y: 60 }, { x: 13, y: 78 }, { x: 87, y: 78 }
+    { x: 7, y: 54 }, { x: 93, y: 54 }, { x: 7, y: 68 },
+    { x: 93, y: 68 }, { x: 13, y: 82 }, { x: 87, y: 82 }
   ];
   const RECIPIENT_PHOTO_POSITIONS = window.innerWidth <= 700 ? [
-    { x: 9, y: 43 }, { x: 91, y: 43 }, { x: 8, y: 57 },
-    { x: 92, y: 57 }, { x: 10, y: 73 }, { x: 90, y: 73 }
+    { x: 8, y: 54 }, { x: 92, y: 54 }, { x: 8, y: 68 },
+    { x: 92, y: 68 }, { x: 12, y: 82 }, { x: 88, y: 82 }
   ] : [
-    { x: 7, y: 43 }, { x: 93, y: 43 }, { x: 7, y: 60 },
-    { x: 93, y: 60 }, { x: 13, y: 78 }, { x: 87, y: 78 }
+    { x: 7, y: 51 }, { x: 93, y: 51 }, { x: 7, y: 65 },
+    { x: 93, y: 65 }, { x: 13, y: 82 }, { x: 87, y: 82 }
   ];
   const PHOTO_CROPS = ['portrait','landscape','soft','circle','oval','arch','heart','stamp'];
   const PHOTO_FRAMES = ['polaroid','white','pink','gold','film','none'];
@@ -733,19 +782,24 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     const photo = normalizePhoto(rawPhoto, index);
     const frame = document.createElement('div');
     frame.className = (stageMode ? 'photo-stage-item' : 'floating-photo-frame') +
-      ' crop-' + photo.crop + ' frame-' + photo.frame + ' size-' + photo.size;
+      ' frame-' + photo.frame + ' size-' + photo.size;
     frame.dataset.photoIndex = String(index);
+    frame.dataset.crop = photo.crop;
     frame.style.left = photo.x + '%';
     frame.style.top = photo.y + '%';
     frame.style.setProperty('--photo-tilt', photo.rotation + 'deg');
     if (stageMode && index === selectedPhotoIndex) frame.classList.add('is-selected');
+
+    const mask = document.createElement('div');
+    mask.className = 'photo-crop-mask crop-' + photo.crop;
     const img = document.createElement('img');
     img.className = 'floating-photo-image';
     img.src = photo.src;
     img.alt = '';
     img.loading = stageMode ? 'eager' : 'lazy';
     img.decoding = 'async';
-    frame.append(img);
+    mask.append(img);
+    frame.append(mask);
     return frame;
   }
 
@@ -1041,55 +1095,49 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
     const wait = (ms) => new Promise(resolve => setTimeout(resolve, reduceMotion ? 0 : ms));
 
-    // Stage 1: open the flap; the paper remains behind the pocket, so it can only emerge through the top.
+    // Stage 1 — flap and sheet move together. The sheet stays clipped by the envelope
+    // while it rises behind its front folds, so no paper or text can leak through them.
     envelope.classList.add('is-opening');
     if (recipientMode) recipientView.classList.add('is-opening');
     else document.querySelector('.preview-paper')?.classList.add('is-opening');
-    await wait(260);
+    await wait(520);
 
-    // Measure the sheet after its small physical lift. The full-size letter will fly from this exact point.
     const measured = peek.getBoundingClientRect();
-    const start = {
-      left: measured.left,
-      top: measured.top,
-      width: Math.max(measured.width, 1),
-      height: Math.max(measured.height, 1)
-    };
-    originRect = { ...start };
+    originRect = { left: measured.left, top: measured.top, width: measured.width, height: measured.height };
     fillLetter(getDataFromCurrentView());
+
+    // Stage 2 — reveal the actual page at its final size. Never scale live text from
+    // envelope dimensions; it caused clipping, visual jitter and text appearing to float.
     const target = getTargetRect();
-
-    // Make the page full-sized in layout first, then animate only transform (GPU-friendly, no text reflow).
     setFlightGeometry(target);
-    fullLetter.style.transformOrigin = 'top left';
-    fullLetter.style.overflow = 'hidden';
-    fullLetter.style.opacity = '1';
-    const sx = start.width / target.width;
-    const sy = start.height / target.height;
-    const startTransform = `translate(${start.left - target.left}px, ${start.top - target.top}px) scale(${sx}, ${sy})`;
-
+    fullLetter.style.transformOrigin = '50% 12%';
+    fullLetter.style.overflow = 'auto';
+    fullLetter.scrollTop = 0;
+    fullLetter.style.opacity = '0';
+    fullLetter.style.transform = 'translateY(22px) scale(.965)';
     overlay.classList.add('is-visible');
     overlay.setAttribute('aria-hidden', 'false');
     closeButton.hidden = false;
     const bottomClose = $('closeLetterBottom');
     if (bottomClose) bottomClose.disabled = true;
-
-    // Commit the exact start pose before the flight.
-    fullLetter.style.transform = startTransform;
     fullLetter.getBoundingClientRect();
+
     activeAnimation = fullLetter.animate([
-      { transform: startTransform, borderRadius: '1px', boxShadow: '0 4px 16px rgba(104,43,67,.08)' },
-      { transform: `translate(${start.left - target.left - 8}px, ${start.top - target.top - 12}px) scale(${sx * 1.015}, ${sy * 1.02})`, offset: .18, borderRadius: '2px', boxShadow: '0 14px 42px rgba(104,43,67,.12)' },
-      { transform: 'translate(0px, 0px) scale(1, 1)', borderRadius: '2px', boxShadow: '0 24px 90px rgba(104,43,67,.15)' }
-    ], { duration: reduceMotion ? 1 : 1180, easing: 'cubic-bezier(.18,.72,.18,1)', fill: 'forwards' });
+      { opacity: 0, transform: 'translateY(22px) scale(.965)' },
+      { opacity: 1, transform: 'translateY(-2px) scale(1.004)', offset: .76 },
+      { opacity: 1, transform: 'translateY(0) scale(1)' }
+    ], {
+      duration: reduceMotion ? 1 : 720,
+      easing: 'cubic-bezier(.2,.72,.2,1)',
+      fill: 'forwards'
+    });
 
     try { await activeAnimation.finished; } catch (_) {}
     activeAnimation = null;
     setFlightGeometry(target);
-    fullLetter.style.transform = 'none';
     fullLetter.style.opacity = '1';
+    fullLetter.style.transform = 'none';
     fullLetter.style.overflow = 'auto';
-    fullLetter.scrollTop = 0;
     opened = true;
     opening = false;
     if (bottomClose) bottomClose.disabled = false;
@@ -1097,7 +1145,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     fullLetter.focus?.({ preventScroll: true });
   }
 
-  function getDataFromCurrentView() {
+    function getDataFromCurrentView() {
     if (!recipientView.hidden) return window.letterData || getData();
     return getData();
   }
@@ -1105,27 +1153,26 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   async function closeLetterView() {
     if (!opened || opening || !activeEnvelope) return;
     opening = true;
-    const destination = originRect || activeEnvelope.getBoundingClientRect();
-    const target = getTargetRect();
 
     if (activeAnimation) activeAnimation.cancel();
-    setFlightGeometry(target);
-    fullLetter.style.transformOrigin = 'top left';
-    fullLetter.style.overflow = 'hidden';
-    fullLetter.style.transform = 'none';
+    const target = getTargetRect();
+    fullLetter.style.transformOrigin = '50% 12%';
+    fullLetter.style.overflow = 'auto';
     fullLetter.getBoundingClientRect();
 
-    const sx = destination.width / target.width;
-    const sy = destination.height / target.height;
-    const endTransform = `translate(${destination.left - target.left}px, ${destination.top - target.top}px) scale(${sx}, ${sy})`;
+    // Fade the full-size page away before closing the flap; avoids shrinking live
+    // text back through the envelope and leaving glyphs outside the paper texture.
     activeAnimation = fullLetter.animate([
-      { transform: 'translate(0px, 0px) scale(1, 1)', opacity: 1, borderRadius: '2px' },
-      { transform: `translate(${destination.left - target.left - 5}px, ${destination.top - target.top - 8}px) scale(${sx * 1.02}, ${sy * 1.02})`, offset: .22, opacity: 1, borderRadius: '2px' },
-      { transform: endTransform, opacity: .98, borderRadius: '1px' }
-    ], { duration: reduceMotion ? 1 : 820, easing: 'cubic-bezier(.55,.04,.75,.25)', fill: 'forwards' });
-
+      { opacity: 1, transform: 'translateY(0) scale(1)' },
+      { opacity: 0, transform: 'translateY(10px) scale(.985)' }
+    ], {
+      duration: reduceMotion ? 1 : 300,
+      easing: 'cubic-bezier(.4,0,.7,.2)',
+      fill: 'forwards'
+    });
     try { await activeAnimation.finished; } catch (_) {}
     activeAnimation = null;
+
     overlay.classList.remove('is-visible');
     overlay.setAttribute('aria-hidden', 'true');
     closeButton.hidden = true;
@@ -1140,7 +1187,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     originRect = null;
   }
 
-  // Preview editor interactions
+    // Preview editor interactions
   function updatePreview() { paintPreview(getData()); renderPhotoPlacementStage(); }
   ['recipient','headerText','title','message','signature','theme','backgroundMode'].forEach(id => {
     $(id)?.addEventListener('input', updatePreview);
