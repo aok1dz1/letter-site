@@ -126,7 +126,7 @@ async function uploadImage(id: string, key: string, raw: unknown, maxChars: numb
   return data.publicUrl;
 }
 
-const allowedThemes = new Set(["rose", "blush", "berry"]);
+const allowedThemes = new Set(["rose", "blush", "berry", "lavender", "sage", "peach", "sky", "champagne", "midnight"]);
 const allowedCrops = new Set(["portrait", "circle", "oval", "arch", "heart", "soft", "stamp", "landscape"]);
 const allowedFrames = new Set(["polaroid", "white", "pink", "gold", "film", "none"]);
 const allowedSizes = new Set(["small", "medium", "large"]);
