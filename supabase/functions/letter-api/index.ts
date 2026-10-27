@@ -2,10 +2,10 @@ import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const MEDIA_BUCKET = "letter-media";
-const JSON_LIMIT = 1_400_000;
-const MAX_PHOTO_COUNT = 6;
-const MAX_BACKGROUND_CHARS = 180_000;
-const MAX_PHOTO_CHARS = 45_000;
+const JSON_LIMIT = 4_500_000;
+const MAX_PHOTO_COUNT = 15;
+const MAX_BACKGROUND_CHARS = 300_000;
+const MAX_PHOTO_CHARS = 220_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -177,7 +177,7 @@ Deno.serve(async (req: Request) => {
     return json(400, { error: "Choose a background image or switch back to the gradient." });
   }
   if (!Array.isArray(source.floatingPhotos) || source.floatingPhotos.length > MAX_PHOTO_COUNT) {
-    return json(400, { error: "Use no more than six personal photos." });
+    return json(400, { error: "Use no more than fifteen personal photos." });
   }
   let allowed = false;
   try { allowed = await requestRateLimit(req); } catch (error) {
@@ -195,8 +195,11 @@ Deno.serve(async (req: Request) => {
     }
 
     const defaultPositions = [
-      { x: 13, y: 18 }, { x: 87, y: 20 }, { x: 7, y: 45 },
-      { x: 93, y: 47 }, { x: 15, y: 78 }, { x: 85, y: 81 },
+      { x: 8, y: 46 }, { x: 92, y: 46 }, { x: 8, y: 55 },
+      { x: 92, y: 55 }, { x: 8, y: 64 }, { x: 92, y: 64 },
+      { x: 8, y: 73 }, { x: 92, y: 73 }, { x: 8, y: 82 },
+      { x: 92, y: 82 }, { x: 18, y: 89 }, { x: 34, y: 90 },
+      { x: 50, y: 90 }, { x: 66, y: 90 }, { x: 82, y: 89 },
     ];
     const floatingPhotos = [];
     for (let i = 0; i < source.floatingPhotos.length; i++) {
