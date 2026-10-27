@@ -341,7 +341,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       message: fields.message?.value.trim() || '',
       signature: fields.signature?.value.trim() || '',
       theme: fields.theme?.value || 'rose',
-      backgroundMode: $('backgroundMode')?.value === 'image' && selectedBackgroundImage ? 'image' : 'color',
+      backgroundMode: $('backgroundMode')?.value === 'image' ? 'image' : 'color',
       backgroundImage: $('backgroundMode')?.value === 'image' ? selectedBackgroundImage : '',
       floatingPhotos: selectedPersonalPhotos.slice(0, 6)
     };
