@@ -220,6 +220,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .size-large{width:clamp(100px,13vw,178px)}
 @media(max-width:700px){.floating-photo-frame{width:clamp(48px,13vw,72px);box-shadow:0 7px 17px rgba(74,25,45,.15)}.size-small{width:clamp(42px,10vw,58px)}.size-medium{width:clamp(48px,13vw,72px)}.size-large{width:clamp(62px,16vw,88px)}.photo-controls-grid{grid-template-columns:1fr 1fr}}
 
+
+/* Keep the draggable placement thumbnails proportional to their small editor canvas. */
+.photo-stage-item.size-small{width:clamp(32px,8%,42px)}
+.photo-stage-item.size-medium{width:clamp(38px,11%,52px)}
+.photo-stage-item.size-large{width:clamp(44px,14%,64px)}
+
 </style>
 </head>
 <body>
@@ -573,8 +579,10 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     } catch (_) { return null; }
   }
 
-  async function compressImageFile(file, maxSide, quality) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Выбери файл изображения.');
+  async function compressImageFile(file, maxSide, quality, maxDataUrlChars = 170000) {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      throw new Error('Выбери файл изображения.');
+    }
     let source;
     let revokeUrl = '';
     try {
@@ -585,26 +593,46 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         source = await new Promise((resolve, reject) => {
           const image = new Image();
           image.onload = () => resolve(image);
-          image.onerror = reject;
+          image.onerror = () => reject(new Error('Не удалось прочитать изображение. Попробуй JPG, PNG или WebP.'));
           image.src = revokeUrl;
         });
       }
-      const width = source.width || source.naturalWidth;
-      const height = source.height || source.naturalHeight;
-      const scale = Math.min(1, maxSide / Math.max(width, height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.round(width * scale));
-      canvas.height = Math.max(1, Math.round(height * scale));
-      const context = canvas.getContext('2d', { alpha: false });
-      if (!context) throw new Error('Не удалось обработать изображение.');
-      context.fillStyle = '#fff8fa';
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(source, 0, 0, canvas.width, canvas.height);
-      if (source.close) source.close();
-      let result = canvas.toDataURL('image/webp', quality);
-      if (!result.startsWith('data:image/webp;')) result = canvas.toDataURL('image/jpeg', quality);
-      return result;
+
+      const originalWidth = source.width || source.naturalWidth;
+      const originalHeight = source.height || source.naturalHeight;
+      if (!originalWidth || !originalHeight) throw new Error('В изображении не удалось определить размер.');
+
+      let sideLimit = maxSide;
+      let currentQuality = quality;
+      for (let attempt = 0; attempt < 15; attempt++) {
+        const scale = Math.min(1, sideLimit / Math.max(originalWidth, originalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(originalWidth * scale));
+        canvas.height = Math.max(1, Math.round(originalHeight * scale));
+        const context = canvas.getContext('2d', { alpha: false });
+        if (!context) throw new Error('Не удалось обработать изображение.');
+        context.fillStyle = '#fff8fa';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(source, 0, 0, canvas.width, canvas.height);
+
+        let result = canvas.toDataURL('image/webp', currentQuality);
+        if (!result.startsWith('data:image/webp;')) {
+          result = canvas.toDataURL('image/jpeg', currentQuality);
+        }
+        if (result.length <= maxDataUrlChars) return result;
+
+        if (currentQuality > 0.39) {
+          currentQuality = Math.max(0.39, currentQuality - 0.08);
+        } else if (sideLimit > 240) {
+          sideLimit = Math.max(240, Math.floor(sideLimit * 0.78));
+          currentQuality = quality;
+        } else {
+          currentQuality = Math.max(0.25, currentQuality - 0.04);
+        }
+      }
+      throw new Error('Изображение слишком сложное для загрузки. Попробуй другое фото или заранее уменьши его размер.');
     } finally {
+      if (source && typeof source.close === 'function') source.close();
       if (revokeUrl) URL.revokeObjectURL(revokeUrl);
     }
   }
@@ -958,7 +986,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (!file) return;
     $('imageStatus').textContent = 'Обрабатываю фоновое фото…';
     try {
-      selectedBackgroundImage = await compressImageFile(file, 1000, 0.58);
+      selectedBackgroundImage = await compressImageFile(file, 1000, 0.58, 170000);
       $('backgroundMode').value = 'image';
       syncBackgroundControls();
       renderBackgroundPreview();
@@ -975,7 +1003,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     const limited = files.slice(0, 6);
     $('imageStatus').textContent = 'Обрабатываю личные фотографии…';
     try {
-      const encodedPhotos = await Promise.all(limited.map(file => compressImageFile(file, 260, 0.55)));
+      const encodedPhotos = await Promise.all(limited.map(file => compressImageFile(file, 260, 0.55, 42000)));
       selectedPersonalPhotos = encodedPhotos.map((src, index) => ({
         src,
         x: DEFAULT_PHOTO_POSITIONS[index].x,
