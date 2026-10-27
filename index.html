@@ -466,7 +466,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         backgroundMode: data.backgroundMode === 'image' ? 'image' : 'color',
         backgroundImage: safeImageData(data.backgroundImage, 140000),
         floatingPhotos: Array.isArray(data.floatingPhotos)
-          ? data.floatingPhotos.slice(0, 6).map(image => safeImageData(image, 24000)).filter(Boolean)
+          ? data.floatingPhotos.slice(0, 6).map(image => safeImageData(image, 40000)).filter(Boolean)
           : []
       };
     } catch (_) { return null; }
@@ -538,7 +538,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     const layer = $('floatingPhotos');
     if (!layer) return;
     layer.replaceChildren();
-    const validPhotos = photos.map(src => safeImageData(src, 24000)).filter(Boolean).slice(0, 6);
+    const validPhotos = photos.map(src => safeImageData(src, 40000)).filter(Boolean).slice(0, 6);
     const mobile = window.innerWidth <= 700;
     const slots = mobile ? [
       { left: '3%', top: '17%' }, { left: '79%', top: '20%' },
