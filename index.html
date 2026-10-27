@@ -471,6 +471,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let recipientPhotoDrag = null;
   let lightboxPreviousFocus = null;
+  let recipientLetterId = '';
   const SUPABASE_URL = 'https://ennhfbjuyifzughuahhw.supabase.co';
   const SUPABASE_PUBLIC_KEY = 'sb_publishable_CfMmv9VCEfYO_MHFP1Vp-w_Jm0jAgbG';
   const LETTER_API_URL = SUPABASE_URL + '/functions/v1/letter-api';
@@ -925,8 +926,18 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         if (window.letterData && Array.isArray(window.letterData.floatingPhotos)) {
           const raw = window.letterData.floatingPhotos[drag.index];
           if (raw) window.letterData.floatingPhotos[drag.index] = normalizePhoto(raw, drag.index);
+          if (recipientLetterId) {
+            try {
+              localStorage.setItem('letter-photo-layout:' + recipientLetterId, JSON.stringify(
+                window.letterData.floatingPhotos.map((photo, index) => {
+                  const normalized = normalizePhoto(photo, index);
+                  return { x: normalized.x, y: normalized.y };
+                })
+              ));
+            } catch (_) { /* private browsing may disable local storage; in-memory movement still works */ }
+          }
+          renderFloatingPhotos(window.letterData.floatingPhotos);
         }
-        renderFloatingPhotos(window.letterData.floatingPhotos);
       } else {
         openPhotoLightbox(drag.index);
       }
@@ -1326,7 +1337,18 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     recipientView.hidden = false;
     setText('recipientCaption', 'Загружаем письмо…');
     setText('recipientHint', 'ОДИН МОМЕНТ');
+    recipientLetterId = shortId;
     loadStoredLetter(shortId).then(data => {
+      try {
+        const savedLayout = JSON.parse(localStorage.getItem('letter-photo-layout:' + shortId) || 'null');
+        if (Array.isArray(savedLayout) && Array.isArray(data.floatingPhotos)) {
+          data.floatingPhotos = data.floatingPhotos.map((photo, index) => {
+            const saved = savedLayout[index];
+            if (!saved || !Number.isFinite(saved.x) || !Number.isFinite(saved.y)) return photo;
+            return { ...photo, x: Math.max(7, Math.min(93, saved.x)), y: Math.max(9, Math.min(91, saved.y)) };
+          });
+        }
+      } catch (_) { /* ignore malformed or unavailable saved layout */ }
       window.letterData = data;
       fillLetter(data);
       setText('recipientHint', 'НАЖМИ, ЧТОБЫ ОТКРЫТЬ');
