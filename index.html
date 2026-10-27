@@ -1,33 +1,116 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fff0f5">
-<title>Письмо — для тебя</title>
-<style>
-:root{--bg:#fff0f5;--ink:#39232c;--muted:#8d6b78;--paper:#fffafd;--line:#efd2dd;--env:#f29bb5;--env-dark:#d96d91;--accent:#b83f69;--shadow:0 28px 80px #7c304018}*{box-sizing:border-box}body{margin:0;min-height:100svh;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:grid;place-items:center;padding:28px;overflow-x:hidden}.grain{position:fixed;inset:0;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E")}.app{width:min(100%,1060px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.8fr);gap:clamp(24px,5vw,72px);align-items:center}.stage{min-height:690px;position:relative;border:1px solid #e3dbcf;border-radius:3px;background:#f8f4ed;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 22px;overflow:hidden}.stage:before,.stage:after{content:"";position:absolute;width:180px;height:180px;border:1px solid #e4dbcf;border-radius:50%;opacity:.6}.stage:before{top:-100px;left:-70px}.stage:after{right:-100px;bottom:-90px}.eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin:0 0 20px}.stage-title{font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,4vw,43px);font-weight:400;letter-spacing:-.04em;text-align:center;line-height:1.1;margin:0 0 12px}.stage-sub{font-size:13px;color:var(--muted);text-align:center;line-height:1.7;max-width:280px;margin:0 0 44px}.scene{width:min(100%,380px);height:290px;display:grid;place-items:center;perspective:1200px;position:relative}.envelope{position:relative;width:min(100%,350px);height:220px;cursor:pointer;filter:drop-shadow(0 22px 22px #54442e16);isolation:isolate;touch-action:manipulation}
-.envelope:hover{filter:drop-shadow(0 24px 24px #54442e20)}
-.envelope:focus-visible{outline:2px solid var(--accent);outline-offset:7px}
-.back{position:absolute;inset:0;background:var(--env);border:1px solid #c6b49e;border-radius:3px;z-index:1}
-.letter{position:absolute;left:7%;width:86%;height:180px;bottom:0;background:var(--paper);border:1px solid #f0dce3;box-shadow:0 4px 18px #6f29400b;z-index:2;padding:0;text-align:center;overflow:hidden;transform:translate3d(0,0,0);transform-origin:50% 100%;transition:transform .9s cubic-bezier(.22,.72,.2,1),box-shadow .6s ease,border-color .5s ease;backface-visibility:hidden}
-.letter-inner{position:relative;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px 19px 18px;overflow:hidden}
-.letter-inner:before{content:"";position:absolute;inset:9px;border:1px solid #f0dbe3;pointer-events:none}
-.letter-mark{position:relative;font:9px/1.4 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.23em;color:var(--accent);margin:0 0 12px}
-.letter-ornament{position:relative;display:grid;place-items:center;width:25px;height:25px;border:1px solid #e8bdcc;border-radius:50%;color:var(--accent);font-size:12px;margin-bottom:12px;background:#fffafd}
-.letter-content{position:relative;width:100%;font:15px/1.72 Georgia,"Times New Roman",serif;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;overflow-y:auto;max-height:150px;scrollbar-width:thin}
-.letter-signature{position:relative;margin-top:12px;color:var(--accent);font:italic 14px/1.5 Georgia,"Times New Roman",serif;white-space:pre-wrap;overflow-wrap:anywhere}.fold-left,.fold-right,.fold-bottom{position:absolute;inset:0;border-radius:2px}.fold-left{background:#cdb89e;clip-path:polygon(0 0,52% 54%,0 100%);z-index:3}.fold-right{background:#c4ad90;clip-path:polygon(100% 0,48% 54%,100% 100%);z-index:3}.fold-bottom{background:#d5c1a7;clip-path:polygon(0 100%,50% 40%,100% 100%);z-index:4}.flap{position:absolute;inset:0;background:var(--flap);clip-path:polygon(0 0,100% 0,50% 57%);transform-origin:50% 0%;transform:rotateX(0deg);backface-visibility:hidden;transition:transform .82s cubic-bezier(.2,.75,.25,1);z-index:5}
-.seal{position:absolute;left:50%;top:48%;width:36px;height:36px;border-radius:50%;background:#f5f0e9;border:1px solid #b49a7a;z-index:6;transform:translate(-50%,-50%);display:grid;place-items:center;color:#9b7653;font-family:Georgia,serif;font-size:15px;transition:opacity .25s,transform .35s}.scene.open .flap{transform:rotateX(180deg)}
-.scene.open .seal{opacity:0;transform:translate(-50%,-50%) scale(.65) rotate(-25deg)}
-.scene.open .letter{transform:translate3d(0,-130px,0);z-index:2;box-shadow:0 24px 55px #6f294020;border-color:#e8c8d4}
-.scene.open .fold-left,.scene.open .fold-right,.scene.open .fold-bottom{filter:saturate(.96)}
-.stage-foot{position:absolute;bottom:24px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#aaa194}.editor{padding:6px 0}.editor .eyebrow{margin-bottom:15px}.editor h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,4vw,46px);font-weight:400;line-height:1.06;letter-spacing:-.045em;margin:0 0 14px}.intro{font-size:13px;color:var(--muted);line-height:1.8;margin:0 0 30px;max-width:390px}.field{display:block;margin:17px 0 8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#68645b}.editor input,.editor textarea,.editor select{width:100%;border:1px solid var(--line);border-radius:2px;padding:13px 14px;background:#faf7f1;color:var(--ink);font:14px inherit;font-size:14px;outline:none;transition:border-color .2s}.editor textarea{min-height:140px;resize:vertical;line-height:1.7}.editor input:focus,.editor textarea:focus,.editor select:focus{border-color:#9b7653}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}.btn{border:1px solid var(--ink);padding:13px 17px;border-radius:2px;background:var(--ink);color:#fffdf8;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s}.btn:hover{background:transparent;color:var(--ink)}.btn.secondary{background:transparent;color:var(--ink);border-color:var(--line)}.btn.secondary:hover{border-color:var(--ink)}.status{min-height:18px;margin:12px 0 0;color:var(--accent);font-size:12px;line-height:1.6}.small-note{font-size:11px;color:#9b968b;line-height:1.7;margin-top:22px}.close-btn{border:0;border-bottom:1px solid #c9bdad;background:none;color:var(--muted);padding:7px 0;margin-top:18px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}.hidden{display:none!important}.recipient-mode .app{grid-template-columns:1fr}.recipient-mode .stage{min-height:min(850px,94svh);max-width:760px;width:100%;margin:auto}.recipient-mode .editor{display:none}.recipient-mode .stage-title{font-size:clamp(34px,6vw,58px)}.recipient-mode .scene{margin:5px 0 35px}.recipient-mode .stage-foot{bottom:28px}@media(max-width:760px){body{padding:12px}.app{grid-template-columns:1fr;gap:22px}.stage{min-height:530px;padding:30px 18px}.stage-sub{margin-bottom:25px}.scene{height:260px;width:min(100%,330px)}.envelope{height:190px}.letter{height:160px}.letter-inner{padding:17px 15px 14px}.letter-content{font-size:14px;max-height:105px}.scene.open .letter{transform:translate3d(0,-112px,0);z-index:2}.editor{padding:10px 4px 24px}.editor h1{font-size:38px}.recipient-mode .stage{min-height:calc(100svh - 24px)}.recipient-mode .scene{margin-bottom:20px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
-</style></head>
-<body><div class="grain"></div><main class="app" id="app"><section class="stage" aria-label="Предпросмотр письма"><p class="eyebrow" id="topEyebrow">A little note, just for you</p><h2 class="stage-title" id="stageTitle">Несколько важных слов</h2><p class="stage-sub" id="stageSub">Иногда самое главное хочется сказать лично. Открой письмо.</p><div class="scene" id="scene"><div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Открыть письмо"><div class="back"></div><div class="letter" id="letter"><div class="letter-inner"><div class="letter-mark">A LITTLE NOTE</div><div class="letter-ornament" aria-hidden="true">✳</div><div class="letter-content" id="letterContent">Здесь появятся твои слова.</div><div class="letter-signature" id="letterSignature"></div></div></div><div class="fold-left"></div><div class="fold-right"></div><div class="fold-bottom"></div><div class="flap"></div><div class="seal">✳</div></div></div><button class="close-btn hidden" id="closeBtn">Закрыть письмо</button><div class="stage-foot" id="stageFoot">Made with care · A private letter</div></section><section class="editor"><p class="eyebrow">A note to someone</p><h1>Скажи это<br>по-особенному.</h1><p class="intro">Напиши личное письмо, посмотри, как оно откроется, и создай ссылку для одного человека.</p><label class="field" for="recipient">Имя получателя</label><input id="recipient" maxlength="60" placeholder="Например, Анна"><label class="field" for="message">Текст письма</label><textarea id="message" maxlength="2500" placeholder="Напиши то, что действительно важно…">Есть вещи, которые не всегда получается сказать вслух. Поэтому я решил написать тебе это письмо.</textarea><div class="row"><div><label class="field" for="signature">Подпись</label><input id="signature" maxlength="80" placeholder="С теплом, …"></div><div><label class="field" for="theme">Цвет конверта</label><select id="theme"><option value="rose" selected>Яркая роза</option><option value="sand">Тёплый песок</option><option value="olive">Шалфей</option><option value="night">Ночной синий</option></select></div></div><div class="actions"><button class="btn secondary" id="previewBtn">Обновить вид</button><button class="btn" id="shareBtn">Создать ссылку ↗</button></div><p class="status" id="status" role="status"></p><p class="small-note">Это рабочий демо-прототип. Ссылка хранит текст письма в своём адресе. Получатель сможет открыть её, если сайт размещён в интернете. Для публичного запуска понадобится хостинг и серверное хранение писем.</p></section></main>
-<script>
-const $=id=>document.getElementById(id);const scene=$('scene');let opened=false;const themes={rose:{bg:'#fff0f5',env:'#f29bb5',left:'#e783a2',right:'#df7294',bottom:'#eb8ba8',flap:'#ffc0d2',accent:'#b83f69'},sand:{bg:'#f5f0e9',env:'#d8c5ae',left:'#cdb89e',right:'#c4ad90',bottom:'#d5c1a7',flap:'#e2d1bd',accent:'#9b7653'},olive:{bg:'#eff0e8',env:'#c6cbb6',left:'#aeb59a',right:'#9da68a',bottom:'#b7bea3',flap:'#d8dccb',accent:'#667453'},night:{bg:'#edf0f2',env:'#aebdca',left:'#879aaa',right:'#778c9f',bottom:'#9aabba',flap:'#c3cfd8',accent:'#526d83'}};
-function update(){const r=$('recipient').value.trim(),m=$('message').value.trim()||'Здесь появятся твои слова.',s=$('signature').value.trim();$('letterContent').textContent=m;$('letterSignature').textContent=s?(s.startsWith('С ')||s.startsWith('Т ')?s:'С теплом, '+s):'';$('stageTitle').textContent=r?`Для ${r}`:'Несколько важных слов';$('stageSub').textContent=r?`${r}, это письмо написано специально для тебя.`:'Иногда самое главное хочется сказать лично. Открой письмо.';const t=themes[$('theme').value];for(const [k,v] of Object.entries({bg:t.bg,env:t.env,accent:t.accent}))document.documentElement.style.setProperty('--'+k,v);document.querySelector('.fold-left').style.background=t.left;document.querySelector('.fold-right').style.background=t.right;document.querySelector('.fold-bottom').style.background=t.bottom;document.querySelector('.flap').style.background=t.flap;document.body.style.background=t.bg;}
-function openLetter(){if(opened)return;opened=true;scene.classList.add('open');$('closeBtn').classList.remove('hidden');$('stageSub').textContent='';}function closeLetter(){opened=false;scene.classList.remove('open');$('closeBtn').classList.add('hidden');update();}
-$('envelope').addEventListener('click',openLetter);$('envelope').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLetter()}});$('closeBtn').addEventListener('click',closeLetter);$('previewBtn').addEventListener('click',()=>{update();closeLetter();$('status').textContent='Предпросмотр обновлён.'});['recipient','message','signature','theme'].forEach(id=>{const refresh=()=>{update();if(opened)closeLetter()};$(id).addEventListener('input',refresh);$(id).addEventListener('change',refresh)});
-function encode(obj){const bytes=new TextEncoder().encode(JSON.stringify(obj));let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};function decode(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const bin=atob(s);return JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,c=>c.charCodeAt(0))))}
-function loadShared(){const match=location.hash.match(/#letter=([^&]+)/);if(!match)return false;try{const d=decode(match[1]);$('recipient').value=d.r||'';$('message').value=d.m||'';$('signature').value=d.s||'';$('theme').value=d.t||'rose';update();$('app').classList.add('recipient-mode');$('stageFoot').textContent='A private letter, made with care';return true}catch(e){return false}}
-$('shareBtn').addEventListener('click',async()=>{update();const data={r:$('recipient').value,m:$('message').value,s:$('signature').value,t:$('theme').value};const url=location.href.split('#')[0]+'#letter='+encode(data);try{await navigator.clipboard.writeText(url);$('status').textContent='Ссылка скопирована. После публикации сайта отправь её получателю.'}catch(e){$('status').textContent='Ссылка готова — скопируй её из поля ниже.';let f=$('urlFallback');if(!f){f=document.createElement('textarea');f.id='urlFallback';f.readOnly=true;f.style.marginTop='12px';f.style.minHeight='80px';$('status').after(f)}f.value=url;f.focus();f.select()}});loadShared();update();
-</script></body></html>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff0f5">
+  <title>Письмо для тебя</title>
+  <meta name="description" content="Красивое письмо, которое открывается прямо из конверта.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main id="builder" class="app">
+    <section class="preview-panel" aria-label="Предпросмотр письма">
+      <div class="preview-paper">
+        <span class="corner corner-top"></span><span class="corner corner-bottom"></span>
+        <div class="preview-heading">
+          <p class="eyebrow">A LITTLE NOTE, JUST FOR YOU</p>
+          <h1 id="previewTitle">Несколько важных слов</h1>
+          <p class="intro">Иногда самое главное хочется сказать<br class="desktop-only"> лично. Открой письмо.</p>
+        </div>
+        <div class="envelope-stage">
+          <button class="envelope" id="envelope" type="button" aria-label="Открыть письмо">
+            <span class="env-back"></span>
+            <span class="letter-peek" id="letterPeek">
+              <span class="peek-topline">A LITTLE NOTE, JUST FOR YOU</span>
+              <span class="peek-title" id="peekTitle">Несколько важных слов</span>
+              <span class="peek-rule"></span>
+              <span class="peek-copy" id="peekCopy">Есть вещи, которые не всегда получается сказать вслух.</span>
+            </span>
+            <span class="env-pocket"></span>
+            <span class="env-left"></span><span class="env-right"></span>
+            <span class="env-flap"></span>
+            <span class="seal"><span>✳</span></span>
+          </button>
+          <p class="open-hint" id="openHint">НАЖМИ НА КОНВЕРТ</p>
+        </div>
+        <p class="preview-footer">MADE WITH CARE · A PRIVATE LETTER</p>
+      </div>
+    </section>
+    <section class="editor-panel">
+      <div class="editor-content">
+        <p class="eyebrow">A NOTE TO SOMEONE</p>
+        <h2>Скажи это<br>по-особенному.</h2>
+        <p class="editor-lead">Напиши личное письмо, посмотри, как оно открывается, и создай ссылку для одного человека.</p>
+        <form id="letterForm">
+          <label>Имя получателя
+            <input id="recipient" maxlength="80" placeholder="Например, Анна" autocomplete="off">
+          </label>
+          <label>Заголовок письма
+            <input id="title" maxlength="100" value="Несколько важных слов">
+          </label>
+          <label>Текст письма
+            <textarea id="message" rows="5" maxlength="5000">Есть вещи, которые не всегда получается сказать вслух. Поэтому я решил написать тебе это письмо.</textarea>
+          </label>
+          <div class="form-row">
+            <label>Подпись
+              <input id="signature" maxlength="100" placeholder="С теплом, …">
+            </label>
+            <label>Цвет конверта
+              <select id="theme">
+                <option value="rose">Яркая роза</option>
+                <option value="blush">Нежный румянец</option>
+                <option value="berry">Ягодный</option>
+              </select>
+            </label>
+          </div>
+          <div class="actions">
+            <button type="button" class="button button-secondary" id="refresh">Обновить вид</button>
+            <button type="submit" class="button button-primary">Создать ссылку ↗</button>
+          </div>
+          <div id="shareResult" class="share-result" hidden>
+            <p>Твоя ссылка готова</p>
+            <div class="share-row"><input id="shareUrl" readonly aria-label="Ссылка на письмо"><button type="button" id="copyLink" class="button button-primary">Копировать</button></div>
+            <small>Открой ссылку в отдельной вкладке, чтобы проверить версию для получателя.</small>
+          </div>
+        </form>
+        <p class="footnote">Ссылка хранит текст письма в адресе браузера. Не используй её для секретной информации. Для постоянного публичного сервиса потребуется серверное хранение.</p>
+      </div>
+    </section>
+  </main>
+
+  <main id="recipientView" class="recipient-view" hidden>
+    <div class="recipient-topline"><span>ПИСЬМО ДЛЯ ТЕБЯ</span><button id="closeLetter" class="close-letter" type="button" aria-label="Закрыть письмо" hidden>×</button></div>
+    <section class="recipient-envelope-wrap" id="recipientWrap">
+      <p class="recipient-caption" id="recipientCaption">Кто-то приготовил для тебя несколько слов</p>
+      <button class="envelope recipient-envelope" id="recipientEnvelope" type="button" aria-label="Открыть письмо">
+        <span class="env-back"></span>
+        <span class="letter-peek">
+          <span class="peek-topline">A LITTLE NOTE, JUST FOR YOU</span>
+          <span class="peek-title" id="recipientPeekTitle">Несколько важных слов</span>
+          <span class="peek-rule"></span>
+          <span class="peek-copy" id="recipientPeekCopy">Есть вещи, которые хочется сказать.</span>
+        </span>
+        <span class="env-pocket"></span><span class="env-left"></span><span class="env-right"></span><span class="env-flap"></span><span class="seal"><span>✳</span></span>
+      </button>
+      <p class="recipient-hint" id="recipientHint">НАЖМИ, ЧТОБЫ ОТКРЫТЬ</p>
+    </section>
+  </main>
+    <div class="letter-overlay" id="letterOverlay" aria-hidden="true">
+      <article class="full-letter" id="fullLetter" aria-label="Текст письма">
+        <div class="letter-decoration letter-decoration-top">✳</div>
+        <p class="letter-eyebrow">A LITTLE NOTE, JUST FOR YOU</p>
+        <h1 id="fullTitle">Несколько важных слов</h1>
+        <p class="to-line" id="toLine"></p>
+        <div class="letter-divider"><span>✦</span></div>
+        <div class="full-message" id="fullMessage"></div>
+        <p class="full-signature" id="fullSignature"></p>
+        <div class="letter-decoration letter-decoration-bottom">— with care —</div>
+      </article>
+    </div>
+  <script src="./script.js"></script>
+</body>
+</html>
