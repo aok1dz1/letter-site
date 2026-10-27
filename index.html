@@ -261,8 +261,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .photo-lightbox{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;background:rgba(255,241,246,.985);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .42s cubic-bezier(.22,.8,.22,1),visibility 0s linear .45s}
 .photo-lightbox.is-visible{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .42s cubic-bezier(.22,.8,.22,1),visibility 0s}
 .photo-lightbox-close{position:absolute;right:max(18px,env(safe-area-inset-right));top:max(18px,env(safe-area-inset-top));width:44px;height:44px;border:1px solid #eac8d5;border-radius:50%;background:rgba(255,255,255,.9);color:#3e202d;font-size:28px;line-height:1;z-index:2;box-shadow:0 5px 18px rgba(83,32,52,.1)}
-.photo-lightbox-media{display:flex;align-items:center;justify-content:center;max-width:96vw;max-height:86svh;padding:10px;background:#fffdfb;border:1px solid #ecd9df;box-shadow:0 18px 55px rgba(104,43,67,.18);transition:transform .45s cubic-bezier(.22,.8,.22,1),box-shadow .45s ease}
-.photo-lightbox-media img{display:block;max-width:min(92vw,1100px);max-height:calc(86svh - 24px);width:auto;height:auto;object-fit:contain;border-radius:0;clip-path:none}
+.photo-lightbox-media{display:flex;align-items:center;justify-content:center;max-width:96vw;max-height:78svh;padding:10px;background:#fffdfb;border:1px solid #ecd9df;box-shadow:0 18px 55px rgba(104,43,67,.18);transition:box-shadow .25s ease;overflow:visible;touch-action:none;user-select:none;-webkit-user-select:none}
+.photo-lightbox-media img{display:block;max-width:min(92vw,1100px);max-height:calc(78svh - 24px);width:auto;height:auto;object-fit:contain;border-radius:0;clip-path:none;transform:translate(0px,0px) scale(1);transform-origin:center center;will-change:transform;touch-action:none;user-select:none;-webkit-user-drag:none}
+.photo-zoom-controls{display:flex;align-items:center;justify-content:center;gap:10px}
+.photo-zoom-controls button{min-width:46px;height:42px;padding:0 13px;border:1px solid #eac8d5;border-radius:999px;background:rgba(255,255,255,.92);color:#3e202d;font-size:21px;box-shadow:0 5px 18px rgba(83,32,52,.08)}
+#photoZoomReset{min-width:76px;font-size:12px;letter-spacing:.08em}
+.photo-zoom-controls button:active{transform:scale(.97)}
 .photo-lightbox-media.frame-polaroid{padding:10px 10px 34px;background:#fffdfb}
 .photo-lightbox-media.frame-pink{border:6px solid #f1a4bd;background:#fff5f8}
 .photo-lightbox-media.frame-gold{border:6px solid #c5a16c;background:#fff8eb}
@@ -270,7 +274,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .photo-lightbox-media.frame-white{border:7px solid #fff;background:#fff}
 .photo-lightbox-media.frame-none{border:0;background:transparent;padding:0;box-shadow:none}
 .photo-lightbox-hint{font-size:10px;letter-spacing:.15em;color:#a97789;text-align:center;margin:0}
-@media(max-width:520px){.photo-lightbox-media{max-width:95vw;max-height:84svh;padding:6px}.photo-lightbox-media img{max-width:calc(95vw - 12px);max-height:calc(84svh - 12px)}.photo-lightbox-media.frame-polaroid{padding:6px 6px 24px}}
+@media(max-width:520px){.photo-lightbox-media{max-width:95vw;max-height:76svh;padding:6px}.photo-lightbox-media img{max-width:calc(95vw - 12px);max-height:calc(76svh - 12px)}.photo-lightbox-media.frame-polaroid{padding:6px 6px 24px}.photo-zoom-controls button{min-width:44px;height:42px}}
 @media(prefers-reduced-motion:reduce){.photo-lightbox,.photo-lightbox-media,.floating-photos,.floating-photo-frame,.letter-overlay{transition-duration:.01ms!important}}
 
 
@@ -379,7 +383,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
               <div id="backgroundPreview" class="background-preview" hidden></div>
               <label>Личные фото вокруг конверта
                 <input id="personalPhotos" type="file" accept="image/*" multiple>
-                <span class="file-help">До 6 фото. Нажми на миниатюру, выбери оформление и перетащи фото на нужное место макета.</span>
+                <span class="file-help">До 15 фото. Можно добавлять снимки несколькими загрузками — уже выбранные фото сохранятся. Нажми на миниатюру, настрой оформление и перетащи её на макет.</span>
               </label>
               <div id="personalPhotoPreviews" class="personal-photo-previews"></div>
               <div id="photoPlacementEditor" class="photo-placement-editor" hidden>
@@ -483,7 +487,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       <div id="photoLightboxMedia" class="photo-lightbox-media">
         <img id="photoLightboxImage" alt="">
       </div>
-      <p id="photoLightboxHint" class="photo-lightbox-hint">ФОТО НА ВЕСЬ ЭКРАН</p>
+      <div class="photo-zoom-controls" aria-label="Управление масштабом фотографии">
+        <button id="photoZoomOut" type="button" aria-label="Уменьшить">−</button>
+        <button id="photoZoomReset" type="button" aria-label="Сбросить масштаб">100%</button>
+        <button id="photoZoomIn" type="button" aria-label="Увеличить">+</button>
+      </div>
+      <p id="photoLightboxHint" class="photo-lightbox-hint">УВЕЛИЧИВАЙ КНОПКАМИ ИЛИ ДВУМЯ ПАЛЬЦАМИ</p>
     </div>
 <script>
 (() => {
@@ -503,6 +512,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   let recipientPhotoDrag = null;
   let lightboxPreviousFocus = null;
   let recipientLetterId = '';
+  const photoZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null, pan: null };
   const SUPABASE_URL = 'https://ennhfbjuyifzughuahhw.supabase.co';
   const SUPABASE_PUBLIC_KEY = 'sb_publishable_CfMmv9VCEfYO_MHFP1Vp-w_Jm0jAgbG';
   const LETTER_API_URL = SUPABASE_URL + '/functions/v1/letter-api';
@@ -753,15 +763,24 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     { x: 93, y: 60 }, { x: 13, y: 78 }, { x: 87, y: 78 }
   ];
   const DEFAULT_PHOTO_POSITIONS = [
-    { x: 7, y: 54 }, { x: 93, y: 54 }, { x: 7, y: 68 },
-    { x: 93, y: 68 }, { x: 13, y: 82 }, { x: 87, y: 82 }
+    { x: 8, y: 46 }, { x: 92, y: 46 }, { x: 8, y: 55 },
+    { x: 92, y: 55 }, { x: 8, y: 64 }, { x: 92, y: 64 },
+    { x: 8, y: 73 }, { x: 92, y: 73 }, { x: 8, y: 82 },
+    { x: 92, y: 82 }, { x: 18, y: 89 }, { x: 34, y: 90 },
+    { x: 50, y: 90 }, { x: 66, y: 90 }, { x: 82, y: 89 }
   ];
   const RECIPIENT_PHOTO_POSITIONS = window.innerWidth <= 700 ? [
-    { x: 8, y: 54 }, { x: 92, y: 54 }, { x: 8, y: 68 },
-    { x: 92, y: 68 }, { x: 12, y: 82 }, { x: 88, y: 82 }
+    { x: 8, y: 46 }, { x: 92, y: 46 }, { x: 8, y: 55 },
+    { x: 92, y: 55 }, { x: 8, y: 64 }, { x: 92, y: 64 },
+    { x: 8, y: 73 }, { x: 92, y: 73 }, { x: 8, y: 82 },
+    { x: 92, y: 82 }, { x: 18, y: 89 }, { x: 34, y: 90 },
+    { x: 50, y: 90 }, { x: 66, y: 90 }, { x: 82, y: 89 }
   ] : [
-    { x: 7, y: 51 }, { x: 93, y: 51 }, { x: 7, y: 65 },
-    { x: 93, y: 65 }, { x: 13, y: 82 }, { x: 87, y: 82 }
+    { x: 7, y: 47 }, { x: 93, y: 47 }, { x: 7, y: 56 },
+    { x: 93, y: 56 }, { x: 7, y: 65 }, { x: 93, y: 65 },
+    { x: 7, y: 74 }, { x: 93, y: 74 }, { x: 7, y: 83 },
+    { x: 93, y: 83 }, { x: 18, y: 90 }, { x: 34, y: 90 },
+    { x: 50, y: 90 }, { x: 66, y: 90 }, { x: 82, y: 90 }
   ];
   const PHOTO_CROPS = ['portrait','landscape','soft','circle','oval','arch','heart','stamp'];
   const PHOTO_FRAMES = ['polaroid','white','pink','gold','film','none'];
@@ -907,6 +926,40 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     });
   }
 
+  function applyPhotoZoom() {
+    photoZoom.scale = Math.max(1, Math.min(5, photoZoom.scale));
+    if (photoZoom.scale <= 1) {
+      photoZoom.scale = 1;
+      photoZoom.x = 0;
+      photoZoom.y = 0;
+    } else {
+      const rect = photoLightboxImage.getBoundingClientRect();
+      const baseWidth = photoLightboxImage.offsetWidth || rect.width / photoZoom.scale;
+      const baseHeight = photoLightboxImage.offsetHeight || rect.height / photoZoom.scale;
+      const maxX = Math.max(0, baseWidth * (photoZoom.scale - 1) / 2);
+      const maxY = Math.max(0, baseHeight * (photoZoom.scale - 1) / 2);
+      photoZoom.x = Math.max(-maxX, Math.min(maxX, photoZoom.x));
+      photoZoom.y = Math.max(-maxY, Math.min(maxY, photoZoom.y));
+    }
+    photoLightboxImage.style.transform = 'translate(' + photoZoom.x + 'px,' + photoZoom.y + 'px) scale(' + photoZoom.scale + ')';
+    setText('photoZoomReset', Math.round(photoZoom.scale * 100) + '%');
+  }
+
+  function resetPhotoZoom() {
+    photoZoom.scale = 1;
+    photoZoom.x = 0;
+    photoZoom.y = 0;
+    photoZoom.pointers.clear();
+    photoZoom.pinch = null;
+    photoZoom.pan = null;
+    applyPhotoZoom();
+  }
+
+  function changePhotoZoom(delta) {
+    photoZoom.scale = Math.max(1, Math.min(5, photoZoom.scale + delta));
+    applyPhotoZoom();
+  }
+
   function openPhotoLightbox(index) {
     const photos = window.letterData && Array.isArray(window.letterData.floatingPhotos)
       ? window.letterData.floatingPhotos : [];
@@ -914,6 +967,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     const photo = raw ? normalizePhoto(raw, index) : null;
     if (!photo || !photo.src) return;
     lightboxPreviousFocus = document.activeElement;
+    resetPhotoZoom();
     photoLightboxImage.src = photo.src;
     photoLightboxImage.alt = 'Личная фотография ' + (index + 1);
     photoLightboxMedia.className = 'photo-lightbox-media frame-' + photo.frame;
@@ -928,9 +982,74 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     photoLightbox.setAttribute('aria-hidden', 'true');
     document.body.style.removeProperty('overflow');
     photoLightboxImage.removeAttribute('src');
+    resetPhotoZoom();
     if (lightboxPreviousFocus && typeof lightboxPreviousFocus.focus === 'function') {
       lightboxPreviousFocus.focus({ preventScroll: true });
     }
+  }
+
+  function setupPhotoZoomGestures() {
+    const media = photoLightboxMedia;
+    media.addEventListener('pointerdown', (event) => {
+      if (!photoLightbox.classList.contains('is-visible') || !event.target.closest('#photoLightboxImage')) return;
+      event.preventDefault();
+      media.setPointerCapture?.(event.pointerId);
+      photoZoom.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (photoZoom.pointers.size >= 2) {
+        const points = [...photoZoom.pointers.values()];
+        photoZoom.pinch = {
+          distance: Math.hypot(points[0].x-points[1].x, points[0].y-points[1].y) || 1,
+          scale: photoZoom.scale
+        };
+        photoZoom.pan = null;
+      } else {
+        photoZoom.pan = { x: event.clientX, y: event.clientY, startX: photoZoom.x, startY: photoZoom.y };
+      }
+    });
+
+    media.addEventListener('pointermove', (event) => {
+      if (!photoZoom.pointers.has(event.pointerId)) return;
+      event.preventDefault();
+      photoZoom.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      if (photoZoom.pointers.size >= 2 && photoZoom.pinch) {
+        const points=[...photoZoom.pointers.values()];
+        const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)||1;
+        photoZoom.scale=Math.max(1,Math.min(5,photoZoom.pinch.scale*distance/photoZoom.pinch.distance));
+        applyPhotoZoom();
+      } else if (photoZoom.scale > 1 && photoZoom.pan) {
+        photoZoom.x=photoZoom.pan.startX+(event.clientX-photoZoom.pan.x);
+        photoZoom.y=photoZoom.pan.startY+(event.clientY-photoZoom.pan.y);
+        applyPhotoZoom();
+      }
+    });
+
+    const endPointer=(event)=>{
+      if (!photoZoom.pointers.has(event.pointerId)) return;
+      photoZoom.pointers.delete(event.pointerId);
+      const remaining=[...photoZoom.pointers.values()];
+      if (remaining.length >= 2) {
+        photoZoom.pinch={distance:Math.hypot(remaining[0].x-remaining[1].x,remaining[0].y-remaining[1].y)||1,scale:photoZoom.scale};
+      } else if (remaining.length === 1) {
+        const point=remaining[0];
+        photoZoom.pinch=null;
+        photoZoom.pan={x:point.x,y:point.y,startX:photoZoom.x,startY:photoZoom.y};
+      } else {
+        photoZoom.pinch=null;
+        photoZoom.pan=null;
+      }
+    };
+    media.addEventListener('pointerup',endPointer);
+    media.addEventListener('pointercancel',endPointer);
+
+    media.addEventListener('wheel',(event)=>{
+      if (!photoLightbox.classList.contains('is-visible')) return;
+      event.preventDefault();
+      changePhotoZoom(event.deltaY < 0 ? .18 : -.18);
+    },{passive:false});
+
+    $('photoZoomIn')?.addEventListener('click',()=>changePhotoZoom(.35));
+    $('photoZoomOut')?.addEventListener('click',()=>changePhotoZoom(-.35));
+    $('photoZoomReset')?.addEventListener('click',resetPhotoZoom);
   }
 
   function setupRecipientPhotoInteractions() {
@@ -1247,7 +1366,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (!file) return;
     $('imageStatus').textContent = 'Обрабатываю фоновое фото…';
     try {
-      selectedBackgroundImage = await compressImageFile(file, 1000, 0.58, 170000);
+      selectedBackgroundImage = await compressImageFile(file, 1800, 0.82, 300000);
       $('backgroundMode').value = 'image';
       syncBackgroundControls();
       renderBackgroundPreview();
@@ -1260,29 +1379,50 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   $('personalPhotos')?.addEventListener('change', async (event) => {
     const files = Array.from(event.target.files || []);
+    // Reset input immediately so the same file can be added again later if needed.
+    event.target.value = '';
     if (!files.length) return;
-    const limited = files.slice(0, 6);
-    $('imageStatus').textContent = 'Обрабатываю личные фотографии…';
-    try {
-      const encodedPhotos = await Promise.all(limited.map(file => compressImageFile(file, 260, 0.55, 42000)));
-      selectedPersonalPhotos = encodedPhotos.map((src, index) => ({
-        src,
-        x: DEFAULT_PHOTO_POSITIONS[index].x,
-        y: DEFAULT_PHOTO_POSITIONS[index].y,
-        crop: 'portrait',
-        frame: 'polaroid',
-        size: 'medium',
-        rotation: index % 2 ? 5 : -5
-      }));
-      selectedPhotoIndex = 0;
-      renderPhotoPreviews();
-      $('imageStatus').textContent = 'Готово: ' + selectedPersonalPhotos.length + ' фото. Перетаскивай снимки на макете и выбирай обрезку и рамку.';
-    } catch (error) {
-      selectedPersonalPhotos = [];
-      renderPhotoPreviews();
-      $('imageStatus').textContent = error?.message || 'Не удалось обработать фотографии.';
+
+    const startingCount = selectedPersonalPhotos.length;
+    const remaining = Math.max(0, 15 - startingCount);
+    if (remaining === 0) {
+      $('imageStatus').textContent = 'Уже добавлено 15 фото — это максимальное количество. Удали ненужные снимки, чтобы добавить другие.';
+      return;
     }
-    if (files.length > 6) $('imageStatus').textContent += ' Использованы первые 6 файлов.';
+    const limited = files.slice(0, remaining);
+    $('imageStatus').textContent = 'Обрабатываю ' + limited.length + ' новых фото… Остальные снимки сохраняются.';
+    try {
+      // More pixels and higher initial WebP quality; the API stores images separately,
+      // so the shared URL remains short even when many photos are used.
+      const encodedPhotos = await Promise.all(limited.map(file =>
+        compressImageFile(file, 1100, 0.84, 220000)
+      ));
+      const appended = encodedPhotos.map((src, batchIndex) => {
+        const index = startingCount + batchIndex;
+        const pos = DEFAULT_PHOTO_POSITIONS[index] || DEFAULT_PHOTO_POSITIONS[DEFAULT_PHOTO_POSITIONS.length - 1];
+        return {
+          src,
+          x: pos.x,
+          y: pos.y,
+          crop: 'portrait',
+          frame: 'polaroid',
+          size: 'medium',
+          rotation: index % 2 ? 5 : -5
+        };
+      });
+      // Crucial: append new images; never replace photos selected in previous upload batches.
+      selectedPersonalPhotos = selectedPersonalPhotos.concat(appended).slice(0, 15);
+      selectedPhotoIndex = startingCount;
+      renderPhotoPreviews();
+      $('imageStatus').textContent = 'Добавлено ' + appended.length + ' фото. Всего: ' + selectedPersonalPhotos.length + ' из 15. Выбранные ранее снимки и их оформление сохранены.';
+    } catch (error) {
+      // Keep all previously selected photos if this batch fails.
+      renderPhotoPreviews();
+      $('imageStatus').textContent = error?.message || 'Не удалось обработать новые фотографии. Ранее выбранные фото сохранены.';
+    }
+    if (files.length > remaining) {
+      $('imageStatus').textContent += ' Добавлены только первые ' + remaining + ' — лимит 15 фото.';
+    }
     updatePreview();
   });
 
@@ -1308,6 +1448,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (event.key === 'Escape' && opened) closeLetterView();
   });
   setupRecipientPhotoInteractions();
+  setupPhotoZoomGestures();
   window.addEventListener('resize', () => {
     if (opened && !opening) {
       const target = getTargetRect();
