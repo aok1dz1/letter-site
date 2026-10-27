@@ -53,7 +53,7 @@ function verifyPublicKey(req: Request): boolean {
       }
     } catch (_) { /* malformed environment is ignored */ }
   }
-  return candidates.length === 0 || candidates.includes(supplied);
+  return supplied.length > 0 && candidates.length > 0 && candidates.includes(supplied);
 }
 
 function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
