@@ -175,6 +175,51 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .recipient-envelope-wrap{position:relative;z-index:2}
 @media(max-width:700px){.floating-photo{width:clamp(48px,13vw,72px);padding:3px 3px 10px;box-shadow:0 7px 17px rgba(74,25,45,.15)}}
 
+
+/* Photo layout editor: drag images into place; crop + frame options are persisted with the letter. */
+.photo-placement-editor{display:grid;gap:10px}
+.photo-placement-stage{position:relative;width:100%;min-height:220px;aspect-ratio:1.45/1;max-height:330px;overflow:hidden;border:1px solid #e9cad5;background:radial-gradient(ellipse at 50% 38%,#fff9fb,#ffeaf1);touch-action:none;user-select:none}
+.placement-stage-label{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:7px;letter-spacing:.22em;color:#b98798;pointer-events:none}
+.placement-mini-envelope{position:absolute;width:40%;height:27%;left:50%;top:52%;transform:translate(-50%,-50%);background:var(--rose-light);box-shadow:0 6px 13px rgba(83,32,52,.12);overflow:hidden}
+.placement-mini-envelope i,.placement-mini-envelope b{position:absolute;inset:0}
+.placement-mini-envelope i{background:var(--rose);clip-path:polygon(0 0,50% 60%,100% 0,100% 100%,0 100%)}
+.placement-mini-envelope b{background:var(--rose-light);clip-path:polygon(0 0,100% 0,50% 60%)}
+.photo-placement-layer{position:absolute;inset:0}
+.photo-stage-item{position:absolute;left:50%;top:50%;width:clamp(42px,14%,68px);aspect-ratio:3/4;display:flex;flex-direction:column;cursor:grab;touch-action:none;transform:translate(-50%,-50%) rotate(var(--photo-tilt,0deg));box-shadow:0 4px 10px rgba(74,25,45,.18);outline:1px solid rgba(255,255,255,.75)}
+.photo-stage-item:active{cursor:grabbing}
+.photo-stage-item.is-selected{outline:2px solid #b83f69;outline-offset:2px;z-index:20!important}
+.photo-stage-item .floating-photo-image{min-height:0}
+.personal-photo-previews{display:flex;flex-wrap:wrap;gap:8px}
+.photo-thumb-wrap{position:relative}
+.personal-photo-thumb{position:relative;width:54px;height:68px;padding:3px;background:#fff;border:1px solid #e9bfce;box-shadow:0 2px 8px rgba(83,32,52,.08);cursor:pointer}
+.personal-photo-thumb.is-selected{outline:2px solid #b83f69;outline-offset:2px}
+.personal-photo-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.photo-remove{position:absolute;top:-7px;right:-7px;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:#54283a;color:#fff;font-size:16px;line-height:20px;z-index:3}
+.photo-editor-controls{display:grid;gap:10px;padding:12px;border:1px solid #efcad7;background:rgba(255,255,255,.35)}
+.photo-editor-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8e6272;margin:0}
+.photo-controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.photo-controls-grid input[type=range]{padding:7px 0;box-shadow:none}
+.floating-photo-frame{position:absolute;left:0;top:0;width:clamp(82px,10vw,145px);aspect-ratio:3/4;display:flex;flex-direction:column;overflow:hidden;transform:translate(-50%,-50%) rotate(var(--photo-tilt,0deg));box-shadow:0 12px 30px rgba(74,25,45,.15);border:1px solid rgba(235,207,218,.9);background:#fffdfb}
+.floating-photo-image{display:block;width:100%;height:100%;min-height:0;flex:1;object-fit:cover}
+.crop-portrait{aspect-ratio:3/4}
+.crop-landscape{aspect-ratio:4/3}
+.crop-soft{aspect-ratio:3/4;border-radius:22%}
+.crop-circle{aspect-ratio:1/1;border-radius:50%}
+.crop-oval{aspect-ratio:.78/1;border-radius:50%}
+.crop-arch{aspect-ratio:3/4;border-radius:50% 50% 5px 5px}
+.crop-heart{aspect-ratio:1/1;clip-path:polygon(50% 100%,8% 58%,0 39%,2% 22%,12% 9%,28% 4%,40% 10%,50% 23%,60% 10%,72% 4%,88% 9%,98% 22%,100% 39%,92% 58%)}
+.crop-stamp{aspect-ratio:3/4;clip-path:polygon(0 0,100% 0,100% 8%,94% 8%,94% 17%,100% 17%,100% 83%,94% 83%,94% 92%,100% 92%,100% 100%,0 100%,0 92%,6% 92%,6% 83%,0 83%,0 17%,6% 17%,6% 8%,0 8%)}
+.frame-polaroid{padding:5px 5px 18px;background:#fffdfb;border:1px solid #e8dce0}
+.frame-white{padding:4px;background:#fff;border:3px solid #fff}
+.frame-pink{padding:4px;background:#fff5f8;border:3px solid #f1a4bd}
+.frame-gold{padding:5px;background:#fff8eb;border:3px solid #c5a16c;box-shadow:0 8px 20px rgba(116,83,38,.16)}
+.frame-film{padding:8px 5px;background:#3d2933;border:2px solid #3d2933}
+.frame-none{padding:0;background:transparent;border:0;box-shadow:none}
+.size-small{width:clamp(62px,7vw,96px)}
+.size-medium{width:clamp(82px,10vw,145px)}
+.size-large{width:clamp(100px,13vw,178px)}
+@media(max-width:700px){.floating-photo-frame{width:clamp(48px,13vw,72px);box-shadow:0 7px 17px rgba(74,25,45,.15)}.size-small{width:clamp(42px,10vw,58px)}.size-medium{width:clamp(48px,13vw,72px)}.size-large{width:clamp(62px,16vw,88px)}.photo-controls-grid{grid-template-columns:1fr 1fr}}
+
 </style>
 </head>
 <body>
@@ -183,7 +228,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       <div class="preview-paper">
         <span class="corner corner-top"></span><span class="corner corner-bottom"></span>
         <div class="preview-heading">
-          <p class="eyebrow">A LITTLE NOTE, JUST FOR YOU</p>
+          <p class="eyebrow" id="previewHeader">ПИСЬМО ДЛЯ ТЕБЯ</p>
           <h1 id="previewTitle">Несколько важных слов</h1>
           <p class="intro">Иногда самое главное хочется сказать<br class="desktop-only"> лично. Открой письмо.</p>
         </div>
@@ -191,7 +236,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
           <button class="envelope" id="envelope" type="button" aria-label="Открыть письмо">
             <span class="env-back"></span>
             <span class="letter-peek" id="letterPeek">
-              <span class="peek-topline">A LITTLE NOTE, JUST FOR YOU</span>
+              <span class="peek-topline" id="peekHeader">ПИСЬМО ДЛЯ ТЕБЯ</span>
               <span class="peek-title" id="peekTitle">Несколько важных слов</span>
               <span class="peek-rule"></span>
               <span class="peek-copy" id="peekCopy">Есть вещи, которые не всегда получается сказать вслух.</span>
@@ -252,10 +297,56 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
               <div id="backgroundPreview" class="background-preview" hidden></div>
               <label>Личные фото вокруг конверта
                 <input id="personalPhotos" type="file" accept="image/*" multiple>
-                <span class="file-help">До 6 фото — они появятся в случайных свободных местах вокруг конверта.</span>
+                <span class="file-help">До 6 фото. Нажми на миниатюру, выбери оформление и перетащи фото на нужное место макета.</span>
               </label>
               <div id="personalPhotoPreviews" class="personal-photo-previews"></div>
-              <p class="file-help">Изображения будут сжаты и добавлены в ссылку. Любой, у кого есть ссылка, сможет увидеть эти фото.</p>
+              <div id="photoPlacementEditor" class="photo-placement-editor" hidden>
+                <p class="file-help">Перетаскивай снимки по макету — их положение сохранится в письме.</p>
+                <div id="photoPlacementStage" class="photo-placement-stage" aria-label="Макет размещения фотографий">
+                  <span class="placement-stage-label">ПИСЬМО ДЛЯ ТЕБЯ</span>
+                  <div class="placement-mini-envelope"><i></i><b></b></div>
+                  <div id="photoPlacementLayer" class="photo-placement-layer"></div>
+                </div>
+                <div id="photoEditorControls" class="photo-editor-controls" hidden>
+                  <p id="photoEditorLabel" class="photo-editor-label">Фотография 1</p>
+                  <div class="photo-controls-grid">
+                    <label>Форма обрезки
+                      <select id="photoCrop">
+                        <option value="portrait">Прямоугольник</option>
+                        <option value="landscape">Альбомная</option>
+                        <option value="soft">Мягкие углы</option>
+                        <option value="circle">Круг</option>
+                        <option value="oval">Овал</option>
+                        <option value="arch">Арка</option>
+                        <option value="heart">Сердце</option>
+                        <option value="stamp">Марка</option>
+                      </select>
+                    </label>
+                    <label>Рамка
+                      <select id="photoFrame">
+                        <option value="polaroid">Polaroid</option>
+                        <option value="white">Белая</option>
+                        <option value="pink">Розовая</option>
+                        <option value="gold">Золотая</option>
+                        <option value="film">Плёнка</option>
+                        <option value="none">Без рамки</option>
+                      </select>
+                    </label>
+                    <label>Размер
+                      <select id="photoSize">
+                        <option value="small">Маленький</option>
+                        <option value="medium">Средний</option>
+                        <option value="large">Крупный</option>
+                      </select>
+                    </label>
+                    <label>Поворот
+                      <input id="photoRotation" type="range" min="-18" max="18" step="1" value="-5">
+                    </label>
+                  </div>
+                  <p id="photoRotationOutput" class="file-help">−5°</p>
+                </div>
+              </div>
+              <p class="file-help">Фотографии хранятся отдельно, ссылка остаётся короткой. Любой, у кого есть ссылка, сможет увидеть письмо и эти изображения.</p>
               <p id="imageStatus" class="image-status" aria-live="polite"></p>
             </div>
           </details>
@@ -269,7 +360,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
             <small>Открой ссылку в отдельной вкладке, чтобы проверить версию для получателя.</small>
           </div>
         </form>
-        <p class="footnote">Ссылка хранит текст письма в адресе браузера. Не используй её для секретной информации. Для постоянного публичного сервиса потребуется серверное хранение.</p>
+        <p class="footnote">Текст и настройки хранятся отдельно от ссылки; фотографии загружаются в хранилище. Письмо доступно любому, у кого есть ссылка.</p>
       </div>
     </section>
   </main>
@@ -317,8 +408,14 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   const previewEnvelope = $('envelope');
   const closeButton = $('closeLetter');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SUPABASE_URL = 'https://ennhfbjuyifzughuahhw.supabase.co';
+  const SUPABASE_PUBLIC_KEY = 'sb_publishable_CfMmv9VCEfYO_MHFP1Vp-w_Jm0jAgbG';
+  const LETTER_API_URL = SUPABASE_URL + '/functions/v1/letter-api';
+  const PUBLIC_MEDIA_PREFIX = SUPABASE_URL + '/storage/v1/object/public/letter-media/';
   let selectedBackgroundImage = '';
   let selectedPersonalPhotos = [];
+  let selectedPhotoIndex = 0;
+  let draggedPhotoIndex = -1;
   let opening = false;
   let opened = false;
   let activeEnvelope = null;
@@ -343,7 +440,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       theme: fields.theme?.value || 'rose',
       backgroundMode: $('backgroundMode')?.value === 'image' ? 'image' : 'color',
       backgroundImage: $('backgroundMode')?.value === 'image' ? selectedBackgroundImage : '',
-      floatingPhotos: selectedPersonalPhotos.slice(0, 6)
+      floatingPhotos: selectedPersonalPhotos.slice(0, 6).map((photo, index) => normalizePhoto(photo, index))
     };
   }
 
@@ -353,6 +450,8 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   }
 
   function paintPreview(data) {
+    setText('previewHeader', data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ');
+    setText('peekHeader', data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ');
     setText('previewTitle', data.title);
     setText('peekTitle', data.title);
     setText('peekCopy', data.message);
@@ -433,6 +532,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   function safeImageData(value, maxLength = 30000) {
     if (typeof value !== 'string' || value.length > maxLength) return '';
+    if (value.startsWith(PUBLIC_MEDIA_PREFIX) && value.length < 600) return value;
     const supported = value.startsWith('data:image/webp;base64,') ||
       value.startsWith('data:image/jpeg;base64,') ||
       value.startsWith('data:image/png;base64,');
@@ -508,63 +608,172 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     }
   }
 
+  const DEFAULT_PHOTO_POSITIONS = [
+    { x: 13, y: 18 }, { x: 87, y: 20 }, { x: 7, y: 45 },
+    { x: 93, y: 47 }, { x: 15, y: 78 }, { x: 85, y: 81 }
+  ];
+  const PHOTO_CROPS = ['portrait','landscape','soft','circle','oval','arch','heart','stamp'];
+  const PHOTO_FRAMES = ['polaroid','white','pink','gold','film','none'];
+  const PHOTO_SIZES = ['small','medium','large'];
+
+  function normalizePhoto(photo, index = 0) {
+    const src = typeof photo === 'string' ? photo : (photo && typeof photo.src === 'string' ? photo.src : '');
+    const validSrc = safeImageData(src, 45000);
+    const fallback = DEFAULT_PHOTO_POSITIONS[index % DEFAULT_PHOTO_POSITIONS.length];
+    return {
+      src: validSrc,
+      x: Math.max(5, Math.min(95, Number.isFinite(Number(photo && photo.x)) ? Number(photo.x) : fallback.x)),
+      y: Math.max(10, Math.min(90, Number.isFinite(Number(photo && photo.y)) ? Number(photo.y) : fallback.y)),
+      crop: PHOTO_CROPS.includes(photo && photo.crop) ? photo.crop : 'portrait',
+      frame: PHOTO_FRAMES.includes(photo && photo.frame) ? photo.frame : 'polaroid',
+      size: PHOTO_SIZES.includes(photo && photo.size) ? photo.size : 'medium',
+      rotation: Math.max(-18, Math.min(18, Number.isFinite(Number(photo && photo.rotation)) ? Number(photo.rotation) : (index % 2 ? 5 : -5)))
+    };
+  }
+
+  function makePhotoNode(rawPhoto, index, stageMode = false) {
+    const photo = normalizePhoto(rawPhoto, index);
+    const frame = document.createElement('div');
+    frame.className = (stageMode ? 'photo-stage-item' : 'floating-photo-frame') +
+      ' crop-' + photo.crop + ' frame-' + photo.frame + ' size-' + photo.size;
+    frame.dataset.photoIndex = String(index);
+    frame.style.left = photo.x + '%';
+    frame.style.top = photo.y + '%';
+    frame.style.setProperty('--photo-tilt', photo.rotation + 'deg');
+    if (stageMode && index === selectedPhotoIndex) frame.classList.add('is-selected');
+    const img = document.createElement('img');
+    img.className = 'floating-photo-image';
+    img.src = photo.src;
+    img.alt = '';
+    img.loading = stageMode ? 'eager' : 'lazy';
+    img.decoding = 'async';
+    frame.append(img);
+    return frame;
+  }
+
+  function syncPhotoEditorControls() {
+    const editor = $('photoEditorControls');
+    const photo = selectedPersonalPhotos[selectedPhotoIndex];
+    if (!photo) {
+      editor.hidden = true;
+      return;
+    }
+    editor.hidden = false;
+    const normalized = normalizePhoto(photo, selectedPhotoIndex);
+    setText('photoEditorLabel', 'Фото ' + (selectedPhotoIndex + 1) + ' — редактирование');
+    $('photoCrop').value = normalized.crop;
+    $('photoFrame').value = normalized.frame;
+    $('photoSize').value = normalized.size;
+    $('photoRotation').value = String(normalized.rotation);
+    setText('photoRotationOutput', (normalized.rotation > 0 ? '+' : '') + normalized.rotation + '°');
+  }
+
+  function renderPhotoPlacementStage() {
+    const editor = $('photoPlacementEditor');
+    const stage = $('photoPlacementStage');
+    const layer = $('photoPlacementLayer');
+    if (!editor || !stage || !layer) return;
+    editor.hidden = selectedPersonalPhotos.length === 0;
+    layer.replaceChildren();
+    selectedPersonalPhotos.forEach((photo, index) => layer.append(makePhotoNode(photo, index, true)));
+    syncPhotoEditorControls();
+  }
+
   function renderPhotoPreviews() {
     const tray = $('personalPhotoPreviews');
     if (!tray) return;
     tray.replaceChildren();
-    selectedPersonalPhotos.forEach((src, index) => {
+    selectedPersonalPhotos.forEach((rawPhoto, index) => {
+      const photo = normalizePhoto(rawPhoto, index);
+      const wrap = document.createElement('div');
+      wrap.className = 'photo-thumb-wrap';
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'personal-photo-thumb';
-      button.title = 'Удалить фотографию';
+      button.className = 'personal-photo-thumb' + (index === selectedPhotoIndex ? ' is-selected' : '');
+      button.title = 'Выбрать фото для настройки';
       const image = document.createElement('img');
-      image.src = src;
+      image.src = photo.src;
       image.alt = '';
-      const remove = document.createElement('span');
-      remove.textContent = '×';
-      button.append(image, remove);
+      button.append(image);
       button.addEventListener('click', () => {
-        selectedPersonalPhotos = selectedPersonalPhotos.filter((_, itemIndex) => itemIndex !== index);
+        selectedPhotoIndex = index;
         renderPhotoPreviews();
+        renderPhotoPlacementStage();
+      });
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'photo-remove';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', 'Удалить фото ' + (index + 1));
+      remove.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        selectedPersonalPhotos = selectedPersonalPhotos.filter((_, i) => i !== index);
+        selectedPhotoIndex = Math.max(0, Math.min(selectedPhotoIndex, selectedPersonalPhotos.length - 1));
+        renderPhotoPreviews();
+        renderPhotoPlacementStage();
+        updatePreview();
         $('imageStatus').textContent = selectedPersonalPhotos.length
-          ? 'Выбрано фото: ' + selectedPersonalPhotos.length + '. Нажми на миниатюру, чтобы удалить её.'
+          ? 'Фото удалено. Оставшиеся снимки можно перетаскивать и настраивать.'
           : 'Личные фотографии удалены.';
       });
-      tray.append(button);
+      wrap.append(button, remove);
+      tray.append(wrap);
     });
+    renderPhotoPlacementStage();
   }
 
   function renderFloatingPhotos(photos) {
     const layer = $('floatingPhotos');
     if (!layer) return;
     layer.replaceChildren();
-    const validPhotos = photos.map(src => safeImageData(src, 40000)).filter(Boolean).slice(0, 6);
-    const mobile = window.innerWidth <= 700;
-    const slots = mobile ? [
-      { left: '3%', top: '17%' }, { left: '79%', top: '20%' },
-      { left: '1%', top: '42%' }, { left: '81%', top: '45%' },
-      { left: '5%', top: '77%' }, { left: '76%', top: '79%' }
-    ] : [
-      { left: '6%', top: '14%' }, { left: '78%', top: '16%' },
-      { left: '3%', top: '42%' }, { left: '82%', top: '43%' },
-      { left: '8%', top: '76%' }, { left: '77%', top: '78%' }
-    ];
-    for (let i = slots.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [slots[i], slots[j]] = [slots[j], slots[i]];
-    }
-    validPhotos.forEach((src, index) => {
-      const img = document.createElement('img');
-      img.className = 'floating-photo';
-      img.src = src;
-      img.alt = '';
-      img.loading = 'eager';
-      img.decoding = 'async';
-      img.style.left = slots[index].left;
-      img.style.top = slots[index].top;
-      img.style.setProperty('--photo-tilt', (Math.round((Math.random() * 18 - 9) * 10) / 10) + 'deg');
-      layer.append(img);
+    const validPhotos = Array.isArray(photos) ? photos.map(normalizePhoto).filter(photo => photo.src).slice(0, 6) : [];
+    validPhotos.forEach((photo, index) => layer.append(makePhotoNode(photo, index, false)));
+  }
+
+  function updateSelectedPhotoStyle() {
+    const photo = selectedPersonalPhotos[selectedPhotoIndex];
+    if (!photo) return;
+    const normalized = normalizePhoto(photo, selectedPhotoIndex);
+    normalized.crop = $('photoCrop').value;
+    normalized.frame = $('photoFrame').value;
+    normalized.size = $('photoSize').value;
+    normalized.rotation = Number($('photoRotation').value);
+    selectedPersonalPhotos[selectedPhotoIndex] = normalized;
+    setText('photoRotationOutput', (normalized.rotation > 0 ? '+' : '') + normalized.rotation + '°');
+    renderPhotoPreviews();
+    renderPhotoPlacementStage();
+    paintPreview(getData());
+  }
+
+  function setupPhotoPlacementDragging() {
+    const stage = $('photoPlacementStage');
+    if (!stage) return;
+    stage.addEventListener('pointerdown', (event) => {
+      const target = event.target.closest('[data-photo-index]');
+      if (!target) return;
+      event.preventDefault();
+      draggedPhotoIndex = Number(target.dataset.photoIndex);
+      selectedPhotoIndex = draggedPhotoIndex;
+      stage.setPointerCapture(event.pointerId);
+      renderPhotoPreviews();
+      renderPhotoPlacementStage();
     });
+    stage.addEventListener('pointermove', (event) => {
+      if (draggedPhotoIndex < 0 || !(event.buttons & 1 || event.pointerType === 'touch')) return;
+      const photo = selectedPersonalPhotos[draggedPhotoIndex];
+      if (!photo) return;
+      const rect = stage.getBoundingClientRect();
+      const normalized = normalizePhoto(photo, draggedPhotoIndex);
+      normalized.x = Math.max(7, Math.min(93, ((event.clientX - rect.left) / rect.width) * 100));
+      normalized.y = Math.max(12, Math.min(88, ((event.clientY - rect.top) / rect.height) * 100));
+      selectedPersonalPhotos[draggedPhotoIndex] = normalized;
+      renderPhotoPlacementStage();
+    });
+    const stop = () => { draggedPhotoIndex = -1; };
+    stage.addEventListener('pointerup', stop);
+    stage.addEventListener('pointercancel', stop);
+    stage.addEventListener('lostpointercapture', stop);
   }
 
   function getTargetRect() {
@@ -706,7 +915,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   }
 
   // Preview editor interactions
-  function updatePreview() { paintPreview(getData()); }
+  function updatePreview() { paintPreview(getData()); renderPhotoPlacementStage(); }
   ['recipient','headerText','title','message','signature','theme','backgroundMode'].forEach(id => {
     $(id)?.addEventListener('input', updatePreview);
     $(id)?.addEventListener('change', updatePreview);
@@ -765,9 +974,19 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     const limited = files.slice(0, 6);
     $('imageStatus').textContent = 'Обрабатываю личные фотографии…';
     try {
-      selectedPersonalPhotos = await Promise.all(limited.map(file => compressImageFile(file, 260, 0.55)));
+      const encodedPhotos = await Promise.all(limited.map(file => compressImageFile(file, 260, 0.55)));
+      selectedPersonalPhotos = encodedPhotos.map((src, index) => ({
+        src,
+        x: DEFAULT_PHOTO_POSITIONS[index].x,
+        y: DEFAULT_PHOTO_POSITIONS[index].y,
+        crop: 'portrait',
+        frame: 'polaroid',
+        size: 'medium',
+        rotation: index % 2 ? 5 : -5
+      }));
+      selectedPhotoIndex = 0;
       renderPhotoPreviews();
-      $('imageStatus').textContent = 'Готово: ' + selectedPersonalPhotos.length + ' фото. Их расположение выберется случайно при открытии письма.';
+      $('imageStatus').textContent = 'Готово: ' + selectedPersonalPhotos.length + ' фото. Перетаскивай снимки на макете и выбирай обрезку и рамку.';
     } catch (error) {
       selectedPersonalPhotos = [];
       renderPhotoPreviews();
@@ -776,6 +995,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (files.length > 6) $('imageStatus').textContent += ' Использованы первые 6 файлов.';
     updatePreview();
   });
+
+  ['photoCrop','photoFrame','photoSize'].forEach(id => {
+    $(id)?.addEventListener('change', updateSelectedPhotoStyle);
+  });
+  $('photoRotation')?.addEventListener('input', updateSelectedPhotoStyle);
+  setupPhotoPlacementDragging();
 
   previewEnvelope?.addEventListener('click', () => openLetter(previewEnvelope));
   recipientEnvelope?.addEventListener('click', () => openLetter(recipientEnvelope));
@@ -811,27 +1036,33 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       return;
     }
     $('shareResult').hidden = false;
-    $('shareUrl').value = 'Подготавливаю ссылку…';
+    $('shareUrl').value = 'Сохраняю письмо и загружаю фотографии…';
     $('copyLink').disabled = true;
-    $('copyLink').textContent = 'Подготовка…';
+    $('copyLink').textContent = 'Сохранение…';
     try {
-      const encoded = await encodeData(data);
-      if (encoded.length > 180000) {
-        $('shareUrl').value = '';
-        $('copyLink').textContent = 'Слишком много данных';
-        $('imageStatus').textContent = 'Ссылка получилась слишком большой. Убери часть личных фото или выбери фотофоны меньшего размера.';
-        return;
+      const response = await fetch(LETTER_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_PUBLIC_KEY
+        },
+        body: JSON.stringify({ data })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.id) {
+        throw new Error(result.error || 'Не удалось сохранить письмо.');
       }
-      const url = new URL('https://letter-site-sand.vercel.app/');
-      url.hash = 'letter=' + encoded;
-      $('shareUrl').value = url.toString();
+      const shareUrl = new URL('https://letter-site-sand.vercel.app/');
+      shareUrl.searchParams.set('l', result.id);
+      $('shareUrl').value = shareUrl.toString();
       $('copyLink').disabled = false;
       $('copyLink').textContent = 'Копировать';
-      $('imageStatus').textContent = 'Ссылка готова. Фон и личные фотографии включены в неё.';
+      $('imageStatus').textContent = 'Письмо сохранено. Фото загружены отдельно, ссылка короткая.';
     } catch (error) {
       $('shareUrl').value = '';
-      $('copyLink').textContent = 'Ошибка';
-      $('imageStatus').textContent = 'Не удалось создать ссылку. Попробуй уменьшить количество изображений.';
+      $('copyLink').textContent = 'Повторить';
+      $('copyLink').disabled = false;
+      $('imageStatus').textContent = error?.message || 'Не удалось создать ссылку. Проверь соединение и попробуй снова.';
     }
   });
   $('copyLink')?.addEventListener('click', async () => {
@@ -851,10 +1082,35 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   renderBackgroundPreview();
   renderPhotoPreviews();
 
+  async function loadStoredLetter(id) {
+    if (!/^[a-f0-9]{16}$/.test(id)) throw new Error('Некорректная ссылка на письмо.');
+    const response = await fetch(LETTER_API_URL + '?id=' + encodeURIComponent(id), {
+      method: 'GET',
+      headers: { 'apikey': SUPABASE_PUBLIC_KEY }
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.data) throw new Error(result.error || 'Письмо не найдено.');
+    return result.data;
+  }
+
   const params = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams(window.location.hash.slice(1));
+  const shortId = params.get('l') || hashParams.get('l');
   const encoded = hashParams.get('letter') || params.get('letter');
-  if (encoded) {
+  if (shortId) {
+    builder.hidden = true;
+    recipientView.hidden = false;
+    setText('recipientCaption', 'Загружаем письмо…');
+    setText('recipientHint', 'ОДИН МОМЕНТ');
+    loadStoredLetter(shortId).then(data => {
+      window.letterData = data;
+      fillLetter(data);
+      document.title = data.recipient ? 'Письмо для ' + data.recipient : 'Письмо для тебя';
+    }).catch(error => {
+      setText('recipientCaption', error?.message || 'Не удалось загрузить письмо.');
+      setText('recipientHint', 'Проверь ссылку и подключение к интернету.');
+    });
+  } else if (encoded) {
     builder.hidden = true;
     recipientView.hidden = false;
     decodeData(encoded).then(shared => {
@@ -871,8 +1127,10 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     });
   } else {
     paintPreview(getData());
+    renderPhotoPreviews();
+    renderPhotoPlacementStage();
   }
-})();
+})();})();
 </script>
 </body>
 </html>
