@@ -518,7 +518,9 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       $('copyLink').disabled = true;
       return;
     }
-    const url = new URL(window.location.pathname, window.location.origin);
+    // Always create share links on the stable public Production domain,
+    // never on a temporary Vercel deployment/preview URL.
+    const url = new URL('https://letter-site-sand.vercel.app/');
     url.searchParams.set('letter', encodeData(data));
     $('shareUrl').value = url.toString();
     $('shareResult').hidden = false;
