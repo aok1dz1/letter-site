@@ -373,7 +373,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       <button class="envelope recipient-envelope" id="recipientEnvelope" type="button" aria-label="Открыть письмо">
         <span class="env-back"></span>
         <span class="letter-peek">
-          <span class="peek-topline">A LITTLE NOTE, JUST FOR YOU</span>
+          <span class="peek-topline" id="recipientPeekHeader">ПИСЬМО ДЛЯ ТЕБЯ</span>
           <span class="peek-title" id="recipientPeekTitle">Несколько важных слов</span>
           <span class="peek-rule"></span>
           <span class="peek-copy" id="recipientPeekCopy">Есть вещи, которые хочется сказать.</span>
@@ -472,6 +472,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   function fillLetter(data) {
     setText('recipientHeader', data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ');
+    setText('recipientPeekHeader', data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ');
     setText('fullTitle', data.title);
     setText('toLine', data.recipient ? `Для ${data.recipient}` : '');
     setText('fullMessage', data.message);
