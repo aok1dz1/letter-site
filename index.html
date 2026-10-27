@@ -609,7 +609,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     recipientView.style.setProperty('--rose-dark', themeDark);
     recipientView.style.setProperty('--rose-mid', themeMid);
     recipientView.style.setProperty('--rose-light', themeLight);
-    const backgroundImage = safeImageData(data.backgroundImage, 140000);
+    const backgroundImage = safeImageData(data.backgroundImage, 320000);
     if (data.backgroundMode === 'image' && backgroundImage) {
       recipientView.classList.add('has-photo-background');
       recipientView.style.backgroundImage = 'linear-gradient(rgba(255,240,245,.14), rgba(255,240,245,.18)), url("' + backgroundImage + '")';
@@ -688,9 +688,16 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         signature: String(data.signature || '').slice(0, 100),
         theme: ['rose','blush','berry','lavender','sage','peach','sky','champagne','midnight'].includes(data.theme) ? data.theme : 'rose',
         backgroundMode: data.backgroundMode === 'image' ? 'image' : 'color',
-        backgroundImage: safeImageData(data.backgroundImage, 140000),
+        backgroundImage: safeImageData(data.backgroundImage, 320000),
         floatingPhotos: Array.isArray(data.floatingPhotos)
-          ? data.floatingPhotos.slice(0, 6).map(image => safeImageData(image, 40000)).filter(Boolean)
+          ? data.floatingPhotos.slice(0, 15).map((photo, index) => {
+              if (typeof photo === 'string') return safeImageData(photo, 220000);
+              if (!photo || typeof photo !== 'object') return null;
+              const src = safeImageData(photo.src, 220000);
+              if (!src) return null;
+              const normalized = normalizePhoto({ ...photo, src }, index);
+              return normalized;
+            }).filter(Boolean)
           : []
       };
     } catch (_) { return null; }
@@ -788,7 +795,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   function normalizePhoto(photo, index = 0) {
     const src = typeof photo === 'string' ? photo : (photo && typeof photo.src === 'string' ? photo.src : '');
-    const validSrc = safeImageData(src, 45000);
+    const validSrc = safeImageData(src, 220000);
     const fallback = DEFAULT_PHOTO_POSITIONS[index % DEFAULT_PHOTO_POSITIONS.length];
     return {
       src: validSrc,
