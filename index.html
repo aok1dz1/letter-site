@@ -226,6 +226,51 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 .photo-stage-item.size-medium{width:clamp(38px,11%,52px)}
 .photo-stage-item.size-large{width:clamp(44px,14%,64px)}
 
+
+/* Recipient experience: mobile-safe photo positions, clear transitions and accessible full-screen viewer. */
+.floating-photos{pointer-events:none;opacity:1;filter:none;transition:opacity .95s cubic-bezier(.22,.8,.22,1),filter .95s cubic-bezier(.22,.8,.22,1)}
+.floating-photo-frame{pointer-events:auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:left,top;transition:filter .55s cubic-bezier(.22,.8,.22,1),box-shadow .55s ease}
+.floating-photo-frame:active{cursor:grabbing}
+.floating-photo-frame .floating-photo-image{pointer-events:none;-webkit-user-drag:none}
+.recipient-view.is-opening .floating-photos{filter:blur(.2px);opacity:1}
+.letter-overlay{background:rgba(255,239,245,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background 1s cubic-bezier(.22,.8,.22,1),opacity .65s ease,backdrop-filter 1s ease,-webkit-backdrop-filter 1s ease,visibility 0s linear .8s}
+.letter-overlay.is-visible{background:rgba(255,239,245,.76);backdrop-filter:blur(.8px);-webkit-backdrop-filter:blur(.8px);transition:background 1s cubic-bezier(.22,.8,.22,1),opacity .65s ease,backdrop-filter 1s ease,-webkit-backdrop-filter 1s ease,visibility 0s}
+@media(max-width:700px){
+  .recipient-view{min-height:100svh;min-height:100dvh;padding-top:max(86px,calc(env(safe-area-inset-top) + 58px));padding-bottom:max(100px,calc(env(safe-area-inset-bottom) + 80px))}
+  .recipient-topline{top:max(28px,calc(env(safe-area-inset-top) + 12px));font-size:9px}
+  .recipient-envelope-wrap{width:100%;max-width:500px}
+  .recipient-caption{font-size:clamp(25px,6.1vw,34px);line-height:1.18;max-width:360px;margin:0 0 clamp(30px,8vw,48px);padding:0 20px}
+  .recipient-envelope{width:min(84vw,420px);height:auto;aspect-ratio:1.68;--env-height:auto}
+  .recipient-envelope .letter-peek{height:100%;top:0;padding:12px 14px}
+  .recipient-envelope .peek-topline{margin:7px 0 10px;font-size:6px}
+  .recipient-envelope .peek-title{font-size:clamp(17px,4.2vw,22px)}
+  .recipient-envelope .peek-copy{font-size:10px}
+  .recipient-hint{margin-top:24px;font-size:9px;letter-spacing:.17em;text-align:center}
+  .floating-photo-frame{width:clamp(46px,12vw,68px);max-width:68px;box-shadow:0 7px 18px rgba(74,25,45,.18)}
+  .floating-photo-frame.size-small{width:clamp(42px,9vw,54px)}
+  .floating-photo-frame.size-medium{width:clamp(46px,12vw,68px)}
+  .floating-photo-frame.size-large{width:clamp(54px,14vw,80px)}
+  .floating-photo-frame.frame-polaroid{padding:3px 3px 10px}
+  .floating-photo-frame.frame-film{padding:6px 4px}
+  .floating-photo-frame.frame-gold{padding:3px}
+  .letter-overlay.is-visible{background:rgba(255,239,245,.76)}
+  .photo-lightbox{padding:max(16px,env(safe-area-inset-top)) 14px max(20px,env(safe-area-inset-bottom))}
+}
+.photo-lightbox{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;background:rgba(255,241,246,.985);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .42s cubic-bezier(.22,.8,.22,1),visibility 0s linear .45s}
+.photo-lightbox.is-visible{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .42s cubic-bezier(.22,.8,.22,1),visibility 0s}
+.photo-lightbox-close{position:absolute;right:max(18px,env(safe-area-inset-right));top:max(18px,env(safe-area-inset-top));width:44px;height:44px;border:1px solid #eac8d5;border-radius:50%;background:rgba(255,255,255,.9);color:#3e202d;font-size:28px;line-height:1;z-index:2;box-shadow:0 5px 18px rgba(83,32,52,.1)}
+.photo-lightbox-media{display:flex;align-items:center;justify-content:center;max-width:96vw;max-height:86svh;padding:10px;background:#fffdfb;border:1px solid #ecd9df;box-shadow:0 18px 55px rgba(104,43,67,.18);transition:transform .45s cubic-bezier(.22,.8,.22,1),box-shadow .45s ease}
+.photo-lightbox-media img{display:block;max-width:min(92vw,1100px);max-height:calc(86svh - 24px);width:auto;height:auto;object-fit:contain;border-radius:0;clip-path:none}
+.photo-lightbox-media.frame-polaroid{padding:10px 10px 34px;background:#fffdfb}
+.photo-lightbox-media.frame-pink{border:6px solid #f1a4bd;background:#fff5f8}
+.photo-lightbox-media.frame-gold{border:6px solid #c5a16c;background:#fff8eb}
+.photo-lightbox-media.frame-film{border:8px solid #3d2933;background:#3d2933}
+.photo-lightbox-media.frame-white{border:7px solid #fff;background:#fff}
+.photo-lightbox-media.frame-none{border:0;background:transparent;padding:0;box-shadow:none}
+.photo-lightbox-hint{font-size:10px;letter-spacing:.15em;color:#a97789;text-align:center;margin:0}
+@media(max-width:520px){.photo-lightbox-media{max-width:95vw;max-height:84svh;padding:6px}.photo-lightbox-media img{max-width:calc(95vw - 12px);max-height:calc(84svh - 12px)}.photo-lightbox-media.frame-polaroid{padding:6px 6px 24px}}
+@media(prefers-reduced-motion:reduce){.photo-lightbox,.photo-lightbox-media,.floating-photos,.floating-photo-frame,.letter-overlay{transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
@@ -402,6 +447,13 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         <button id="closeLetterBottom" class="button button-primary" type="button">Закрыть письмо</button>
       </div>
     </div>
+    <div id="photoLightbox" class="photo-lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Просмотр фотографии">
+      <button id="photoLightboxClose" class="photo-lightbox-close" type="button" aria-label="Закрыть фото">×</button>
+      <div id="photoLightboxMedia" class="photo-lightbox-media">
+        <img id="photoLightboxImage" alt="">
+      </div>
+      <p id="photoLightboxHint" class="photo-lightbox-hint">ФОТО НА ВЕСЬ ЭКРАН</p>
+    </div>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -413,7 +465,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   const recipientEnvelope = $('recipientEnvelope');
   const previewEnvelope = $('envelope');
   const closeButton = $('closeLetter');
+  const photoLightbox = $('photoLightbox');
+  const photoLightboxMedia = $('photoLightboxMedia');
+  const photoLightboxImage = $('photoLightboxImage');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let recipientPhotoDrag = null;
+  let lightboxPreviousFocus = null;
   const SUPABASE_URL = 'https://ennhfbjuyifzughuahhw.supabase.co';
   const SUPABASE_PUBLIC_KEY = 'sb_publishable_CfMmv9VCEfYO_MHFP1Vp-w_Jm0jAgbG';
   const LETTER_API_URL = SUPABASE_URL + '/functions/v1/letter-api';
@@ -637,9 +694,20 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     }
   }
 
-  const DEFAULT_PHOTO_POSITIONS = [
+  const LEGACY_PHOTO_POSITIONS = [
     { x: 13, y: 18 }, { x: 87, y: 20 }, { x: 7, y: 45 },
     { x: 93, y: 47 }, { x: 15, y: 78 }, { x: 85, y: 81 }
+  ];
+  const DEFAULT_PHOTO_POSITIONS = [
+    { x: 7, y: 43 }, { x: 93, y: 43 }, { x: 7, y: 60 },
+    { x: 93, y: 60 }, { x: 13, y: 78 }, { x: 87, y: 78 }
+  ];
+  const RECIPIENT_PHOTO_POSITIONS = window.innerWidth <= 700 ? [
+    { x: 9, y: 43 }, { x: 91, y: 43 }, { x: 8, y: 57 },
+    { x: 92, y: 57 }, { x: 10, y: 73 }, { x: 90, y: 73 }
+  ] : [
+    { x: 7, y: 43 }, { x: 93, y: 43 }, { x: 7, y: 60 },
+    { x: 93, y: 60 }, { x: 13, y: 78 }, { x: 87, y: 78 }
   ];
   const PHOTO_CROPS = ['portrait','landscape','soft','circle','oval','arch','heart','stamp'];
   const PHOTO_FRAMES = ['polaroid','white','pink','gold','film','none'];
@@ -757,7 +825,125 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (!layer) return;
     layer.replaceChildren();
     const validPhotos = Array.isArray(photos) ? photos.map(normalizePhoto).filter(photo => photo.src).slice(0, 6) : [];
-    validPhotos.forEach((photo, index) => layer.append(makePhotoNode(photo, index, false)));
+    validPhotos.forEach((photo, index) => {
+      const legacy = LEGACY_PHOTO_POSITIONS[index];
+      const isLegacyDefault = legacy && Math.abs(photo.x - legacy.x) < .1 && Math.abs(photo.y - legacy.y) < .1;
+      // Reposition old default layouts away from the greeting on narrow screens.
+      if (isLegacyDefault) {
+        photo.x = RECIPIENT_PHOTO_POSITIONS[index].x;
+        photo.y = RECIPIENT_PHOTO_POSITIONS[index].y;
+      }
+      const node = makePhotoNode(photo, index, false);
+      node.setAttribute('role', 'button');
+      node.setAttribute('tabindex', '0');
+      node.setAttribute('aria-label', 'Фото ' + (index + 1) + '. Нажми для просмотра, перетащи для перемещения.');
+      layer.append(node);
+    });
+  }
+
+  function openPhotoLightbox(index) {
+    const photos = window.letterData && Array.isArray(window.letterData.floatingPhotos)
+      ? window.letterData.floatingPhotos : [];
+    const raw = photos[index];
+    const photo = raw ? normalizePhoto(raw, index) : null;
+    if (!photo || !photo.src) return;
+    lightboxPreviousFocus = document.activeElement;
+    photoLightboxImage.src = photo.src;
+    photoLightboxImage.alt = 'Личная фотография ' + (index + 1);
+    photoLightboxMedia.className = 'photo-lightbox-media frame-' + photo.frame;
+    photoLightbox.classList.add('is-visible');
+    photoLightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    $('photoLightboxClose').focus({ preventScroll: true });
+  }
+
+  function closePhotoLightbox() {
+    photoLightbox.classList.remove('is-visible');
+    photoLightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.removeProperty('overflow');
+    photoLightboxImage.removeAttribute('src');
+    if (lightboxPreviousFocus && typeof lightboxPreviousFocus.focus === 'function') {
+      lightboxPreviousFocus.focus({ preventScroll: true });
+    }
+  }
+
+  function setupRecipientPhotoInteractions() {
+    const layer = $('floatingPhotos');
+    if (!layer) return;
+
+    layer.addEventListener('pointerdown', (event) => {
+      const node = event.target.closest('.floating-photo-frame[data-photo-index]');
+      if (!node || photoLightbox.classList.contains('is-visible')) return;
+      const index = Number(node.dataset.photoIndex);
+      const photos = window.letterData && Array.isArray(window.letterData.floatingPhotos)
+        ? window.letterData.floatingPhotos : [];
+      if (!photos[index]) return;
+      event.preventDefault();
+      node.setPointerCapture?.(event.pointerId);
+      recipientPhotoDrag = {
+        pointerId: event.pointerId,
+        index,
+        startX: event.clientX,
+        startY: event.clientY,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        moved: false,
+        node
+      };
+      node.classList.add('is-dragging');
+    });
+
+    layer.addEventListener('pointermove', (event) => {
+      const drag = recipientPhotoDrag;
+      if (!drag || drag.pointerId !== event.pointerId) return;
+      const dx = event.clientX - drag.startX;
+      const dy = event.clientY - drag.startY;
+      if (!drag.moved && Math.hypot(dx, dy) < 7) return;
+      drag.moved = true;
+      const rect = recipientView.getBoundingClientRect();
+      const photos = window.letterData && Array.isArray(window.letterData.floatingPhotos)
+        ? window.letterData.floatingPhotos : [];
+      const raw = photos[drag.index];
+      if (!raw) return;
+      const next = normalizePhoto(raw, drag.index);
+      next.x = Math.max(7, Math.min(93, ((event.clientX - rect.left) / rect.width) * 100));
+      next.y = Math.max(9, Math.min(91, ((event.clientY - rect.top) / rect.height) * 100));
+      photos[drag.index] = next;
+      drag.lastX = event.clientX;
+      drag.lastY = event.clientY;
+      drag.node.style.left = next.x + '%';
+      drag.node.style.top = next.y + '%';
+    });
+
+    const finishDrag = (event) => {
+      const drag = recipientPhotoDrag;
+      if (!drag || (event && drag.pointerId !== event.pointerId)) return;
+      drag.node.classList.remove('is-dragging');
+      recipientPhotoDrag = null;
+      if (drag.moved) {
+        // Keep the changed position for this recipient's current session, including closing/reopening the letter.
+        if (window.letterData && Array.isArray(window.letterData.floatingPhotos)) {
+          const raw = window.letterData.floatingPhotos[drag.index];
+          if (raw) window.letterData.floatingPhotos[drag.index] = normalizePhoto(raw, drag.index);
+        }
+        renderFloatingPhotos(window.letterData.floatingPhotos);
+      } else {
+        openPhotoLightbox(drag.index);
+      }
+    };
+    layer.addEventListener('pointerup', finishDrag);
+    layer.addEventListener('pointercancel', (event) => {
+      if (recipientPhotoDrag && recipientPhotoDrag.pointerId === event.pointerId) {
+        recipientPhotoDrag.node.classList.remove('is-dragging');
+        recipientPhotoDrag = null;
+      }
+    });
+    layer.addEventListener('keydown', (event) => {
+      const node = event.target.closest('.floating-photo-frame[data-photo-index]');
+      if (!node || !['Enter',' '].includes(event.key)) return;
+      event.preventDefault();
+      openPhotoLightbox(Number(node.dataset.photoIndex));
+    });
   }
 
   function updateSelectedPhotoStyle() {
@@ -1035,9 +1221,18 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   recipientEnvelope?.addEventListener('click', () => openLetter(recipientEnvelope));
   closeButton?.addEventListener('click', closeLetterView);
   $('closeLetterBottom')?.addEventListener('click', closeLetterView);
+  $('photoLightboxClose')?.addEventListener('click', closePhotoLightbox);
+  photoLightbox?.addEventListener('click', (event) => {
+    if (event.target === photoLightbox) closePhotoLightbox();
+  });
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && photoLightbox?.classList.contains('is-visible')) {
+      closePhotoLightbox();
+      return;
+    }
     if (event.key === 'Escape' && opened) closeLetterView();
   });
+  setupRecipientPhotoInteractions();
   window.addEventListener('resize', () => {
     if (opened && !opening) {
       const target = getTargetRect();
@@ -1134,6 +1329,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     loadStoredLetter(shortId).then(data => {
       window.letterData = data;
       fillLetter(data);
+      setText('recipientHint', 'НАЖМИ, ЧТОБЫ ОТКРЫТЬ');
       document.title = data.recipient ? 'Письмо для ' + data.recipient : 'Письмо для тебя';
     }).catch(error => {
       setText('recipientCaption', error?.message || 'Не удалось загрузить письмо.');
@@ -1146,6 +1342,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       if (shared) {
         window.letterData = shared;
         fillLetter(shared);
+        setText('recipientHint', 'НАЖМИ, ЧТОБЫ ОТКРЫТЬ');
         document.title = shared.recipient ? 'Письмо для ' + shared.recipient : 'Письмо для тебя';
       } else {
         builder.hidden = false;
