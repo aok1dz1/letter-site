@@ -50,6 +50,10 @@
     selectedId:'bloom-2'
   };
   let drag = null;
+  let letterBouquetDrag = null;
+  let attachedRecipientDrag = null;
+  let attachedRecipientFlowers = [];
+  let attachedRecipientId = '';
   const recipientView = $('bouquetRecipientView');
   let recipientId = new URLSearchParams(window.location.search).get('l') || '';
 
@@ -84,13 +88,31 @@
   function defaultSlot(index) {
     return FLOWER_SLOTS[index] || {x:22+(index%7)*9,y:48+(index%3)*5};
   }
+  const LETTER_FLOWER_SLOTS = [
+    {x:18,y:61},{x:31,y:57},{x:44,y:54},{x:56,y:54},{x:69,y:57},
+    {x:82,y:61},{x:23,y:70},{x:35,y:68},{x:47,y:65},{x:59,y:65},
+    {x:71,y:68},{x:14,y:72},{x:29,y:76},{x:71,y:76},{x:86,y:72}
+  ];
+  let letterBouquetState = {
+    enabled:false,
+    flowers:[
+      {id:'letter-bloom-1',type:'rose',x:19,y:62,rotation:-7,scale:.9},
+      {id:'letter-bloom-2',type:'peony',x:33,y:57,rotation:3,scale:1},
+      {id:'letter-bloom-3',type:'tulip',x:67,y:57,rotation:8,scale:.9},
+      {id:'letter-bloom-4',type:'daisy',x:81,y:62,rotation:-8,scale:.82},
+      {id:'letter-bloom-5',type:'lily',x:50,y:69,rotation:6,scale:.86}
+    ],
+    greenery:'eucalyptus',
+    theme:'rose',
+    selectedId:'letter-bloom-2'
+  };
   function normalizeBloom(raw,index=0) {
     const slot=defaultSlot(index);
     return {
       id:typeof raw?.id==='string' ? raw.id : 'bloom-'+(index+1),
       type:FLOWERS[raw?.type] ? raw.type : 'rose',
       x:clamp(raw?.x,8,92,slot.x),
-      y:clamp(raw?.y,22,74,slot.y),
+      y:clamp(raw?.y,20,86,slot.y),
       rotation:clamp(raw?.rotation,-35,35,0),
       scale:clamp(raw?.scale,.7,1.3,1)
     };
@@ -219,7 +241,180 @@
     $('letterForm').hidden=isBouquet;
     $('letterFootnote').hidden=isBouquet;
     $('bouquetBuilderFields').hidden=!isBouquet;
-    document.querySelectorAll('[data-builder-mode]').forEach(b=>{
+  
+  function renderLetterBouquetEditor() {
+    const checkbox=$('enableLetterBouquet');
+    const editor=$('letterBouquetEditor');
+    const enabled=Boolean(checkbox?.checked);
+    letterBouquetState.enabled=enabled;
+    if(editor)editor.hidden=!enabled;
+    if(!enabled)return;
+    const stage=$('letterBouquetEditorStage');
+    setTheme(stage,letterBouquetState.theme);
+    renderGreenery('letterBouquetEditorGreenery',letterBouquetState.greenery);
+    renderFlowers('letterBouquetEditorFlowers',letterBouquetState.flowers,letterBouquetState.selectedId,true);
+    $('letterBouquetGreenery').value=letterBouquetState.greenery;
+    $('letterBouquetTheme').value=letterBouquetState.theme;
+    const n=letterBouquetState.flowers.length;
+    $('letterBouquetStatus').textContent='Добавлено '+n+' из 15 цветов. Перетаскивай цветы мышью или пальцем.';
+  }
+
+  function getAttachedBouquetData() {
+    if(!$('enableLetterBouquet')?.checked)return null;
+    return {
+      flowers:letterBouquetState.flowers.slice(0,15).map((b,i)=>normalizeBloom(b,i)),
+      greenery:letterBouquetState.greenery,
+      theme:letterBouquetState.theme,
+      cardStyle:'cream'
+    };
+  }
+
+  function addLetterFlower(type) {
+    if(!FLOWERS[type])return;
+    $('enableLetterBouquet').checked=true;
+    letterBouquetState.enabled=true;
+    if(letterBouquetState.flowers.length>=15) {
+      $('letterBouquetStatus').textContent='Максимум 15 цветов в букете.';
+      renderLetterBouquetEditor();
+      return;
+    }
+    const index=letterBouquetState.flowers.length;
+    const slot=LETTER_FLOWER_SLOTS[index]||{x:18+(index%7)*10,y:70+Math.floor(index/7)*5};
+    const bloom={id:'letter-bloom-'+Date.now().toString(36)+'-'+index,type,x:slot.x,y:slot.y,rotation:index%2?5:-5,scale:index>9?.72:.86};
+    letterBouquetState.flowers.push(bloom);
+    letterBouquetState.selectedId=bloom.id;
+    renderLetterBouquetEditor();
+  }
+
+  function setupLetterBouquetEditorDrag() {
+    const stage=$('letterBouquetEditorStage');
+    if(!stage||stage.dataset.dragReady==='1')return;
+    stage.dataset.dragReady='1';
+    stage.addEventListener('pointerdown',event=>{
+      const node=event.target.closest('.bouquet-flower-node');
+      if(!node)return;
+      const bloom=letterBouquetState.flowers.find(x=>x.id===node.dataset.flowerId);
+      if(!bloom)return;
+      event.preventDefault();
+      node.setPointerCapture?.(event.pointerId);
+      letterBouquetState.selectedId=bloom.id;
+      stage.querySelectorAll('.bouquet-flower-node').forEach(item=>item.classList.toggle('is-selected',item.dataset.flowerId===bloom.id));
+      letterBouquetDrag={pointerId:event.pointerId,id:bloom.id,startX:event.clientX,startY:event.clientY,originX:bloom.x,originY:bloom.y,moved:false};
+    });
+    stage.addEventListener('pointermove',event=>{
+      const current=letterBouquetDrag;
+      if(!current||current.pointerId!==event.pointerId)return;
+      const rect=stage.getBoundingClientRect();
+      const dx=event.clientX-current.startX,dy=event.clientY-current.startY;
+      if(Math.hypot(dx,dy)>2)current.moved=true;
+      const bloom=letterBouquetState.flowers.find(x=>x.id===current.id);
+      if(!bloom)return;
+      bloom.x=clamp(current.originX+dx/rect.width*100,8,92,bloom.x);
+      bloom.y=clamp(current.originY+dy/rect.height*100,20,86,bloom.y);
+      const node=stage.querySelector('[data-flower-id="'+current.id+'"]');
+      if(node){node.style.left=bloom.x+'%';node.style.top=bloom.y+'%';}
+    });
+    const end=event=>{
+      if(!letterBouquetDrag||(event&&letterBouquetDrag.pointerId!==event.pointerId))return;
+      letterBouquetDrag=null;
+      renderLetterBouquetEditor();
+    };
+    stage.addEventListener('pointerup',end);
+    stage.addEventListener('pointercancel',end);
+  }
+
+  function renderLetterBouquet(data) {
+    const layer=$('letterBouquetLayer');
+    if(!layer)return;
+    const bouquet=data&&Array.isArray(data.flowers)&&data.flowers.length?data:null;
+    layer.hidden=!bouquet;
+    recipientView?.classList.toggle('has-letter-bouquet',Boolean(bouquet));
+    if(!bouquet)return;
+    attachedRecipientId=recipientId || new URLSearchParams(window.location.search).get('l') || '';
+    const savedPalette=THEMES[bouquet.theme]?bouquet.theme:'rose';
+    attachedRecipientFlowers=bouquet.flowers.slice(0,15).map((b,i)=>normalizeBloom(b,i));
+    if(attachedRecipientId) {
+      try {
+        const saved=JSON.parse(localStorage.getItem('letter-bouquet-layout:'+attachedRecipientId)||'null');
+        if(Array.isArray(saved))attachedRecipientFlowers=attachedRecipientFlowers.map((b,i)=>saved[i]?({...b,x:clamp(saved[i].x,8,92,b.x),y:clamp(saved[i].y,20,86,b.y)}):b);
+      } catch(_){}
+    }
+    setTheme(layer,savedPalette);
+    renderGreenery('letterBouquetLiveGreenery',['eucalyptus','fern','olive','willow'].includes(bouquet.greenery)?bouquet.greenery:'eucalyptus');
+    renderFlowers('letterBouquetLiveFlowers',attachedRecipientFlowers,null,true);
+    setupAttachedRecipientDrag();
+  }
+
+  function setupAttachedRecipientDrag() {
+    const stage=$('letterBouquetLayer');
+    if(!stage||stage.dataset.dragReady==='1')return;
+    stage.dataset.dragReady='1';
+    stage.addEventListener('pointerdown',event=>{
+      const node=event.target.closest('.bouquet-flower-node');
+      if(!node)return;
+      const bloom=attachedRecipientFlowers.find(x=>x.id===node.dataset.flowerId);
+      if(!bloom)return;
+      event.preventDefault();
+      node.setPointerCapture?.(event.pointerId);
+      attachedRecipientDrag={pointerId:event.pointerId,id:bloom.id,startX:event.clientX,startY:event.clientY,originX:bloom.x,originY:bloom.y,moved:false};
+    });
+    stage.addEventListener('pointermove',event=>{
+      const current=attachedRecipientDrag;
+      if(!current||current.pointerId!==event.pointerId)return;
+      const rect=stage.getBoundingClientRect();
+      const dx=event.clientX-current.startX,dy=event.clientY-current.startY;
+      if(Math.hypot(dx,dy)>2)current.moved=true;
+      const bloom=attachedRecipientFlowers.find(x=>x.id===current.id);
+      if(!bloom)return;
+      bloom.x=clamp(current.originX+dx/rect.width*100,8,92,bloom.x);
+      bloom.y=clamp(current.originY+dy/rect.height*100,20,86,bloom.y);
+      const node=stage.querySelector('[data-flower-id="'+current.id+'"]');
+      if(node){node.style.left=bloom.x+'%';node.style.top=bloom.y+'%';}
+    });
+    const end=event=>{
+      if(!attachedRecipientDrag||(event&&attachedRecipientDrag.pointerId!==event.pointerId))return;
+      const moved=attachedRecipientDrag.moved;
+      attachedRecipientDrag=null;
+      if(moved&&attachedRecipientId) {
+        try {
+          localStorage.setItem('letter-bouquet-layout:'+attachedRecipientId,
+            JSON.stringify(attachedRecipientFlowers.map(b=>({x:b.x,y:b.y}))));
+        } catch(_){}
+      }
+    };
+    stage.addEventListener('pointerup',end);
+    stage.addEventListener('pointercancel',end);
+    stage.addEventListener('keydown',event=>{
+      const node=event.target.closest('.bouquet-flower-node');
+      if(!node||!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
+      const bloom=attachedRecipientFlowers.find(x=>x.id===node.dataset.flowerId);
+      if(!bloom)return;
+      event.preventDefault();
+      if(event.key==='ArrowLeft')bloom.x=clamp(bloom.x-2,8,92,bloom.x);
+      if(event.key==='ArrowRight')bloom.x=clamp(bloom.x+2,8,92,bloom.x);
+      if(event.key==='ArrowUp')bloom.y=clamp(bloom.y-2,20,86,bloom.y);
+      if(event.key==='ArrowDown')bloom.y=clamp(bloom.y+2,20,86,bloom.y);
+      node.style.left=bloom.x+'%';node.style.top=bloom.y+'%';
+    });
+  }
+
+  $('enableLetterBouquet')?.addEventListener('change',renderLetterBouquetEditor);
+  document.querySelectorAll('[data-add-letter-flower]').forEach(button=>button.addEventListener('click',()=>addLetterFlower(button.dataset.addLetterFlower)));
+  $('letterBouquetGreenery')?.addEventListener('change',event=>{letterBouquetState.greenery=event.target.value;renderLetterBouquetEditor();});
+  $('letterBouquetTheme')?.addEventListener('change',event=>{letterBouquetState.theme=event.target.value;renderLetterBouquetEditor();});
+  $('removeLetterBouquetFlower')?.addEventListener('click',()=>{
+    const id=letterBouquetState.selectedId;
+    if(!id)return;
+    letterBouquetState.flowers=letterBouquetState.flowers.filter(b=>b.id!==id);
+    letterBouquetState.selectedId=letterBouquetState.flowers.at(-1)?.id||null;
+    renderLetterBouquetEditor();
+  });
+  setupLetterBouquetEditorDrag();
+  renderLetterBouquetEditor();
+  window.getAttachedBouquetData=getAttachedBouquetData;
+  window.renderLetterBouquet=renderLetterBouquet;
+  if(window.letterData?.bouquet)renderLetterBouquet(window.letterData.bouquet);
+  document.querySelectorAll('[data-builder-mode]').forEach(b=>{
       const active=b.dataset.builderMode===mode;
       b.classList.toggle('is-active',active);
       b.setAttribute('aria-pressed',String(active));
