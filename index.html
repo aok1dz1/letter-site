@@ -1743,6 +1743,8 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         }
       } catch (_) { /* ignore malformed or unavailable saved layout */ }
       if (data.kind === 'bouquet') {
+        window.letterData = data;
+        window.pendingBouquetData = data;
         recipientView.hidden = true;
         const bouquetView = $('bouquetRecipientView');
         if (bouquetView) bouquetView.hidden = false;
@@ -1764,6 +1766,8 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     decodeData(encoded).then(shared => {
       if (shared) {
         if (shared.kind === 'bouquet') {
+          window.letterData = shared;
+          window.pendingBouquetData = shared;
           recipientView.hidden = true;
           builder.hidden = true;
           const bouquetView = $('bouquetRecipientView');
