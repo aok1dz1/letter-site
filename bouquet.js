@@ -669,4 +669,6 @@
   renderPreview();
   renderStep();
   window.renderBouquetRecipient=renderRecipient;
+  if(window.pendingBouquetData?.kind==='bouquet')renderRecipient(window.pendingBouquetData);
+  if(window.letterData?.kind!=='bouquet' && window.letterData?.bouquet)renderLetterBouquet(window.letterData.bouquet);
 })();
