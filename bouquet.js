@@ -262,10 +262,13 @@
     if(!bloom) return;
     state.selectedId=bloom.id;
     const stage=$('bouquetPreviewStage');
-    const rect=stage.getBoundingClientRect();
+    stage.querySelectorAll('.bouquet-flower-node').forEach(item=>item.classList.toggle('is-selected',item.dataset.flowerId===bloom.id));
+    $('bouquetFlowerControls').hidden=false;
+    $('bouquetSelectedLabel').textContent=(FLOWERS[bloom.type]?.name||'Цветок')+' — настройки';
+    $('bouquetFlowerRotation').value=String(bloom.rotation);
+    $('bouquetFlowerScale').value=String(Math.round(bloom.scale*100));
     drag={pointerId:event.pointerId,id:bloom.id,startX:event.clientX,startY:event.clientY,originX:bloom.x,originY:bloom.y,moved:false};
     node.setPointerCapture?.(event.pointerId);
-    renderPreview();
   }
   function handleFlowerMove(event) {
     if(!drag||drag.pointerId!==event.pointerId) return;
@@ -461,7 +464,6 @@
     if(!node)return;
     event.preventDefault();
     moveSelectedFlower(event);
-    renderPreview();
   });
   $('bouquetPreviewStage')?.addEventListener('pointermove',handleFlowerMove);
   $('bouquetPreviewStage')?.addEventListener('pointerup',endFlowerMove);
