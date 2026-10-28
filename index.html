@@ -308,6 +308,11 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     <section class="preview-panel" aria-label="Предпросмотр">
       <div class="preview-paper" id="letterPreviewPaper">
         <span class="corner corner-top"></span><span class="corner corner-bottom"></span>
+        <div id="letterPreviewBouquetLayer" class="letter-preview-bouquet-layer" hidden aria-label="Цветочная композиция вокруг конверта">
+          <div id="letterPreviewBouquetGreenery" class="bouquet-greenery-layer"></div>
+          <div id="letterPreviewBouquetFlowers" class="bouquet-flower-layer"></div>
+          <div id="letterPreviewBouquetDecor" class="letter-preview-bouquet-decor"></div>
+        </div>
         <div class="preview-heading">
           <p class="eyebrow" id="previewHeader">ПИСЬМО ДЛЯ ТЕБЯ</p>
           <h1 id="previewTitle">Несколько важных слов</h1>
@@ -352,14 +357,18 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     </section>
     <section class="editor-panel">
       <div class="editor-content">
-        <div class="builder-mode-switch" role="group" aria-label="Что создать">
-          <button type="button" class="builder-mode-button is-active" data-builder-mode="letter" aria-pressed="true">Письмо</button>
-          <button type="button" class="builder-mode-button" data-builder-mode="bouquet" aria-pressed="false">Цифровой букет</button>
+        <div class="builder-mode-switch" role="group" aria-label="Режим создания">
+          <button type="button" class="builder-mode-button is-active" data-builder-mode="letter" aria-pressed="true"><span aria-hidden="true">✉</span> Письмо</button>
+          <button type="button" class="builder-mode-button" data-builder-mode="attached" aria-pressed="false"><span aria-hidden="true">✿</span> Букет на экран письма</button>
+          <button type="button" class="builder-mode-button" data-builder-mode="bouquet" aria-pressed="false"><span aria-hidden="true">♧</span> Отдельный букет</button>
         </div>
-        <p class="eyebrow" id="editorEyebrow">A NOTE TO SOMEONE</p>
-        <h2 id="editorHeading">Скажи это<br>по-особенному.</h2>
-        <p class="editor-lead" id="editorLead">Напиши личное письмо, посмотри, как оно открывается, и создай ссылку для одного человека.</p>
+        <div id="editorIntro" class="editor-intro">
+          <p class="eyebrow" id="editorEyebrow">A NOTE TO SOMEONE</p>
+          <h2 id="editorHeading">Скажи это<br>по-особенному.</h2>
+          <p class="editor-lead" id="editorLead">Напиши личное письмо, посмотри, как оно открывается, и создай ссылку для одного человека.</p>
+        </div>
         <form id="letterForm">
+          <div id="letterCoreFields" class="letter-core-fields">
           <label>Имя получателя
             <input id="recipient" maxlength="80" placeholder="Например, Анна" autocomplete="off">
           </label>
@@ -390,16 +399,19 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
               </select>
             </label>
           </div>
-          <details class="visual-settings">
+          </div>
+          <details class="visual-settings" id="letterVisualSettings">
             <summary>Фон и личные фото</summary>
             <div class="visual-settings-body">
               <section class="letter-bouquet-settings" aria-labelledby="letterBouquetTitle">
                 <label class="letter-bouquet-toggle">
                   <input id="enableLetterBouquet" type="checkbox">
                   <span><strong id="letterBouquetTitle">Добавить букет на экран письма</strong><small>Цветы будут вокруг конверта на странице получателя. Их можно передвигать.</small></span>
+                  <i aria-hidden="true" class="bouquet-toggle-chevron"></i>
                 </label>
                 <div id="letterBouquetEditor" class="letter-bouquet-editor" hidden>
-                  <p class="file-help">Нажимай на цветы, чтобы добавить их. Перетаскивай каждый цветок прямо на макете.</p>
+                  <div class="letter-bouquet-section-heading">ВЫБОР ЦВЕТОВ <span>(ДО 15)</span></div>
+                  <p class="file-help">Нажимай на цветы, чтобы добавить их. Перетаскивай цветы на макете слева, чтобы расставить композицию.</p>
                   <div id="letterBouquetEditorStage" class="bouquet-arrangement-stage letter-bouquet-editor-stage" aria-label="Расположение букета на экране письма">
                     <div id="letterBouquetEditorGreenery" class="bouquet-greenery-layer"></div>
                     <div id="letterBouquetEditorFlowers" class="bouquet-flower-layer"></div>
@@ -413,38 +425,65 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
                     <button type="button" data-add-letter-flower="daisy" title="Добавить ромашку"><span data-letter-flower-art="daisy"></span><small>Ромашка</small></button>
                     <button type="button" data-add-letter-flower="lily" title="Добавить лилию"><span data-letter-flower-art="lily"></span><small>Лилия</small></button>
                     <button type="button" data-add-letter-flower="hydrangea" title="Добавить гортензию"><span data-letter-flower-art="hydrangea"></span><small>Гортензия</small></button>
-                    <button type="button" data-add-letter-flower="gypsophila" title="Добавить гипсофилу"><span data-letter-flower-art="gypsophila"></span><small>Гипсофила</small></button>
-                    <button type="button" data-add-letter-flower="lavender" title="Добавить лаванду"><span data-letter-flower-art="lavender"></span><small>Лаванда</small></button>
                     <button type="button" data-add-letter-flower="carnation" title="Добавить гвоздику"><span data-letter-flower-art="carnation"></span><small>Гвоздика</small></button>
                     <button type="button" data-add-letter-flower="anemone" title="Добавить анемон"><span data-letter-flower-art="anemone"></span><small>Анемон</small></button>
+                    <button type="button" data-add-letter-flower="lavender" title="Добавить лаванду"><span data-letter-flower-art="lavender"></span><small>Лаванда</small></button>
+                    <button type="button" data-add-letter-flower="gypsophila" title="Добавить гипсофилу"><span data-letter-flower-art="gypsophila"></span><small>Гипсофила</small></button>
                     <button type="button" data-add-letter-flower="sunflower" title="Добавить подсолнух"><span data-letter-flower-art="sunflower"></span><small>Подсолнух</small></button>
                   </div>
-                  <div class="letter-bouquet-controls">
+
+                  <div class="letter-bouquet-section-heading">ЦВЕТОВАЯ ПАЛИТРА</div>
+                  <div class="letter-bouquet-palette-grid" id="letterBouquetPaletteGrid">
+                    <button type="button" data-letter-bouquet-palette="rose" class="is-selected"><i style="--swatch:#efacb9"></i><span>Нежная роза</span></button>
+                    <button type="button" data-letter-bouquet-palette="peach"><i style="--swatch:#f1b69b"></i><span>Пастельный персик</span></button>
+                    <button type="button" data-letter-bouquet-palette="lavender"><i style="--swatch:#b9a9db"></i><span>Лавандовая дымка</span></button>
+                    <button type="button" data-letter-bouquet-palette="sage"><i style="--swatch:#a9bca4"></i><span>Зелёный шалфей</span></button>
+                    <button type="button" data-letter-bouquet-palette="champagne"><i style="--swatch:#d6c4a4"></i><span>Кремовая классика</span></button>
+                    <button type="button" data-letter-bouquet-palette="berry"><i style="--swatch:#c87f91"></i><span>Пыльная роза</span></button>
+                    <button type="button" data-letter-bouquet-palette="sky"><i style="--swatch:#a8c7d9"></i><span>Небесная свежесть</span></button>
+                    <button type="button" data-letter-bouquet-palette="midnight"><i style="--swatch:#9181b4"></i><span>Вечерняя лаванда</span></button>
+                  </div>
+
+                  <div class="letter-bouquet-section-heading">ЗЕЛЕНЬ И ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ</div>
+                  <div class="letter-bouquet-extras-grid">
+                    <button type="button" data-letter-decor="eucalyptus" class="is-selected"><span class="extra-art greenery-eucalyptus"></span><small>Эвкалипт</small></button>
+                    <button type="button" data-letter-decor="ruscus"><span class="extra-art greenery-ruscus"></span><small>Рускус</small></button>
+                    <button type="button" data-letter-decor="gypsophila"><span class="extra-art greenery-gypsophila"></span><small>Гипсофила</small></button>
+                    <button type="button" data-letter-decor="olive"><span class="extra-art greenery-olive"></span><small>Оливковая ветвь</small></button>
+                    <button type="button" data-letter-decor="salal"><span class="extra-art greenery-salal"></span><small>Салал</small></button>
+                    <button type="button" data-letter-decor="petals"><span class="extra-art extra-petals"></span><small>Лепестки</small></button>
+                    <button type="button" data-letter-decor="ribbon"><span class="extra-art extra-ribbon"></span><small>Ленты</small></button>
+                    <button type="button" data-letter-decor="postcard"><span class="extra-art extra-postcard"></span><small>Открытки</small></button>
+                  </div>
+
+                  <div class="letter-bouquet-controls hidden-bouquet-setting">
                     <label>Зелень
                       <select id="letterBouquetGreenery">
-                        <option value="eucalyptus">Эвкалипт</option>
-                        <option value="fern">Папоротник</option>
-                        <option value="olive">Оливковые ветви</option>
-                        <option value="willow">Ива</option>
+                        <option value="eucalyptus">Эвкалипт</option><option value="fern">Папоротник</option><option value="olive">Оливковые ветви</option><option value="willow">Ива</option>
+                        <option value="ruscus">Рускус</option><option value="gypsophila">Гипсофила</option><option value="salal">Салал</option>
                       </select>
                     </label>
                     <label>Палитра букета
                       <select id="letterBouquetTheme">
-                        <option value="rose">Розовая дымка</option>
-                        <option value="lavender">Лавандовый сад</option>
-                        <option value="sage">Шалфей</option>
-                        <option value="peach">Персиковый свет</option>
-                        <option value="sky">Небесный</option>
-                        <option value="champagne">Шампань</option>
-                        <option value="midnight">Лунный</option>
-                        <option value="berry">Ягодный</option>
+                        <option value="rose">Нежная роза</option><option value="lavender">Лавандовая дымка</option><option value="sage">Зелёный шалфей</option><option value="peach">Пастельный персик</option><option value="sky">Небесная свежесть</option><option value="champagne">Кремовая классика</option><option value="midnight">Вечерняя лаванда</option><option value="berry">Пыльная роза</option>
                       </select>
                     </label>
-                    <button type="button" class="button button-secondary" id="removeLetterBouquetFlower">Убрать выбранный цветок</button>
                   </div>
-                  <p id="letterBouquetStatus" class="image-status" aria-live="polite">Добавлено 5 цветов. Перетащи их в удобное положение.</p>
+                  <div id="letterBouquetSelectedControls" class="letter-bouquet-selected" hidden>
+                    <div class="letter-bouquet-selected-identity">
+                      <span id="letterBouquetSelectedThumb" class="selected-flower-art"></span>
+                      <div><strong id="letterBouquetSelectedName">Ранункулюс</strong><small id="letterBouquetSelectedType">Нежно-розовый</small><button type="button" id="removeLetterBouquetFlower" class="button button-secondary">Удалить</button></div>
+                    </div>
+                    <div class="letter-bouquet-sliders">
+                      <label>Размер <output id="letterBouquetScaleOut">86%</output><input id="letterBouquetFlowerScale" type="range" min="70" max="130" step="1" value="86"></label>
+                      <label>Поворот <output id="letterBouquetRotationOut">0°</output><input id="letterBouquetFlowerRotation" type="range" min="-35" max="35" step="1" value="0"></label>
+                    </div>
+                    <div class="letter-bouquet-layer-controls"><span>Отразить</span><button type="button" id="letterBouquetFlip" aria-label="Отразить цветок">↔</button><span>На слой</span><button type="button" id="letterBouquetLayerDown" aria-label="Переместить ниже">↓</button><button type="button" id="letterBouquetLayerUp" aria-label="Переместить выше">↑</button></div>
+                  </div>
+                  <p id="letterBouquetStatus" class="image-status" aria-live="polite">Добавлено 5 из 15 цветов. Перетаскивай цветы мышью или пальцем.</p>
                 </div>
               </section>
+              <div id="nonBouquetVisualSettings">
               <label>Фон экрана получателя
                 <select id="backgroundMode">
                   <option value="color">Текущий розовый градиент</option>
@@ -509,6 +548,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
               </div>
               <p class="file-help">Фотографии хранятся отдельно, ссылка остаётся короткой. Любой, у кого есть ссылка, сможет увидеть письмо и эти изображения.</p>
               <p id="imageStatus" class="image-status" aria-live="polite"></p>
+              </div>
             </div>
           </details>
           <div class="actions">
