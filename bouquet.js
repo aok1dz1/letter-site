@@ -2,18 +2,19 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   const FLOWERS = {
-    rose:       {name:'Роза', colors:['#e8a4ae','#f6d0ca','#c87382'], center:'#9f4358', leaf:'#6b8b68'},
-    peony:      {name:'Пион', colors:['#e8a0b5','#f8d5dc','#c96f91'], center:'#d88da3', leaf:'#718e6d'},
-    ranunculus: {name:'Ранункулюс', colors:['#eaa5a8','#f8d7cf','#cc7180'], center:'#d98a82', leaf:'#718b69'},
-    tulip:      {name:'Тюльпан', colors:['#e99aa7','#f7c6cd','#c76a7a'], center:'#e99aa7', leaf:'#66865e'},
-    daisy:      {name:'Ромашка', colors:['#fff8e9','#fffdf5','#eadfcf'], center:'#dcae58', leaf:'#708e69'},
-    lily:       {name:'Лилия', colors:['#f4d8d0','#fff2e9','#d88e9e'], center:'#c88c4e', leaf:'#6d8761'},
-    hydrangea:  {name:'Гортензия', colors:['#d8b6d9','#f0d9eb','#b69bcf'], center:'#d3a45f', leaf:'#68845e'},
-    gypsophila: {name:'Гипсофила', colors:['#fffaf1','#fffef8','#ecdde0'], center:'#e8c3bf', leaf:'#81977a'},
-    lavender:   {name:'Лаванда', colors:['#aa9bcf','#d5c7e9','#8573ad'], center:'#b8a4d8', leaf:'#748c6e'},
-    carnation:  {name:'Гвоздика', colors:['#e9a4b3','#f7d1d7','#cb768d'], center:'#d6879c', leaf:'#688663'},
-    anemone:    {name:'Анемон', colors:['#f0d6d7','#fff0e9','#c7a1ba'], center:'#39354b', leaf:'#6d896a'},
-    sunflower:  {name:'Подсолнух', colors:['#e9c56b','#f7dda0','#cfa64a'], center:'#655046', leaf:'#66825b'}
+    rose:       {name:'Роза', sprite:0, colors:['#e8a4ae','#f6d0ca','#c87382'], center:'#9f4358', leaf:'#6b8b68'},
+    peony:      {name:'Пион', sprite:1, colors:['#e8a0b5','#f8d5dc','#c96f91'], center:'#d88da3', leaf:'#718e6d'},
+    ranunculus: {name:'Ранункулюс', sprite:2, colors:['#eaa5a8','#f8d7cf','#cc7180'], center:'#d98a82', leaf:'#718b69'},
+    tulip:      {name:'Тюльпан', sprite:3, colors:['#e99aa7','#f7c6cd','#c76a7a'], center:'#e99aa7', leaf:'#66865e'},
+    daisy:      {name:'Ромашка', sprite:4, colors:['#fff8e9','#fffdf5','#eadfcf'], center:'#dcae58', leaf:'#708e69'},
+    lily:       {name:'Лилия', sprite:5, colors:['#f4d8d0','#fff2e9','#d88e9e'], center:'#c88c4e', leaf:'#6d8761'},
+    hydrangea:  {name:'Гортензия', sprite:6, colors:['#d8b6d9','#f0d9eb','#b69bcf'], center:'#d3a45f', leaf:'#68845e'},
+    carnation:  {name:'Гвоздика', sprite:7, colors:['#e9a4b3','#f7d1d7','#cb768d'], center:'#d6879c', leaf:'#688663'},
+    anemone:    {name:'Анемон', sprite:8, colors:['#f0d6d7','#fff0e9','#c7a1ba'], center:'#39354b', leaf:'#6d896a'},
+    lavender:   {name:'Лаванда', sprite:9, colors:['#aa9bcf','#d5c7e9','#8573ad'], center:'#b8a4d8', leaf:'#748c6e'},
+    gypsophila: {name:'Гипсофила', sprite:10, colors:['#fffaf1','#fffef8','#ecdde0'], center:'#e8c3bf', leaf:'#81977a'},
+    eucalyptus: {name:'Эвкалипт', sprite:11, colors:['#b4c8b2','#dce5d7','#7f9b84'], center:'#81977a', leaf:'#81977a'},
+    sunflower:  {name:'Подсолнух', sprite:null, colors:['#e9c56b','#f7dda0','#cfa64a'], center:'#655046', leaf:'#66825b'}
   };
   const THEMES = {
     rose:      ['#fff8fb','#fce7ef','#492938','#c85e85'],
@@ -315,14 +316,15 @@
   let letterBouquetState = {
     enabled:false,
     flowers:[
-      {id:'letter-bloom-1',type:'rose',x:19,y:62,rotation:-7,scale:.9},
-      {id:'letter-bloom-2',type:'peony',x:33,y:57,rotation:3,scale:1},
-      {id:'letter-bloom-3',type:'tulip',x:67,y:57,rotation:8,scale:.9},
-      {id:'letter-bloom-4',type:'daisy',x:81,y:62,rotation:-8,scale:.82},
-      {id:'letter-bloom-5',type:'lily',x:50,y:69,rotation:6,scale:.86}
+      {id:'letter-bloom-1',type:'rose',x:18,y:64,rotation:-7,scale:.9,z:10},
+      {id:'letter-bloom-2',type:'peony',x:33,y:57,rotation:3,scale:1,z:20},
+      {id:'letter-bloom-3',type:'ranunculus',x:67,y:57,rotation:8,scale:.92,z:18},
+      {id:'letter-bloom-4',type:'tulip',x:81,y:62,rotation:-8,scale:.82,z:15},
+      {id:'letter-bloom-5',type:'lily',x:50,y:69,rotation:6,scale:.86,z:12}
     ],
     greenery:'eucalyptus',
     theme:'rose',
+    decorations:[],
     selectedId:'letter-bloom-2'
   };
   function normalizeBloom(raw,index=0) {
@@ -333,7 +335,9 @@
       x:clamp(raw?.x,8,92,slot.x),
       y:clamp(raw?.y,20,86,slot.y),
       rotation:clamp(raw?.rotation,-35,35,0),
-      scale:clamp(raw?.scale,.7,1.3,1)
+      scale:clamp(raw?.scale,.7,1.3,1),
+      flip:Boolean(raw?.flip),
+      z:clamp(raw?.z,0,100,Math.round(slot.y))
     };
   }
   function clamp(v,min,max,fallback) {
@@ -382,11 +386,17 @@
     node.style.top=bloom.y+'%';
     node.style.setProperty('--flower-rotation',bloom.rotation+'deg');
     node.style.setProperty('--flower-scale',String(bloom.scale));
-    node.style.zIndex=String(Math.round(bloom.y));
+    node.style.setProperty('--flower-flip',bloom.flip ? '-1' : '1');
+    node.style.zIndex=String(bloom.z || Math.round(bloom.y));
     node.setAttribute('role','button');
     node.setAttribute('tabindex','0');
     node.setAttribute('aria-label',(FLOWERS[bloom.type]?.name||'Цветок')+'. Можно переместить');
-    node.innerHTML=svgFlower(bloom.type);
+    if (FLOWERS[bloom.type]?.sprite !== null && window.BOTANICAL_SPRITE_URL) {
+      node.innerHTML='<span class="botanical-sprite-art"></span>';
+      applyFlowerSprite(node.querySelector('.botanical-sprite-art'),bloom.type);
+    } else {
+      node.innerHTML=svgFlower(bloom.type);
+    }
     if(!interactive) {
       node.style.cursor='default';
       node.setAttribute('tabindex','-1');
@@ -454,13 +464,39 @@
     document.querySelectorAll('[data-card-style]').forEach(b=>b.classList.toggle('is-selected',b.dataset.cardStyle===state.cardStyle));
   }
   function setMode(mode) {
-    const isBouquet=mode==='bouquet';
-    $('letterPreviewPaper').hidden=isBouquet;
-    $('bouquetPreviewPanel').hidden=!isBouquet;
-    $('letterForm').hidden=isBouquet;
-    $('letterFootnote').hidden=isBouquet;
-    $('bouquetBuilderFields').hidden=!isBouquet;
-  
+    const isBouquet = mode === 'bouquet';
+    const isAttached = mode === 'attached';
+    $('letterPreviewPaper').hidden = isBouquet;
+    $('bouquetPreviewPanel').hidden = !isBouquet;
+    $('letterForm').hidden = isBouquet;
+    $('letterFootnote').hidden = isBouquet;
+    $('bouquetBuilderFields').hidden = !isBouquet;
+    if ($('editorIntro')) $('editorIntro').hidden = isAttached;
+    if ($('letterCoreFields')) $('letterCoreFields').hidden = isAttached;
+    if ($('nonBouquetVisualSettings')) $('nonBouquetVisualSettings').hidden = isAttached;
+    const settings = $('letterVisualSettings');
+    if (settings) {
+      settings.open = isAttached || settings.open;
+      const summary = settings.querySelector('summary');
+      if (summary) summary.hidden = isAttached;
+    }
+    if (isAttached) {
+      $('enableLetterBouquet').checked = true;
+      renderLetterBouquetEditor();
+    }
+    document.querySelectorAll('[data-builder-mode]').forEach(button => {
+      const active = button.dataset.builderMode === mode;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    $('editorEyebrow').textContent = isBouquet ? 'A DIGITAL BOUQUET' : 'A NOTE TO SOMEONE';
+    $('editorHeading').textContent = isBouquet ? 'Создай свой букет' : 'Скажи это по-особенному.';
+    $('editorLead').textContent = isBouquet
+      ? 'Выбери цветы, расставь их как тебе нравится, добавь открытку и отправь короткую ссылку.'
+      : 'Напиши личное письмо, посмотри, как оно открывается, и создай ссылку для одного человека.';
+    if (isBouquet) { renderStep(); renderPreview(); }
+  }
+
   function renderLetterBouquetEditor() {
     const checkbox=$('enableLetterBouquet');
     const editor=$('letterBouquetEditor');
@@ -633,16 +669,6 @@
   window.getAttachedBouquetData=getAttachedBouquetData;
   window.renderLetterBouquet=renderLetterBouquet;
   if(window.letterData?.bouquet)renderLetterBouquet(window.letterData.bouquet);
-  document.querySelectorAll('[data-builder-mode]').forEach(b=>{
-      const active=b.dataset.builderMode===mode;
-      b.classList.toggle('is-active',active);
-      b.setAttribute('aria-pressed',String(active));
-    });
-    $('editorEyebrow').textContent=isBouquet?'A DIGITAL BOUQUET':'A NOTE TO SOMEONE';
-    $('editorHeading').textContent=isBouquet?'Создай свой букет':'Скажи это по-особенному.';
-    $('editorLead').textContent=isBouquet?'Выбери цветы, расставь их как тебе нравится, добавь открытку и отправь короткую ссылку.':'Напиши личное письмо, посмотри, как оно открывается, и создай ссылку для одного человека.';
-    if(isBouquet){renderStep();renderPreview();}
-  }
   function addFlower(type) {
     if(!FLOWERS[type]) return;
     if(state.flowers.length>=15) {
