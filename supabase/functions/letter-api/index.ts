@@ -179,7 +179,7 @@ Deno.serve(async (req: Request) => {
   let attachedBouquet: any = null;
   if (kind !== "bouquet" && source.bouquet !== undefined && source.bouquet !== null) {
     const bouquet = source.bouquet;
-    const allowedFlowerTypes = new Set(["rose", "peony", "tulip", "daisy", "lily", "sunflower", "anemone", "lavender"]);
+    const allowedFlowerTypes = new Set(["rose", "peony", "ranunculus", "tulip", "daisy", "lily", "hydrangea", "gypsophila", "lavender", "carnation", "anemone", "sunflower"]);
     const allowedGreenery = new Set(["eucalyptus", "fern", "olive", "willow"]);
     if (!bouquet || typeof bouquet !== "object" || !Array.isArray(bouquet.flowers)) {
       return json(400, { error: "Invalid attached bouquet." });
@@ -209,7 +209,7 @@ Deno.serve(async (req: Request) => {
 
   if (kind === "bouquet") {
     const bouquet = source.bouquet;
-    const allowedFlowerTypes = new Set(["rose", "peony", "tulip", "daisy", "lily", "sunflower", "anemone", "lavender"]);
+    const allowedFlowerTypes = new Set(["rose", "peony", "ranunculus", "tulip", "daisy", "lily", "hydrangea", "gypsophila", "lavender", "carnation", "anemone", "sunflower"]);
     const allowedGreenery = new Set(["eucalyptus", "fern", "olive", "willow"]);
     const allowedCardStyles = new Set(["cream", "vintage", "rose-gold", "midnight", "kraft", "garden"]);
     if (!bouquet || typeof bouquet !== "object" || !Array.isArray(bouquet.flowers)) {
