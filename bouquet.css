@@ -139,7 +139,7 @@
 .letter-bouquet-live .bouquet-flower-node{width:clamp(44px,10vw,86px);pointer-events:auto;cursor:grab}
 .letter-bouquet-live .bouquet-flower-node:active{cursor:grabbing}
 .letter-bouquet-live .bouquet-flower-node svg{filter:drop-shadow(0 3px 5px rgba(63,40,50,.13))}
-.recipient-view.has-letter-bouquet .recipient-envelope-wrap{z-index:5;position:relative}
+.recipient-view.has-letter-bouquet .recipient-envelope-wrap{z-index:3;position:relative}
 .recipient-view.has-letter-bouquet .recipient-topline{z-index:6}
 .recipient-view.has-letter-bouquet #floatingPhotos{z-index:7}
 @media(max-width:700px){
