@@ -304,3 +304,12 @@
 .letter-bouquet-live .bouquet-flower-node{position:absolute}
 .preview-heading,.envelope-stage,.open-hint{position:relative;z-index:2}
 .bouquet-flower-node:focus-visible{outline:1px solid #d35b82;outline-offset:3px}
+
+
+/* Decorative foliage sprigs around the letter composition. */
+.letter-preview-decor{pointer-events:none}
+.letter-preview-decor.decor-eucalyptus{width:82px;height:150px;background:radial-gradient(ellipse at 35% 15%,#b9cbb7 0 8px,transparent 9px),radial-gradient(ellipse at 66% 25%,#789879 0 9px,transparent 10px),radial-gradient(ellipse at 31% 37%,#a3b99f 0 9px,transparent 10px),radial-gradient(ellipse at 71% 49%,#8ca68b 0 9px,transparent 10px),radial-gradient(ellipse at 38% 62%,#b6c7b0 0 8px,transparent 9px),linear-gradient(105deg,transparent 49%,#779477 50% 51%,transparent 52%);opacity:.88}
+.letter-preview-decor.decor-ruscus{width:64px;height:160px;background:repeating-linear-gradient(118deg,transparent 0 20px,#8aa57f 21px 23px,transparent 24px 36px),linear-gradient(108deg,transparent 49%,#66875f 50% 51%,transparent 52%);opacity:.9}
+.letter-preview-decor.decor-gypsophila{width:94px;height:170px;background:radial-gradient(circle at 18% 19%,#fffaf0 0 4px,transparent 5px),radial-gradient(circle at 39% 12%,#f4e6dd 0 4px,transparent 5px),radial-gradient(circle at 56% 22%,#fffaf4 0 5px,transparent 6px),radial-gradient(circle at 76% 17%,#efe1d8 0 4px,transparent 5px),radial-gradient(circle at 28% 38%,#fffaf1 0 4px,transparent 5px),radial-gradient(circle at 63% 41%,#fffaf1 0 4px,transparent 5px),radial-gradient(circle at 82% 49%,#f2e3da 0 4px,transparent 5px),radial-gradient(circle at 44% 60%,#fffaf1 0 4px,transparent 5px),repeating-linear-gradient(78deg,transparent 0 26px,#8aa17c 27px 28px,transparent 29px 40px);opacity:.92}
+.letter-preview-decor.decor-olive{width:76px;height:165px;background:repeating-linear-gradient(122deg,transparent 0 16px,#97a98a 17px 19px,transparent 20px 32px),linear-gradient(105deg,transparent 49%,#778c6c 50% 51%,transparent 52%);opacity:.9}
+.letter-preview-decor.decor-salal{width:74px;height:150px;background:radial-gradient(ellipse at 36% 20%,#9bb28c 0 8px,transparent 9px),radial-gradient(ellipse at 65% 34%,#6f8b62 0 8px,transparent 9px),radial-gradient(ellipse at 35% 48%,#83a073 0 8px,transparent 9px),radial-gradient(ellipse at 64% 62%,#a8bb99 0 8px,transparent 9px),linear-gradient(105deg,transparent 49%,#69865d 50% 51%,transparent 52%);opacity:.9}
