@@ -298,3 +298,9 @@
  .letter-bouquet-editor{gap:10px}
  .letter-bouquet-section-heading{margin-top:6px}
 }
+
+.letter-bouquet-live .bouquet-flower-node{pointer-events:auto;touch-action:none}
+.letter-bouquet-live .bouquet-flower-layer{pointer-events:none}
+.letter-bouquet-live .bouquet-flower-node{position:absolute}
+.preview-heading,.envelope-stage,.open-hint{position:relative;z-index:2}
+.bouquet-flower-node:focus-visible{outline:1px solid #d35b82;outline-offset:3px}
