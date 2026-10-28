@@ -387,7 +387,7 @@
     node.style.setProperty('--flower-rotation',bloom.rotation+'deg');
     node.style.setProperty('--flower-scale',String(bloom.scale));
     node.style.setProperty('--flower-flip',bloom.flip ? '-1' : '1');
-    node.style.zIndex=String(bloom.z || Math.round(bloom.y));
+    node.style.zIndex=String(Number.isFinite(Number(bloom.z)) ? Number(bloom.z) : Math.round(bloom.y));
     node.setAttribute('role','button');
     node.setAttribute('tabindex','0');
     node.setAttribute('aria-label',(FLOWERS[bloom.type]?.name||'Цветок')+'. Можно переместить');
@@ -523,6 +523,10 @@
     });
     document.querySelectorAll('[data-letter-decor]').forEach(button=>{
       button.classList.toggle('is-selected',letterBouquetState.decorations.includes(button.dataset.letterDecor));
+    });
+    const selectedBloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);
+    document.querySelectorAll('[data-add-letter-flower]').forEach(button=>{
+      button.classList.toggle('is-selected',Boolean(selectedBloom)&&button.dataset.addLetterFlower===selectedBloom.type);
     });
     const n=letterBouquetState.flowers.length;
     $('letterBouquetStatus').textContent='Добавлено '+n+' из 15 цветов. Перетаскивай цветы мышью или пальцем.';
