@@ -2,14 +2,18 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   const FLOWERS = {
-    rose:      {name:'Роза', petals:9, colors:['#d85f87','#f4a0ba','#b84670'], center:'#f7d4b1', leaf:'#61846a'},
-    peony:     {name:'Пион', petals:14, colors:['#ef9eb9','#ffd0de','#ce6d91'], center:'#e8a25c', leaf:'#68876a'},
-    tulip:     {name:'Тюльпан', petals:6, colors:['#e46d8e','#ffb2c7','#c64d75'], center:'#f5c66e', leaf:'#557d60'},
-    daisy:     {name:'Ромашка', petals:12, colors:['#fffaf0','#fffdf8','#ebd9c6'], center:'#e9b84e', leaf:'#648a68'},
-    lily:      {name:'Лилия', petals:6, colors:['#fff1e8','#f8c0ca','#d990a7'], center:'#e2a94e', leaf:'#628267'},
-    sunflower: {name:'Подсолнух', petals:14, colors:['#f4c85c','#ffdf85','#dba53f'], center:'#68483c', leaf:'#557d60'},
-    anemone:   {name:'Анемон', petals:8, colors:['#8f91ce','#b8b5e9','#6c70ad'], center:'#3f374f', leaf:'#63806c'},
-    lavender:  {name:'Лаванда', petals:7, colors:['#a99ad5','#d2c7ee','#8070b7'], center:'#d7b7e8', leaf:'#68866e'}
+    rose:       {name:'Роза', colors:['#e8a4ae','#f6d0ca','#c87382'], center:'#9f4358', leaf:'#6b8b68'},
+    peony:      {name:'Пион', colors:['#e8a0b5','#f8d5dc','#c96f91'], center:'#d88da3', leaf:'#718e6d'},
+    ranunculus: {name:'Ранункулюс', colors:['#eaa5a8','#f8d7cf','#cc7180'], center:'#d98a82', leaf:'#718b69'},
+    tulip:      {name:'Тюльпан', colors:['#e99aa7','#f7c6cd','#c76a7a'], center:'#e99aa7', leaf:'#66865e'},
+    daisy:      {name:'Ромашка', colors:['#fff8e9','#fffdf5','#eadfcf'], center:'#dcae58', leaf:'#708e69'},
+    lily:       {name:'Лилия', colors:['#f4d8d0','#fff2e9','#d88e9e'], center:'#c88c4e', leaf:'#6d8761'},
+    hydrangea:  {name:'Гортензия', colors:['#d8b6d9','#f0d9eb','#b69bcf'], center:'#d3a45f', leaf:'#68845e'},
+    gypsophila: {name:'Гипсофила', colors:['#fffaf1','#fffef8','#ecdde0'], center:'#e8c3bf', leaf:'#81977a'},
+    lavender:   {name:'Лаванда', colors:['#aa9bcf','#d5c7e9','#8573ad'], center:'#b8a4d8', leaf:'#748c6e'},
+    carnation:  {name:'Гвоздика', colors:['#e9a4b3','#f7d1d7','#cb768d'], center:'#d6879c', leaf:'#688663'},
+    anemone:    {name:'Анемон', colors:['#f0d6d7','#fff0e9','#c7a1ba'], center:'#39354b', leaf:'#6d896a'},
+    sunflower:  {name:'Подсолнух', colors:['#e9c56b','#f7dda0','#cfa64a'], center:'#655046', leaf:'#66825b'}
   };
   const THEMES = {
     rose:      ['#fff8fb','#fce7ef','#492938','#c85e85'],
@@ -59,30 +63,244 @@
 
   function svgFlower(type) {
     const spec = FLOWERS[type] || FLOWERS.rose;
-    const n = spec.petals;
-    let petals = '';
-    for (let i=0;i<n;i++) {
-      const angle=(360/n)*i;
-      const rx = type==='sunflower' ? 6.2 : type==='daisy' ? 5.5 : type==='lily' ? 5.8 : type==='lavender' ? 5.2 : 7.4;
-      const ry = type==='tulip' ? 14 : type==='sunflower' ? 15 : type==='daisy' ? 14 : type==='lavender' ? 10 : 16;
-      const color = spec.colors[i%spec.colors.length];
-      petals += '<ellipse cx="0" cy="-13" rx="'+rx+'" ry="'+ry+'" transform="rotate('+angle+')" fill="'+color+'" stroke="'+(type==='daisy'?'#ebdfd1':'rgba(120,55,78,.13)')+'" stroke-width=".7"/>';
-    }
-    if (type==='rose') {
-      petals += '<g fill="#c54f78"><circle cx="0" cy="0" r="12"/><path d="M-8 0 Q-4 -10 2 -6 Q8 -3 5 4 Q1 9 -4 4 Q-7 2 -3 -1 Q0 -3 1 0" fill="#f3a0ba" stroke="#b84670" stroke-width="1.4"/></g>';
-    } else {
-      petals += '<circle cx="0" cy="0" r="'+(type==='sunflower'?13:type==='daisy'?8:type==='anemone'?10:7)+'" fill="'+spec.center+'"/>';
-      if(type==='sunflower') {
-        for(let i=0;i<12;i++) {
-          const angle=i*30*Math.PI/180, x=Math.cos(angle)*6, y=Math.sin(angle)*6;
-          petals += '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="1.6" fill="#3e2a29"/>';
+    const colors = spec.colors;
+    const esc = (v) => String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    let head = '';
+    const ellipse = (x,y,rx,ry,rotation,fill,opacity,stroke) =>
+      '<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" transform="rotate('+rotation+' '+x+' '+y+')"' +
+      ' fill="'+fill+'" opacity="'+(opacity===undefined?1:opacity)+'" stroke="'+(stroke||'rgba(112,67,77,.16)')+'" stroke-width=".65"/>';
+    const path = (d,fill,stroke,sw,opacity) =>
+      '<path d="'+d+'" fill="'+fill+'"'+(stroke?' stroke="'+stroke+'"':'')+
+      (sw?' stroke-width="'+sw+'"':'')+(opacity!==undefined?' opacity="'+opacity+'"':'')+'/>';
+    const dot = (x,y,r,fill,opacity) =>
+      '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+fill+'"'+(opacity!==undefined?' opacity="'+opacity+'"':'')+'/>';
+    const ring = (count,rx,ry,radY,palette,offset,opacity) => {
+      let out='';
+      for(let i=0;i<count;i++){
+        const a=(360/count)*i+(offset||0);
+        out+=ellipse(0,radY,rx,ry,a,palette[i%palette.length],opacity===undefined?1:opacity);
+      }
+      return out;
+    };
+    const leaf = (y,side,scale,angle) => {
+      const mirror=side==='right'?-1:1;
+      return '<g transform="translate(50 '+y+') scale('+mirror+' 1) rotate('+angle+') scale('+scale+')">'+
+        path('M0 0 C-10 -5 -20 -24 -34 -22 C-30 -8 -16 5 0 0Z',spec.leaf,'rgba(47,83,55,.28)',.7)+
+        path('M-1 0 Q-17 -10 -32 -21','none','#c7d6b5',.9,.72)+
+        path('M-14 -9 L-22 -7 M-20 -14 L-27 -14','none','#dbe3c9',.65,.65)+
+      '</g>';
+    };
+    const petalsRadial = (count,rx,ry,radius,palette,angleOffset=0,opacity=1) => {
+      let out='';
+      for(let i=0;i<count;i++){
+        const a=360/count*i+angleOffset;
+        const rad=a*Math.PI/180;
+        const x=Math.cos(rad)*radius;
+        const y=Math.sin(rad)*radius;
+        out+=ellipse(x,y,rx,ry,a+90,palette[i%palette.length],opacity);
+      }
+      return out;
+    };
+    const stem =
+      path('M50 40 C44 70 56 103 49 176','none','#547b5c',3.2,1)+
+      path('M50 43 C46 76 54 111 49 172','none','#93aa7e',1.1,.95)+
+      leaf(91,'left',.82,-14)+leaf(111,'right',.9,12)+
+      leaf(132,'left',.72,-7)+leaf(150,'right',.68,10)+
+      path('M48 174 Q48 177 47 179','none','#527650',1.5,1);
+
+    if(type==='rose'){
+      head += ring(9,10.5,16,-7,colors,10,.96);
+      head += ring(8,8.5,12,-5,colors,32,.98);
+      head += ring(6,6.5,8,-3,colors,18,1);
+      head += path('M-7 -2 C-9 -10 -1 -14 5 -10 C12 -6 8 1 2 2 C-3 4 -5 0 -2 -3 C1 -6 5 -2 3 1','none','#a74e66',1.6,.98);
+      head += path('M-2 -7 C3 -11 8 -7 6 -3 C4 0 1 -2 3 -4','none','#f8dfd5',1.4,.9);
+      head += dot(-9,-15,2.2,'#fff4eb',.85)+dot(11,-7,1.4,'#fff7ee',.9);
+    } else if(type==='peony'){
+      // Broad, ruffled layers form a soft globe instead of a flat circle.
+      head += ring(11,9,15,-5,colors,4,.9);
+      head += ring(10,8,12,-10,colors,22,.95);
+      head += ring(8,7,10,-12,colors,5,1);
+      head += ring(7,5.5,8,-14,colors,26,1);
+      for(let i=0;i<7;i++){
+        const a=i*51;
+        head += path('M0 -10 C-5 -16 -5 -24 0 -27 C5 -24 5 -16 0 -10Z',colors[i%colors.length],'rgba(166,83,112,.25)',.7,.9).replace('Z','Z');
+        head += '<path d="M0 -11 Q1 -18 0 -25" transform="rotate('+a+')" fill="none" stroke="rgba(255,247,239,.7)" stroke-width=".8"/>';
+      }
+      head += ring(5,3.5,5,-8,[colors[1],colors[0],colors[2]],35,1);
+    } else if(type==='ranunculus'){
+      // Many small overlapping petals, gradually tightening into a spiral center.
+      for(let layer=0;layer<5;layer++){
+        const count=14-layer;
+        const radius=12-layer*2.1;
+        for(let i=0;i<count;i++){
+          const a=360/count*i+layer*11;
+          const rad=a*Math.PI/180;
+          const x=Math.cos(rad)*radius;
+          const y=-5+Math.sin(rad)*radius*.74;
+          const rx=4.1-layer*.38, ry=7.8-layer*.85;
+          head+=ellipse(x,y,rx,ry,a+90,colors[(i+layer)%colors.length],.96,'rgba(160,82,91,.22)');
+          head+=path('M'+x.toFixed(1)+' '+(y-ry+1).toFixed(1)+' Q'+(x+1).toFixed(1)+' '+(y-1).toFixed(1)+' '+(x+.2).toFixed(1)+' '+(y+ry-1).toFixed(1),'none','rgba(255,247,235,.58)',.65,.8);
         }
       }
-      if(type==='anemone') petals += '<circle cx="0" cy="0" r="5.5" fill="#2f2c41"/>';
+      head+=path('M-4 -5 Q-2 -12 3 -10 Q8 -8 4 -3 Q1 0 -2 -3 Q-4 -5 0 -7','none','#c16c74',1.25,1);
+      head+=dot(0,-6,1.7,'#f8e0cb',1);
+    } else if(type==='tulip'){
+      head += path('M-20 6 C-28 -5 -23 -21 -12 -28 C-6 -22 -2 -15 0 -12 C3 -23 9 -31 14 -29 C26 -18 27 -2 17 7 C8 15 -10 15 -20 6Z',colors[0],'rgba(151,67,91,.28)',.9);
+      head += path('M-20 4 C-14 -1 -10 -15 -12 -27 C-3 -18 -1 -5 0 8 C0 -4 7 -18 14 -29 C12 -12 16 -1 18 5 C8 15 -10 15 -20 4Z',colors[1],'rgba(255,239,228,.55)',.7,.95);
+      head += path('M-7 -17 Q-6 -4 -2 7 M7 -19 Q5 -4 3 8','none','#c97083',.8,.7);
+      head += path('M-15 1 Q0 12 15 1','none','rgba(255,245,235,.7)',.8,.75);
+    } else if(type==='daisy' || type==='sunflower'){
+      const n=type==='sunflower'?18:16;
+      const palette=type==='sunflower'?colors:['#fffdf5','#f8edda','#fffaf1'];
+      head += petalsRadial(n,type==='sunflower'?4.7:3.7,type==='sunflower'?14:13,9,palette,type==='sunflower'?0:3,1);
+      head += petalsRadial(n,type==='sunflower'?3.4:2.6,type==='sunflower'?11:10,7,palette,10,.95);
+      head += dot(0,0,type==='sunflower'?12:8,spec.center,1);
+      if(type==='sunflower'){
+        head += dot(0,0,9,'#795b42',1);
+        for(let i=0;i<44;i++){
+          const a=i*137.5*Math.PI/180;
+          const rad=2+Math.sqrt(i)*1.15;
+          head+=dot((Math.cos(a)*rad).toFixed(1),(Math.sin(a)*rad*.86).toFixed(1),.65,i%3?'#b08a5d':'#352c2b',.95);
+        }
+      }else{
+        for(let i=0;i<12;i++){
+          const a=i*30*Math.PI/180;
+          head+=dot((Math.cos(a)*4.5).toFixed(2),(Math.sin(a)*4.5).toFixed(2),.6,'#f4d889',.9);
+        }
+      }
+    } else if(type==='lily'){
+      for(let i=0;i<6;i++){
+        const a=i*60;
+        head += '<g transform="rotate('+a+')">'+
+          path('M0 8 C-8 -1 -13 -17 -4 -31 C-1 -26 1 -20 0 -15 C3 -23 7 -29 8 -30 C15 -12 8 1 0 8Z',colors[i%colors.length],'rgba(163,98,116,.3)',.8)+
+          path('M0 4 Q0 -14 3 -27','none','rgba(255,250,236,.82)',.8,.85)+
+          path('M1 -3 L-2 -14 M2 -2 L5 -12','none','#c7898e',.6,.75)+
+        '</g>';
+      }
+      head += path('M0 1 Q-2 -7 -4 -15 M0 1 Q3 -9 5 -15 M0 1 Q0 -10 0 -18','none','#9a6c54',1.2,1);
+      head += dot(-4,-15,1.7,'#c69a51',1)+dot(5,-15,1.7,'#c69a51',1)+dot(0,-18,1.7,'#c69a51',1);
+    } else if(type==='hydrangea'){
+      // Rounded cluster of small four-petal florets.
+      const centers=[];
+      for(let row=-2;row<=2;row++){
+        for(let col=-2;col<=2;col++){
+          if(Math.abs(row*1.05)+Math.abs(col*.95)<=3.1){
+            centers.push([col*7,row*6.2-3]);
+          }
+        }
+      }
+      centers.forEach((p,i)=>{
+        const x=p[0],y=p[1],pal=colors;
+        for(let k=0;k<4;k++){
+          const an=k*90+i*11;
+          const rad=4.1;
+          const dx=x+Math.cos(an*Math.PI/180)*rad,dy=y+Math.sin(an*Math.PI/180)*rad;
+          head+=ellipse(dx,dy,3.5,4.2,an,pal[(i+k)%pal.length],.93,'rgba(128,91,144,.18)');
+        }
+        head+=dot(x,y,1.15,'#e8d4a7',.95);
+      });
+    } else if(type==='gypsophila'){
+      // Several branching stems with tiny clusters of white buds.
+      head='';
+      const branches=[
+        [0,5,-17,-8], [0,5,16,-14], [0,3,-22,-28], [0,4,22,-32],
+        [0,8,-8,-39], [0,9,12,-48], [0,8,-29,-48], [0,10,30,-44],
+        [0,10,-3,-57], [0,12,18,-61]
+      ];
+      branches.forEach((p,i)=>{
+        head+=path('M'+p[0]+' '+p[1]+' Q'+(p[2]*.45).toFixed(1)+' '+(p[3]*.42).toFixed(1)+' '+p[2]+' '+p[3],'none','#7f9a79',1.15,.95);
+        const x=p[2],y=p[3];
+        for(let k=0;k<5;k++){
+          const ang=k*72+i*19, rad=2.1+(k%2)*.6;
+          const px=x+Math.cos(ang*Math.PI/180)*rad,py=y+Math.sin(ang*Math.PI/180)*rad;
+          head+=ellipse(px,py,1.9,2.25,ang,colors[(k+i)%colors.length],1,'rgba(190,166,167,.32)');
+        }
+        head+=dot(x,y,1.05,spec.center,.95);
+      });
+    } else if(type==='lavender'){
+      // Slender lavender spike with small buds along the stem.
+      head='';
+      head+=path('M0 16 C-2 -2 1 -29 0 -62','none','#6c8a65',1.8,1);
+      for(let row=0;row<8;row++){
+        const y=10-row*8;
+        const width=7-row*.55;
+        head+=path('M0 '+y+' Q-'+(width+5)+' '+(y-2)+' -'+width+' '+(y-8)+' Q-1 '+(y-5)+' 0 '+y+'Z',colors[row%colors.length],'rgba(116,91,148,.2)',.55,1);
+        head+=path('M0 '+(y-2)+' Q'+(width+4)+' '+(y-5)+' '+width+' '+(y-10)+' Q2 '+(y-6)+' 0 '+(y-2)+'Z',colors[(row+1)%colors.length],'rgba(116,91,148,.2)',.55,1);
+      }
+      head+=path('M0 -57 Q-6 -67 0 -72 Q6 -67 0 -57Z',colors[1],'rgba(116,91,148,.2)',.55,1);
+    } else if(type==='carnation'){
+      // Soft scalloped, layered petals with tiny ruffles.
+      for(let layer=0;layer<3;layer++){
+        const n=13-layer*2;
+        for(let i=0;i<n;i++){
+          const a=360/n*i+layer*8;
+          const r=12-layer*4;
+          const x=Math.cos(a*Math.PI/180)*r,y=Math.sin(a*Math.PI/180)*r-5;
+          head+=path('M'+x.toFixed(1)+' '+y.toFixed(1)+' c-6 -7 -4 -13 0 -13 c2 3 2 5 4 3 c1 -5 7 -5 7 0 c0 5 -3 9 -7 12Z',colors[(i+layer)%colors.length],'rgba(157,79,98,.19)',.55,.98);
+        }
+      }
+      head+=ring(6,4,6,-4,colors,15,1);
+    } else if(type==='anemone'){
+      head+=ring(9,8.8,14,-5,colors,0,.96);
+      head+=ring(8,7.2,11,-6,colors,23,.98);
+      head+=dot(0,-4,9,'#f7f0e9',.98);
+      head+=dot(0,-4,6.5,spec.center,1);
+      for(let i=0;i<22;i++){
+        const a=i*360/22*Math.PI/180;
+        const x=Math.cos(a)*7.4,y=-4+Math.sin(a)*7.4;
+        head+=dot(x.toFixed(2),y.toFixed(2),.7,i%2?'#e1bb76':'#292638',1);
+      }
     }
-    const tulip = type==='tulip' ? '<path d="M-15 -6 Q-22 -28 -10 -35 Q-4 -22 0 -18 Q5 -32 12 -35 Q23 -23 14 -6 Q8 2 0 3 Q-10 1 -15 -6Z" fill="'+spec.colors[0]+'" stroke="#bd5578" stroke-width="1"/>' : '';
-    const flowerHead = type==='tulip' ? tulip : '<g transform="translate(0 0)">'+petals+'</g>';
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 180" aria-hidden="true"><defs><linearGradient id="stem-'+type+'" x1="0" y1="0" x2="1" y2="0"><stop stop-color="'+spec.leaf+'"/><stop offset="1" stop-color="#4d7356"/></linearGradient></defs><path d="M50 46 C45 80 59 111 50 176" fill="none" stroke="url(#stem-'+type+')" stroke-width="3.4" stroke-linecap="round"/><path d="M49 101 C31 79 19 86 28 99 C35 108 42 106 49 101Z" fill="'+spec.leaf+'"/><path d="M52 127 C70 103 82 111 73 124 C66 132 59 131 52 127Z" fill="'+spec.leaf+'"/><path d="M49 101 L29 91 M52 127 L74 116" stroke="#c9dfc1" stroke-width="1" opacity=".7"/><g transform="translate(50 43)">'+flowerHead+'</g><path d="M49 170 L50 176" stroke="#3e6549" stroke-width="2" stroke-linecap="round"/></svg>';
+
+    let stemMarkup =
+      path('M50 40 C46 72 55 105 49 176','none','#5e805e',3.1,1)+
+      path('M50 42 C47 73 53 105 49 173','none','#a4b58a',.95,.94)+
+      leaf(92,'left',.84,-14)+leaf(109,'right',.91,13)+
+      leaf(132,'left',.72,-8)+leaf(151,'right',.7,10)+
+      path('M49 171 Q48 176 47 179','none','#496f52',1.4,1);
+
+    if(type==='lily'){
+      stemMarkup=path('M50 40 C46 72 54 104 49 176','none','#5e805e',3.1,1)+
+        path('M50 42 C47 73 52 105 49 173','none','#a4b58a',.95,.94)+
+        leaf(103,'left',.82,-16)+leaf(129,'right',.76,12)+leaf(154,'left',.56,-7);
+    } else if(type==='lavender'){
+      stemMarkup=path('M50 39 C48 74 53 111 49 176','none','#5e805e',2.8,1)+
+        path('M50 41 C48 72 51 110 49 173','none','#a4b58a',.9,.94)+
+        leaf(105,'left',.62,-25)+leaf(128,'right',.62,22)+leaf(151,'left',.48,-11);
+    } else if(type==='gypsophila'){
+      stemMarkup=path('M50 45 C46 81 54 120 49 176','none','#718c6b',2.5,1)+
+        path('M50 58 Q42 35 32 28 M49 79 Q65 56 76 43 M49 99 Q31 80 23 68 M49 116 Q67 95 80 79 M49 136 Q40 121 31 112','none','#718c6b',1.4,.95)+
+        leaf(128,'left',.45,-16);
+    } else if(type==='hydrangea'){
+      stemMarkup=path('M50 42 C46 72 54 110 49 176','none','#5e805e',3.1,1)+
+        path('M50 72 Q32 61 26 51 M51 84 Q68 70 76 57','none','#5e805e',1.7,1)+
+        leaf(108,'left',.82,-14)+leaf(137,'right',.73,13)+leaf(159,'left',.5,-7);
+    } else if(type==='carnation'){
+      stemMarkup=path('M50 40 C46 72 54 108 49 176','none','#5e805e',3.1,1)+
+        path('M50 63 Q37 57 30 44','none','#5e805e',1.5,1)+
+        leaf(97,'left',.72,-14)+leaf(119,'right',.78,15)+leaf(145,'left',.55,-9);
+    } else if(type==='tulip'){
+      stemMarkup=path('M50 43 C51 85 49 122 50 176','none','#5e805e',3.2,1)+
+        path('M50 122 Q30 102 30 79 Q45 87 50 110Z','#77966b','rgba(76,112,77,.3)',.7)+
+        path('M50 147 Q69 121 71 95 Q54 105 50 132Z','#6d8c63','rgba(76,112,77,.3)',.7)+
+        path('M50 121 Q39 101 32 83','none','#c7d8af',.8,.8)+path('M50 145 Q62 123 68 101','none','#c7d8af',.8,.8);
+    } else if(type==='sunflower'){
+      stemMarkup=path('M50 48 C46 80 58 110 50 176','none','#5e805e',4,1)+
+        leaf(81,'left',1,-16)+leaf(103,'right',.96,13)+leaf(131,'left',.86,-8)+leaf(153,'right',.72,10);
+    }
+    if(type==='gypsophila'||type==='lavender') {
+      // The flower spike sits directly on its own fine stem, with a few buds flowing into the stem line.
+      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 180" aria-hidden="true"><defs>'+
+        '<linearGradient id="stem-'+type+'" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#567654"/><stop offset=".55" stop-color="'+spec.leaf+'"/><stop offset="1" stop-color="#4b6c50"/></linearGradient>'+
+        '</defs>'+stemMarkup+'<g transform="translate(50 100)">'+head+'</g></svg>';
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 180" aria-hidden="true"><defs>'+
+      '<linearGradient id="stem-'+type+'" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#4f724f"/><stop offset=".48" stop-color="'+spec.leaf+'"/><stop offset="1" stop-color="#456b4b"/></linearGradient>'+
+      '<radialGradient id="petal-'+type+'" cx="35%" cy="25%" r="80%"><stop stop-color="'+colors[1]+'"/><stop offset=".65" stop-color="'+colors[0]+'"/><stop offset="1" stop-color="'+colors[2]+'"/></radialGradient>'+
+      '</defs>'+stemMarkup+
+      '<g transform="translate(50 43)">'+
+      '<g fill="url(#petal-'+type+')">'+head+'</g>'+
+      '</g></svg>';
   }
 
   function defaultSlot(index) {
@@ -627,7 +845,7 @@
 
   document.querySelectorAll('[data-builder-mode]').forEach(button=>button.addEventListener('click',()=>setMode(button.dataset.builderMode)));
   document.querySelectorAll('[data-add-flower]').forEach(button=>button.addEventListener('click',()=>addFlower(button.dataset.addFlower)));
-  document.querySelectorAll('[data-flower-art]').forEach(el=>el.innerHTML=svgFlower(el.dataset.flowerArt));
+  document.querySelectorAll('[data-flower-art],[data-letter-flower-art]').forEach(el=>el.innerHTML=svgFlower(el.dataset.flowerArt || el.dataset.letterFlowerArt));
   document.querySelectorAll('[data-greenery]').forEach(button=>button.addEventListener('click',()=>{
     state.greenery=button.dataset.greenery;renderStep();renderPreview();
   }));
