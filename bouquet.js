@@ -74,11 +74,15 @@
       (sw?' stroke-width="'+sw+'"':'')+(opacity!==undefined?' opacity="'+opacity+'"':'')+'/>';
     const dot = (x,y,r,fill,opacity) =>
       '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+fill+'"'+(opacity!==undefined?' opacity="'+opacity+'"':'')+'/>';
-    const ring = (count,rx,ry,radY,palette,offset,opacity) => {
+    const ring = (count,rx,ry,radius,palette,offset,opacity) => {
       let out='';
+      const r=Math.abs(radius);
       for(let i=0;i<count;i++){
         const a=(360/count)*i+(offset||0);
-        out+=ellipse(0,radY,rx,ry,a,palette[i%palette.length],opacity===undefined?1:opacity);
+        const rad=a*Math.PI/180;
+        const x=Math.cos(rad)*r;
+        const y=Math.sin(rad)*r*.72;
+        out+=ellipse(x,y,rx,ry,a+90,palette[i%palette.length],opacity===undefined?1:opacity,'rgba(133,76,91,.19)');
       }
       return out;
     };
@@ -116,17 +120,14 @@
       head += path('M-2 -7 C3 -11 8 -7 6 -3 C4 0 1 -2 3 -4','none','#f8dfd5',1.4,.9);
       head += dot(-9,-15,2.2,'#fff4eb',.85)+dot(11,-7,1.4,'#fff7ee',.9);
     } else if(type==='peony'){
-      // Broad, ruffled layers form a soft globe instead of a flat circle.
-      head += ring(11,9,15,-5,colors,4,.9);
-      head += ring(10,8,12,-10,colors,22,.95);
-      head += ring(8,7,10,-12,colors,5,1);
-      head += ring(7,5.5,8,-14,colors,26,1);
-      for(let i=0;i<7;i++){
-        const a=i*51;
-        head += path('M0 -10 C-5 -16 -5 -24 0 -27 C5 -24 5 -16 0 -10Z',colors[i%colors.length],'rgba(166,83,112,.25)',.7,.9).replace('Z','Z');
-        head += '<path d="M0 -11 Q1 -18 0 -25" transform="rotate('+a+')" fill="none" stroke="rgba(255,247,239,.7)" stroke-width=".8"/>';
-      }
-      head += ring(5,3.5,5,-8,[colors[1],colors[0],colors[2]],35,1);
+      // Layered, rounded petals with visible folded edges and a soft shaded centre.
+      head += ring(13,7.2,12,8,colors,4,.88);
+      head += ring(11,6.8,10,6,colors,21,.94);
+      head += ring(9,5.6,8,4,colors,2,.98);
+      head += ring(7,4.3,6,2,colors,26,1);
+      head += path('M-7 -1 C-9 -7 -4 -12 0 -8 C4 -13 10 -8 7 -2 C5 3 -1 5 -5 2Z',colors[1],'rgba(164,83,112,.3)',.7,1);
+      head += path('M-4 -2 Q-1 -8 2 -4 Q6 -1 1 2 Q-3 3 -2 -1 Q0 -3 2 -1','none','#b76180',1.05,.95);
+      head += path('M-12 -7 Q-9 -15 -4 -16 M9 -12 Q13 -7 12 -2 M-4 -17 Q0 -20 3 -17','none','rgba(255,246,239,.8)',.85,.9);
     } else if(type==='ranunculus'){
       // Many small overlapping petals, gradually tightening into a spiral center.
       for(let layer=0;layer<5;layer++){
