@@ -39,3 +39,10 @@ The letters table has RLS enabled and no direct public read/write grants; only t
 
 ## Photo editor
 Upload up to fifteen personal photos across multiple selection batches; newly selected photos append without replacing earlier ones. Click a thumbnail to select it, drag it on the placement mockup, and choose crop shape, frame, size, and rotation. The full-screen recipient photo viewer supports pinch-to-zoom on touchscreens and zoom buttons/wheel on desktop. Background images and personal photos upload when the letter is saved, not into the URL. The envelope-opening animation remains in the frontend and is independent of persistence.
+
+
+## Bouquet builder
+
+The main page has a mode switch for letters and digital bouquets. Bouquet artwork is generated from original inline SVG illustrations (rose, peony, tulip, daisy, lily, sunflower, anemone and lavender), so it does not depend on copied third-party flower assets.
+
+The editor supports up to 15 flowers, drag placement, per-flower rotation and scale, four greenery styles, six card treatments, and eight background themes. Bouquet data is stored in the same `public.letters` table through the `letter-api` Edge Function and uses the same short `?l=<id>` link pattern. Recipients can reposition flowers on their device; those recipient-side changes are saved locally and do not overwrite the sender's original arrangement.
