@@ -406,14 +406,18 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
                     <div class="letter-bouquet-guide-envelope" aria-hidden="true"></div>
                   </div>
                   <div class="letter-bouquet-flower-picker" id="letterBouquetFlowerPicker">
-                    <button type="button" data-add-letter-flower="rose" title="Добавить розу">🌹</button>
-                    <button type="button" data-add-letter-flower="peony" title="Добавить пион">🌸</button>
-                    <button type="button" data-add-letter-flower="tulip" title="Добавить тюльпан">🌷</button>
-                    <button type="button" data-add-letter-flower="daisy" title="Добавить ромашку">🌼</button>
-                    <button type="button" data-add-letter-flower="lily" title="Добавить лилию">百合</button>
-                    <button type="button" data-add-letter-flower="sunflower" title="Добавить подсолнух">🌻</button>
-                    <button type="button" data-add-letter-flower="anemone" title="Добавить анемон">✿</button>
-                    <button type="button" data-add-letter-flower="lavender" title="Добавить лаванду">🪻</button>
+                    <button type="button" data-add-letter-flower="rose" title="Добавить розу"><span data-letter-flower-art="rose"></span><small>Роза</small></button>
+                    <button type="button" data-add-letter-flower="peony" title="Добавить пион"><span data-letter-flower-art="peony"></span><small>Пион</small></button>
+                    <button type="button" data-add-letter-flower="ranunculus" title="Добавить ранункулюс"><span data-letter-flower-art="ranunculus"></span><small>Ранункулюс</small></button>
+                    <button type="button" data-add-letter-flower="tulip" title="Добавить тюльпан"><span data-letter-flower-art="tulip"></span><small>Тюльпан</small></button>
+                    <button type="button" data-add-letter-flower="daisy" title="Добавить ромашку"><span data-letter-flower-art="daisy"></span><small>Ромашка</small></button>
+                    <button type="button" data-add-letter-flower="lily" title="Добавить лилию"><span data-letter-flower-art="lily"></span><small>Лилия</small></button>
+                    <button type="button" data-add-letter-flower="hydrangea" title="Добавить гортензию"><span data-letter-flower-art="hydrangea"></span><small>Гортензия</small></button>
+                    <button type="button" data-add-letter-flower="gypsophila" title="Добавить гипсофилу"><span data-letter-flower-art="gypsophila"></span><small>Гипсофила</small></button>
+                    <button type="button" data-add-letter-flower="lavender" title="Добавить лаванду"><span data-letter-flower-art="lavender"></span><small>Лаванда</small></button>
+                    <button type="button" data-add-letter-flower="carnation" title="Добавить гвоздику"><span data-letter-flower-art="carnation"></span><small>Гвоздика</small></button>
+                    <button type="button" data-add-letter-flower="anemone" title="Добавить анемон"><span data-letter-flower-art="anemone"></span><small>Анемон</small></button>
+                    <button type="button" data-add-letter-flower="sunflower" title="Добавить подсолнух"><span data-letter-flower-art="sunflower"></span><small>Подсолнух</small></button>
                   </div>
                   <div class="letter-bouquet-controls">
                     <label>Зелень
@@ -531,12 +535,16 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
             <div class="bouquet-flower-picker" id="bouquetFlowerPicker">
               <button type="button" class="bouquet-flower-choice" data-add-flower="rose"><span class="bouquet-choice-art" data-flower-art="rose"></span><span>Роза</span><b>+</b></button>
               <button type="button" class="bouquet-flower-choice" data-add-flower="peony"><span class="bouquet-choice-art" data-flower-art="peony"></span><span>Пион</span><b>+</b></button>
+              <button type="button" class="bouquet-flower-choice" data-add-flower="ranunculus"><span class="bouquet-choice-art" data-flower-art="ranunculus"></span><span>Ранункулюс</span><b>+</b></button>
               <button type="button" class="bouquet-flower-choice" data-add-flower="tulip"><span class="bouquet-choice-art" data-flower-art="tulip"></span><span>Тюльпан</span><b>+</b></button>
               <button type="button" class="bouquet-flower-choice" data-add-flower="daisy"><span class="bouquet-choice-art" data-flower-art="daisy"></span><span>Ромашка</span><b>+</b></button>
               <button type="button" class="bouquet-flower-choice" data-add-flower="lily"><span class="bouquet-choice-art" data-flower-art="lily"></span><span>Лилия</span><b>+</b></button>
-              <button type="button" class="bouquet-flower-choice" data-add-flower="sunflower"><span class="bouquet-choice-art" data-flower-art="sunflower"></span><span>Подсолнух</span><b>+</b></button>
-              <button type="button" class="bouquet-flower-choice" data-add-flower="anemone"><span class="bouquet-choice-art" data-flower-art="anemone"></span><span>Анемон</span><b>+</b></button>
+              <button type="button" class="bouquet-flower-choice" data-add-flower="hydrangea"><span class="bouquet-choice-art" data-flower-art="hydrangea"></span><span>Гортензия</span><b>+</b></button>
+              <button type="button" class="bouquet-flower-choice" data-add-flower="gypsophila"><span class="bouquet-choice-art" data-flower-art="gypsophila"></span><span>Гипсофила</span><b>+</b></button>
               <button type="button" class="bouquet-flower-choice" data-add-flower="lavender"><span class="bouquet-choice-art" data-flower-art="lavender"></span><span>Лаванда</span><b>+</b></button>
+              <button type="button" class="bouquet-flower-choice" data-add-flower="carnation"><span class="bouquet-choice-art" data-flower-art="carnation"></span><span>Гвоздика</span><b>+</b></button>
+              <button type="button" class="bouquet-flower-choice" data-add-flower="anemone"><span class="bouquet-choice-art" data-flower-art="anemone"></span><span>Анемон</span><b>+</b></button>
+              <button type="button" class="bouquet-flower-choice" data-add-flower="sunflower"><span class="bouquet-choice-art" data-flower-art="sunflower"></span><span>Подсолнух</span><b>+</b></button>
             </div>
             <div class="bouquet-flower-controls" id="bouquetFlowerControls" hidden>
               <span id="bouquetSelectedLabel">Цветок выбран</span>
