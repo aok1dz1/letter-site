@@ -324,7 +324,7 @@
     ],
     greenery:'eucalyptus',
     theme:'rose',
-    decorations:[],
+    decorations:['eucalyptus','gypsophila'],
     selectedId:'letter-bloom-2'
   };
   function normalizeBloom(raw,index=0) {
@@ -412,7 +412,10 @@
       eucalyptus:['#8db29b','#719c83','#b2c9af'],
       fern:['#6e9871','#507f5c','#92b48c'],
       olive:['#829b6c','#6e885b','#a8b98b'],
-      willow:['#80a783','#5e8d67','#9cbd9a']
+      willow:['#80a783','#5e8d67','#9cbd9a'],
+      ruscus:['#739466','#557b50','#9bb487'],
+      gypsophila:['#879d7f','#aec3a3','#e5d9c9'],
+      salal:['#63845c','#4e7247','#8da67a']
     }[kind]||['#8db29b','#719c83','#b2c9af'];
     GREENERY_LEAVES.forEach((p,i)=>{
       const leaf=document.createElement('span');
@@ -503,23 +506,92 @@
     const enabled=Boolean(checkbox?.checked);
     letterBouquetState.enabled=enabled;
     if(editor)editor.hidden=!enabled;
-    if(!enabled)return;
+    const previewLayer=$('letterPreviewBouquetLayer');
+    if(previewLayer)previewLayer.hidden=!enabled;
+    if(!enabled) {
+      renderLetterPreviewBouquet();
+      return;
+    }
     const stage=$('letterBouquetEditorStage');
     setTheme(stage,letterBouquetState.theme);
     renderGreenery('letterBouquetEditorGreenery',letterBouquetState.greenery);
     renderFlowers('letterBouquetEditorFlowers',letterBouquetState.flowers,letterBouquetState.selectedId,true);
     $('letterBouquetGreenery').value=letterBouquetState.greenery;
     $('letterBouquetTheme').value=letterBouquetState.theme;
+    document.querySelectorAll('[data-letter-bouquet-palette]').forEach(button=>{
+      button.classList.toggle('is-selected',button.dataset.letterBouquetPalette===letterBouquetState.theme);
+    });
+    document.querySelectorAll('[data-letter-decor]').forEach(button=>{
+      button.classList.toggle('is-selected',letterBouquetState.decorations.includes(button.dataset.letterDecor));
+    });
     const n=letterBouquetState.flowers.length;
     $('letterBouquetStatus').textContent='Добавлено '+n+' из 15 цветов. Перетаскивай цветы мышью или пальцем.';
+    updateLetterBouquetSelectedControls();
+    renderLetterPreviewBouquet();
   }
 
-  function getAttachedBouquetData() {
+  function updateLetterBouquetSelectedControls() {
+    const selected=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);
+    const controls=$('letterBouquetSelectedControls');
+    if(!controls)return;
+    controls.hidden=!selected;
+    if(!selected)return;
+    const name=FLOWERS[selected.type]?.name||'Цветок';
+    $('letterBouquetSelectedName').textContent=name;
+    $('letterBouquetSelectedType').textContent=selected.type==='ranunculus'?'Нежно-розовый':selected.type==='peony'?'Пастельно-розовый':'Ботанический оттенок';
+    $('letterBouquetFlowerScale').value=String(Math.round(selected.scale*100));
+    $('letterBouquetScaleOut').textContent=Math.round(selected.scale*100)+'%';
+    $('letterBouquetFlowerRotation').value=String(selected.rotation);
+    $('letterBouquetRotationOut').textContent=selected.rotation+'°';
+    const thumb=$('letterBouquetSelectedThumb');
+    if(thumb) {
+      thumb.replaceChildren();
+      const art=document.createElement('span');
+      art.className='bouquet-mini-botanical';
+      art.innerHTML=svgFlower(selected.type);
+      thumb.append(art);
+    }
+  }
+
+  function renderLetterPreviewBouquet() {
+    const layer=$('letterPreviewBouquetLayer');
+    if(!layer)return;
+    const enabled=Boolean($('enableLetterBouquet')?.checked);
+    layer.hidden=!enabled;
+    if(!enabled)return;
+    setTheme(layer,letterBouquetState.theme);
+    renderGreenery('letterPreviewBouquetGreenery',letterBouquetState.greenery);
+    renderFlowers('letterPreviewBouquetFlowers',letterBouquetState.flowers,null,false);
+    const decor=$('letterPreviewBouquetDecor');
+    if(decor) {
+      decor.replaceChildren();
+      letterBouquetState.decorations.forEach((kind,index)=>{
+        if(['petals','ribbon','postcard'].includes(kind)) {
+          const item=document.createElement('span');
+          item.className='letter-preview-decor decor-'+kind;
+          item.style.left=([10,85,18,82][index%4])+'%';
+          item.style.top=([74,78,88,90][index%4])+'%';
+          decor.append(item);
+        }
+      });
+    }
+  }
+
+  function setAttachedFlowerSelected(id) {
+    letterBouquetState.selectedId=id;
+    $('letterBouquetEditorFlowers')?.querySelectorAll('.bouquet-flower-node').forEach(node=>{
+      node.classList.toggle('is-selected',node.dataset.flowerId===id);
+    });
+    updateLetterBouquetSelectedControls();
+  }
+
+    function getAttachedBouquetData() {
     if(!$('enableLetterBouquet')?.checked)return null;
     return {
       flowers:letterBouquetState.flowers.slice(0,15).map((b,i)=>normalizeBloom(b,i)),
       greenery:letterBouquetState.greenery,
       theme:letterBouquetState.theme,
+      decorations:letterBouquetState.decorations.slice(0,8),
       cardStyle:'cream'
     };
   }
@@ -552,8 +624,7 @@
       if(!bloom)return;
       event.preventDefault();
       node.setPointerCapture?.(event.pointerId);
-      letterBouquetState.selectedId=bloom.id;
-      stage.querySelectorAll('.bouquet-flower-node').forEach(item=>item.classList.toggle('is-selected',item.dataset.flowerId===bloom.id));
+      setAttachedFlowerSelected(bloom.id);
       letterBouquetDrag={pointerId:event.pointerId,id:bloom.id,startX:event.clientX,startY:event.clientY,originX:bloom.x,originY:bloom.y,moved:false};
     });
     stage.addEventListener('pointermove',event=>{
@@ -595,7 +666,7 @@
       } catch(_){}
     }
     setTheme(layer,savedPalette);
-    renderGreenery('letterBouquetLiveGreenery',['eucalyptus','fern','olive','willow'].includes(bouquet.greenery)?bouquet.greenery:'eucalyptus');
+    renderGreenery('letterBouquetLiveGreenery',['eucalyptus','fern','olive','willow','ruscus','gypsophila','salal'].includes(bouquet.greenery)?bouquet.greenery:'eucalyptus');
     renderFlowers('letterBouquetLiveFlowers',attachedRecipientFlowers,null,true);
     setupAttachedRecipientDrag();
   }
@@ -654,9 +725,54 @@
   }
 
   $('enableLetterBouquet')?.addEventListener('change',renderLetterBouquetEditor);
+  document.querySelectorAll('[data-letter-bouquet-palette]').forEach(button=>button.addEventListener('click',()=>{
+    letterBouquetState.theme=button.dataset.letterBouquetPalette;
+    $('letterBouquetTheme').value=letterBouquetState.theme;
+    renderLetterBouquetEditor();
+  }));
+  document.querySelectorAll('[data-letter-decor]').forEach(button=>button.addEventListener('click',()=>{
+    const kind=button.dataset.letterDecor;
+    if(['eucalyptus','ruscus','gypsophila','olive','salal'].includes(kind)) {
+      letterBouquetState.greenery=kind;
+      $('letterBouquetGreenery').value=kind;
+    }
+    if(['petals','ribbon','postcard'].includes(kind)) {
+      const current=letterBouquetState.decorations.includes(kind);
+      letterBouquetState.decorations=letterBouquetState.decorations.filter(x=>x!==kind);
+      if(!current)letterBouquetState.decorations.push(kind);
+    } else {
+      letterBouquetState.decorations=letterBouquetState.decorations.filter(x=>!['eucalyptus','ruscus','gypsophila','olive','salal'].includes(x));
+      letterBouquetState.decorations.push(kind);
+    }
+    renderLetterBouquetEditor();
+  }));
   document.querySelectorAll('[data-add-letter-flower]').forEach(button=>button.addEventListener('click',()=>addLetterFlower(button.dataset.addLetterFlower)));
   $('letterBouquetGreenery')?.addEventListener('change',event=>{letterBouquetState.greenery=event.target.value;renderLetterBouquetEditor();});
   $('letterBouquetTheme')?.addEventListener('change',event=>{letterBouquetState.theme=event.target.value;renderLetterBouquetEditor();});
+  $('letterBouquetFlowerScale')?.addEventListener('input',event=>{
+    const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
+    bloom.scale=Number(event.target.value)/100;
+    $('letterBouquetScaleOut').textContent=event.target.value+'%';
+    renderLetterBouquetEditor();
+  });
+  $('letterBouquetFlowerRotation')?.addEventListener('input',event=>{
+    const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
+    bloom.rotation=Number(event.target.value);
+    $('letterBouquetRotationOut').textContent=event.target.value+'°';
+    renderLetterBouquetEditor();
+  });
+  $('letterBouquetFlip')?.addEventListener('click',()=>{
+    const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
+    bloom.flip=!bloom.flip;renderLetterBouquetEditor();
+  });
+  $('letterBouquetLayerUp')?.addEventListener('click',()=>{
+    const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
+    bloom.z=Math.min(100,Number(bloom.z||bloom.y)+5);renderLetterBouquetEditor();
+  });
+  $('letterBouquetLayerDown')?.addEventListener('click',()=>{
+    const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
+    bloom.z=Math.max(0,Number(bloom.z||bloom.y)-5);renderLetterBouquetEditor();
+  });
   $('removeLetterBouquetFlower')?.addEventListener('click',()=>{
     const id=letterBouquetState.selectedId;
     if(!id)return;
@@ -872,7 +988,14 @@
 
   document.querySelectorAll('[data-builder-mode]').forEach(button=>button.addEventListener('click',()=>setMode(button.dataset.builderMode)));
   document.querySelectorAll('[data-add-flower]').forEach(button=>button.addEventListener('click',()=>addFlower(button.dataset.addFlower)));
-  document.querySelectorAll('[data-flower-art],[data-letter-flower-art]').forEach(el=>el.innerHTML=svgFlower(el.dataset.flowerArt || el.dataset.letterFlowerArt));
+  document.querySelectorAll('[data-flower-art],[data-letter-flower-art]').forEach(el=>{
+    const type=el.dataset.flowerArt || el.dataset.letterFlowerArt;
+    el.replaceChildren();
+    const art=document.createElement('span');
+    art.className='bouquet-mini-botanical';
+    art.innerHTML=svgFlower(type);
+    el.append(art);
+  });
   document.querySelectorAll('[data-greenery]').forEach(button=>button.addEventListener('click',()=>{
     state.greenery=button.dataset.greenery;renderStep();renderPreview();
   }));
