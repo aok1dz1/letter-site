@@ -180,7 +180,7 @@ Deno.serve(async (req: Request) => {
   if (kind !== "bouquet" && source.bouquet !== undefined && source.bouquet !== null) {
     const bouquet = source.bouquet;
     const allowedFlowerTypes = new Set(["rose", "peony", "ranunculus", "tulip", "daisy", "lily", "hydrangea", "gypsophila", "lavender", "carnation", "anemone", "sunflower"]);
-    const allowedGreenery = new Set(["eucalyptus", "fern", "olive", "willow"]);
+    const allowedGreenery = new Set(["eucalyptus", "fern", "olive", "willow", "ruscus", "gypsophila", "salal"]);
     if (!bouquet || typeof bouquet !== "object" || !Array.isArray(bouquet.flowers)) {
       return json(400, { error: "Invalid attached bouquet." });
     }
@@ -200,9 +200,14 @@ Deno.serve(async (req: Request) => {
         y: clampNumber(flower.y, 20, 86, 62),
         rotation: clampNumber(flower.rotation, -35, 35, 0),
         scale: clampNumber(flower.scale, 0.7, 1.3, 0.85),
+        flip: Boolean(flower.flip),
+        z: clampNumber(flower.z, 0, 100, clampNumber(flower.y, 20, 86, 62)),
       })),
       greenery: bouquet.greenery,
       theme: bouquet.theme,
+      decorations: Array.isArray(bouquet.decorations)
+        ? bouquet.decorations.filter((value: unknown) => ["eucalyptus", "ruscus", "gypsophila", "olive", "salal", "petals", "ribbon", "postcard"].includes(String(value))).slice(0, 8)
+        : [],
       cardStyle: "cream",
     };
   }
