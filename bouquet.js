@@ -396,6 +396,7 @@
       if(!node)return;
       const bloom=state.flowers.find(x=>x.id===node.dataset.flowerId);if(!bloom)return;
       event.preventDefault();
+      node.setPointerCapture?.(event.pointerId);
       drag={pointerId:event.pointerId,id:bloom.id,startX:event.clientX,startY:event.clientY,originX:bloom.x,originY:bloom.y,moved:false,recipient:true};
       node.setPointerCapture?.(event.pointerId);
     });
