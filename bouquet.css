@@ -279,3 +279,22 @@
  .letter-bouquet-layer-controls{grid-column:1/-1}
  .letter-preview-bouquet-layer .bouquet-flower-node{width:clamp(55px,18%,92px)}
 }
+
+
+/* Gentle botanical palette tinting for the selected flower set and the live letter scene. */
+.letter-bouquet-editor-stage[data-theme="peach"] .bouquet-flower-node,.letter-preview-bouquet-layer[data-theme="peach"] .bouquet-flower-node,.letter-bouquet-live[data-theme="peach"] .bouquet-flower-node{filter:sepia(.10) saturate(.85) hue-rotate(-8deg) drop-shadow(0 4px 5px rgba(85,51,59,.1))}
+.letter-bouquet-editor-stage[data-theme="lavender"] .bouquet-flower-node,.letter-preview-bouquet-layer[data-theme="lavender"] .bouquet-flower-node,.letter-bouquet-live[data-theme="lavender"] .bouquet-flower-node{filter:hue-rotate(20deg) saturate(.78) brightness(1.02) drop-shadow(0 4px 5px rgba(85,51,59,.1))}
+.letter-bouquet-editor-stage[data-theme="sage"] .bouquet-flower-node,.letter-preview-bouquet-layer[data-theme="sage"] .bouquet-flower-node,.letter-bouquet-live[data-theme="sage"] .bouquet-flower-node{filter:hue-rotate(62deg) saturate(.55) brightness(1.04) drop-shadow(0 4px 5px rgba(85,51,59,.1))}
+.letter-bouquet-editor-stage[data-theme="champagne"] .bouquet-flower-node,.letter-preview-bouquet-layer[data-theme="champagne"] .bouquet-flower-node,.letter-bouquet-live[data-theme="champagne"] .bouquet-flower-node{filter:sepia(.22) saturate(.72) brightness(1.04) drop-shadow(0 4px 5px rgba(85,51,59,.1))}
+.letter-bouquet-editor-stage[data-theme="berry"] .bouquet-flower-node,.letter-preview-bouquet-layer[data-theme="berry"] .bouquet-flower-node,.letter-bouquet-live[data-theme="berry"] .bouquet-flower-node{filter:saturate(1.12) hue-rotate(-9deg) drop-shadow(0 4px 5px rgba(85,51,59,.1))}
+.letter-bouquet-editor-stage[data-theme="sky"] .bouquet-flower-node,.letter-preview-bouquet-layer[data-theme="sky"] .bouquet-flower-node,.letter-bouquet-live[data-theme="sky"] .bouquet-flower-node{filter:hue-rotate(170deg) saturate(.48) brightness(1.04) drop-shadow(0 4px 5px rgba(85,51,59,.1))}
+.letter-bouquet-editor-stage[data-theme="midnight"] .bouquet-flower-node,.letter-preview-bouquet-layer[data-theme="midnight"] .bouquet-flower-node,.letter-bouquet-live[data-theme="midnight"] .bouquet-flower-node{filter:hue-rotate(24deg) saturate(.64) brightness(.94) drop-shadow(0 4px 5px rgba(85,51,59,.1))}
+.letter-preview-bouquet-layer .bouquet-flower-node{width:clamp(90px,18%,142px)}
+.letter-preview-bouquet-layer .bouquet-flower-node .is-selected{outline:0}
+.letter-bouquet-editor-stage .bouquet-flower-node{touch-action:none}
+.bouquet-flower-choice .bouquet-mini-botanical svg{overflow:visible}
+@media(min-width:1100px){
+ .editor-content{width:min(100%,760px)}
+ .letter-bouquet-editor{gap:10px}
+ .letter-bouquet-section-heading{margin-top:6px}
+}
