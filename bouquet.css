@@ -111,3 +111,40 @@
  .bouquet-recipient-card{padding:28px 20px}
  .bouquet-step-actions .button{flex:1}
 }
+
+
+/* Optional flower arrangement attached to an existing letter; envelope animation is independent. */
+.letter-bouquet-settings{display:grid;gap:13px;padding:14px;border:1px solid #eed1dc;background:rgba(255,255,255,.34)}
+.letter-bouquet-toggle{display:flex;grid-template-columns:none;flex-direction:row;align-items:flex-start;gap:12px;letter-spacing:normal;text-transform:none;cursor:pointer}
+.letter-bouquet-toggle>input{width:18px;height:18px;flex:none;margin:2px 0 0;accent-color:#bf5a80}
+.letter-bouquet-toggle>span{display:grid;gap:5px}
+.letter-bouquet-toggle strong{font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:none;color:#583447}
+.letter-bouquet-toggle small{font-size:11px;line-height:1.5;letter-spacing:normal;text-transform:none;color:#9a7584}
+.letter-bouquet-editor{display:grid;gap:12px}
+.letter-bouquet-editor-stage{width:100%;height:clamp(250px,44vw,340px);min-height:250px;max-height:none;aspect-ratio:auto;flex:none;border:1px solid #ead2dc;background:radial-gradient(ellipse at 50% 47%,rgba(255,255,255,.82),rgba(255,255,255,.18) 72%);position:relative;overflow:hidden}
+.letter-bouquet-editor-stage .bouquet-flower-layer{pointer-events:none}
+.letter-bouquet-editor-stage .bouquet-flower-node{width:clamp(42px,15%,76px);pointer-events:auto}
+.letter-bouquet-guide-envelope{position:absolute;z-index:2;left:50%;top:54%;width:35%;height:23%;transform:translate(-50%,-50%);background:var(--rose-light,#ffc1d4);box-shadow:0 8px 18px rgba(80,36,55,.1);clip-path:polygon(0 0,100% 0,100% 100%,0 100%);pointer-events:none}
+.letter-bouquet-guide-envelope:before{content:"";position:absolute;inset:0;background:var(--rose,#e7789e);clip-path:polygon(0 0,50% 65%,100% 0,100% 100%,0 100%)}
+.letter-bouquet-guide-envelope:after{content:"";position:absolute;inset:0;background:var(--rose-light,#ffc1d4);clip-path:polygon(0 0,100% 0,50% 55%)}
+.letter-bouquet-flower-picker{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
+.letter-bouquet-flower-picker button{display:grid;place-items:center;min-width:0;min-height:42px;border:1px solid #ecd0da;background:rgba(255,255,255,.63);font-size:21px;padding:5px 1px}
+.letter-bouquet-flower-picker button:active{transform:scale(.96)}
+.letter-bouquet-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+.letter-bouquet-controls label{font-size:9px}
+.letter-bouquet-controls .button{grid-column:1/-1}
+.letter-bouquet-live{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+.letter-bouquet-live .bouquet-greenery-layer{z-index:1}
+.letter-bouquet-live .bouquet-flower-layer{z-index:3;pointer-events:none}
+.letter-bouquet-live .bouquet-flower-node{width:clamp(44px,10vw,86px);pointer-events:auto;cursor:grab}
+.letter-bouquet-live .bouquet-flower-node:active{cursor:grabbing}
+.letter-bouquet-live .bouquet-flower-node svg{filter:drop-shadow(0 3px 5px rgba(63,40,50,.13))}
+.recipient-view.has-letter-bouquet .recipient-envelope-wrap{z-index:5;position:relative}
+.recipient-view.has-letter-bouquet .recipient-topline{z-index:6}
+.recipient-view.has-letter-bouquet #floatingPhotos{z-index:7}
+@media(max-width:700px){
+ .letter-bouquet-editor-stage{height:270px;min-height:250px}
+ .letter-bouquet-flower-picker{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .letter-bouquet-flower-picker button{min-height:42px}
+ .letter-bouquet-live .bouquet-flower-node{width:clamp(42px,12vw,68px)}
+}
