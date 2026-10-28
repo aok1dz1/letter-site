@@ -570,11 +570,11 @@
     if(decor) {
       decor.replaceChildren();
       letterBouquetState.decorations.forEach((kind,index)=>{
-        if(['petals','ribbon','postcard'].includes(kind)) {
+        if(['eucalyptus','ruscus','gypsophila','olive','salal','petals','ribbon','postcard'].includes(kind)) {
           const item=document.createElement('span');
           item.className='letter-preview-decor decor-'+kind;
-          item.style.left=([10,85,18,82][index%4])+'%';
-          item.style.top=([74,78,88,90][index%4])+'%';
+          item.style.left=([9,84,16,80,24,76,13,88][index%8])+'%';
+          item.style.top=([69,72,78,82,86,88,76,80][index%8])+'%';
           decor.append(item);
         }
       });
@@ -659,7 +659,7 @@
     const layer=$(layerId);
     if(!layer)return;
     layer.replaceChildren();
-    (Array.isArray(decorations)?decorations:[]).filter(kind=>['petals','ribbon','postcard'].includes(kind)).forEach((kind,index)=>{
+    (Array.isArray(decorations)?decorations:[]).filter(kind=>['eucalyptus','ruscus','gypsophila','olive','salal','petals','ribbon','postcard'].includes(kind)).forEach((kind,index)=>{
       const item=document.createElement('span');
       item.className='letter-preview-decor decor-'+kind;
       item.style.left=([10,85,18,82][index%4])+'%';
