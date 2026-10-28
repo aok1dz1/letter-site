@@ -393,6 +393,54 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
           <details class="visual-settings">
             <summary>Фон и личные фото</summary>
             <div class="visual-settings-body">
+              <section class="letter-bouquet-settings" aria-labelledby="letterBouquetTitle">
+                <label class="letter-bouquet-toggle">
+                  <input id="enableLetterBouquet" type="checkbox">
+                  <span><strong id="letterBouquetTitle">Добавить букет на экран письма</strong><small>Цветы будут вокруг конверта на странице получателя. Их можно передвигать.</small></span>
+                </label>
+                <div id="letterBouquetEditor" class="letter-bouquet-editor" hidden>
+                  <p class="file-help">Нажимай на цветы, чтобы добавить их. Перетаскивай каждый цветок прямо на макете.</p>
+                  <div id="letterBouquetEditorStage" class="bouquet-arrangement-stage letter-bouquet-editor-stage" aria-label="Расположение букета на экране письма">
+                    <div id="letterBouquetEditorGreenery" class="bouquet-greenery-layer"></div>
+                    <div id="letterBouquetEditorFlowers" class="bouquet-flower-layer"></div>
+                    <div class="letter-bouquet-guide-envelope" aria-hidden="true"></div>
+                  </div>
+                  <div class="letter-bouquet-flower-picker" id="letterBouquetFlowerPicker">
+                    <button type="button" data-add-letter-flower="rose" title="Добавить розу">🌹</button>
+                    <button type="button" data-add-letter-flower="peony" title="Добавить пион">🌸</button>
+                    <button type="button" data-add-letter-flower="tulip" title="Добавить тюльпан">🌷</button>
+                    <button type="button" data-add-letter-flower="daisy" title="Добавить ромашку">🌼</button>
+                    <button type="button" data-add-letter-flower="lily" title="Добавить лилию">百合</button>
+                    <button type="button" data-add-letter-flower="sunflower" title="Добавить подсолнух">🌻</button>
+                    <button type="button" data-add-letter-flower="anemone" title="Добавить анемон">✿</button>
+                    <button type="button" data-add-letter-flower="lavender" title="Добавить лаванду">🪻</button>
+                  </div>
+                  <div class="letter-bouquet-controls">
+                    <label>Зелень
+                      <select id="letterBouquetGreenery">
+                        <option value="eucalyptus">Эвкалипт</option>
+                        <option value="fern">Папоротник</option>
+                        <option value="olive">Оливковые ветви</option>
+                        <option value="willow">Ива</option>
+                      </select>
+                    </label>
+                    <label>Палитра букета
+                      <select id="letterBouquetTheme">
+                        <option value="rose">Розовая дымка</option>
+                        <option value="lavender">Лавандовый сад</option>
+                        <option value="sage">Шалфей</option>
+                        <option value="peach">Персиковый свет</option>
+                        <option value="sky">Небесный</option>
+                        <option value="champagne">Шампань</option>
+                        <option value="midnight">Лунный</option>
+                        <option value="berry">Ягодный</option>
+                      </select>
+                    </label>
+                    <button type="button" class="button button-secondary" id="removeLetterBouquetFlower">Убрать выбранный цветок</button>
+                  </div>
+                  <p id="letterBouquetStatus" class="image-status" aria-live="polite">Добавлено 5 цветов. Перетащи их в удобное положение.</p>
+                </div>
+              </section>
               <label>Фон экрана получателя
                 <select id="backgroundMode">
                   <option value="color">Текущий розовый градиент</option>
@@ -672,7 +720,8 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       theme: fields.theme?.value || 'rose',
       backgroundMode: $('backgroundMode')?.value === 'image' ? 'image' : 'color',
       backgroundImage: $('backgroundMode')?.value === 'image' ? selectedBackgroundImage : '',
-      floatingPhotos: selectedPersonalPhotos.slice(0, 15).map((photo, index) => normalizePhoto(photo, index))
+      floatingPhotos: selectedPersonalPhotos.slice(0, 15).map((photo, index) => normalizePhoto(photo, index)),
+      bouquet: window.getAttachedBouquetData?.() || null
     };
   }
 
@@ -751,6 +800,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       recipientView.style.removeProperty('background-repeat');
     }
     renderFloatingPhotos(Array.isArray(data.floatingPhotos) ? data.floatingPhotos : []);
+    window.renderLetterBouquet?.(data.bouquet || null);
   }
 
   function bytesToUrlBase64(bytes) {
