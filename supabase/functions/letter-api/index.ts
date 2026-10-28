@@ -165,19 +165,41 @@ Deno.serve(async (req: Request) => {
 
   const source = body?.data;
   if (!source || typeof source !== "object" || Array.isArray(source)) return json(400, { error: "Missing letter data." });
+  const kind = source.kind === "bouquet" ? "bouquet" : "letter";
   const recipient = cleanText(source.recipient, 80);
-  const headerText = cleanText(source.headerText, 80, "ПИСЬМО ДЛЯ ТЕБЯ") || "ПИСЬМО ДЛЯ ТЕБЯ";
-  const title = cleanText(source.title, 100, "Несколько важных слов") || "Несколько важных слов";
+  const headerText = cleanText(source.headerText, 80, kind === "bouquet" ? "БУКЕТ ДЛЯ ТЕБЯ" : "ПИСЬМО ДЛЯ ТЕБЯ") || "ПИСЬМО ДЛЯ ТЕБЯ";
+  const title = cleanText(source.title, 100, kind === "bouquet" ? "Небольшой букет для тебя" : "Несколько важных слов") || "Несколько важных слов";
   const message = typeof source.message === "string" ? source.message.trim().slice(0, 5000) : "";
   const signature = cleanText(source.signature, 100);
   const theme = allowedThemes.has(source.theme) ? source.theme : "rose";
   const backgroundMode = source.backgroundMode === "image" ? "image" : "color";
-  if (!message) return json(400, { error: "Letter text is required." });
-  if (backgroundMode === "image" && !source.backgroundImage) {
-    return json(400, { error: "Choose a background image or switch back to the gradient." });
-  }
-  if (!Array.isArray(source.floatingPhotos) || source.floatingPhotos.length > MAX_PHOTO_COUNT) {
-    return json(400, { error: "Use no more than fifteen personal photos." });
+
+  if (!message) return json(400, { error: "Message text is required." });
+
+  if (kind === "bouquet") {
+    const bouquet = source.bouquet;
+    const allowedFlowerTypes = new Set(["rose", "peony", "tulip", "daisy", "lily", "sunflower", "anemone", "lavender"]);
+    const allowedGreenery = new Set(["eucalyptus", "fern", "olive", "willow"]);
+    const allowedCardStyles = new Set(["cream", "vintage", "rose-gold", "midnight", "kraft", "garden"]);
+    if (!bouquet || typeof bouquet !== "object" || !Array.isArray(bouquet.flowers)) {
+      return json(400, { error: "Missing bouquet arrangement." });
+    }
+    if (bouquet.flowers.length < 3 || bouquet.flowers.length > 15) {
+      return json(400, { error: "A bouquet must contain between 3 and 15 flowers." });
+    }
+    if (bouquet.flowers.some((flower: any) => !flower || !allowedFlowerTypes.has(flower.type))) {
+      return json(400, { error: "One or more flower types are invalid." });
+    }
+    if (!allowedGreenery.has(bouquet.greenery)) return json(400, { error: "Invalid greenery style." });
+    if (!allowedCardStyles.has(bouquet.cardStyle)) return json(400, { error: "Invalid card style." });
+    if (!allowedThemes.has(bouquet.theme)) return json(400, { error: "Invalid bouquet theme." });
+  } else {
+    if (backgroundMode === "image" && !source.backgroundImage) {
+      return json(400, { error: "Choose a background image or switch back to the gradient." });
+    }
+    if (!Array.isArray(source.floatingPhotos) || source.floatingPhotos.length > MAX_PHOTO_COUNT) {
+      return json(400, { error: "Use no more than fifteen personal photos." });
+    }
   }
   let allowed = false;
   try { allowed = await requestRateLimit(req); } catch (error) {
@@ -189,6 +211,47 @@ Deno.serve(async (req: Request) => {
   const uploadedPaths: string[] = [];
   const id = randomId();
   try {
+    if (kind === "bouquet") {
+      const bouquet = source.bouquet;
+      const defaultPositions = [
+        { x: 34, y: 49 }, { x: 50, y: 40 }, { x: 66, y: 48 },
+        { x: 25, y: 53 }, { x: 42, y: 55 }, { x: 58, y: 55 },
+        { x: 75, y: 53 }, { x: 31, y: 39 }, { x: 69, y: 39 },
+        { x: 39, y: 45 }, { x: 61, y: 44 }, { x: 26, y: 45 },
+        { x: 74, y: 45 }, { x: 45, y: 51 }, { x: 55, y: 50 },
+      ];
+      const flowers = bouquet.flowers.slice(0, 15).map((flower: any, index: number) => {
+        const pos = defaultPositions[index];
+        return {
+          id: cleanText(flower.id, 80, "bloom-" + (index + 1)),
+          type: flower.type,
+          x: clampNumber(flower.x, 8, 92, pos.x),
+          y: clampNumber(flower.y, 22, 74, pos.y),
+          rotation: clampNumber(flower.rotation, -35, 35, 0),
+          scale: clampNumber(flower.scale, 0.7, 1.3, 1),
+        };
+      });
+      const storedData = {
+        kind: "bouquet",
+        recipient,
+        headerText: cleanText(source.headerText, 80, "БУКЕТ ДЛЯ ТЕБЯ"),
+        title: cleanText(source.title, 100, "Небольшой букет для тебя"),
+        message,
+        signature,
+        theme: bouquet.theme,
+        bouquet: {
+          flowers,
+          greenery: bouquet.greenery,
+          cardStyle: bouquet.cardStyle,
+          theme: bouquet.theme,
+        },
+        floatingPhotos: [],
+      };
+      const { error } = await admin.from("letters").insert({ id, data: storedData });
+      if (error) throw new Error("Database insert failed: " + error.message);
+      return json(201, { id, url: "https://letter-site-sand.vercel.app/?l=" + id });
+    }
+
     let backgroundImage = "";
     if (backgroundMode === "image") {
       backgroundImage = await uploadImage(id, "background", source.backgroundImage, MAX_BACKGROUND_CHARS, uploadedPaths);
