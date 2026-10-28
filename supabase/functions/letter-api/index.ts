@@ -176,6 +176,37 @@ Deno.serve(async (req: Request) => {
 
   if (!message) return json(400, { error: "Message text is required." });
 
+  let attachedBouquet: any = null;
+  if (kind !== "bouquet" && source.bouquet !== undefined && source.bouquet !== null) {
+    const bouquet = source.bouquet;
+    const allowedFlowerTypes = new Set(["rose", "peony", "tulip", "daisy", "lily", "sunflower", "anemone", "lavender"]);
+    const allowedGreenery = new Set(["eucalyptus", "fern", "olive", "willow"]);
+    if (!bouquet || typeof bouquet !== "object" || !Array.isArray(bouquet.flowers)) {
+      return json(400, { error: "Invalid attached bouquet." });
+    }
+    if (bouquet.flowers.length < 1 || bouquet.flowers.length > 15) {
+      return json(400, { error: "An attached bouquet can contain between 1 and 15 flowers." });
+    }
+    if (bouquet.flowers.some((flower: any) => !flower || !allowedFlowerTypes.has(flower.type))) {
+      return json(400, { error: "One or more attached flower types are invalid." });
+    }
+    if (!allowedGreenery.has(bouquet.greenery)) return json(400, { error: "Invalid attached greenery style." });
+    if (!allowedThemes.has(bouquet.theme)) return json(400, { error: "Invalid attached bouquet theme." });
+    attachedBouquet = {
+      flowers: bouquet.flowers.slice(0, 15).map((flower: any, index: number) => ({
+        id: cleanText(flower.id, 80, "letter-bloom-" + (index + 1)) || ("letter-bloom-" + (index + 1)),
+        type: flower.type,
+        x: clampNumber(flower.x, 8, 92, 50),
+        y: clampNumber(flower.y, 20, 86, 62),
+        rotation: clampNumber(flower.rotation, -35, 35, 0),
+        scale: clampNumber(flower.scale, 0.7, 1.3, 0.85),
+      })),
+      greenery: bouquet.greenery,
+      theme: bouquet.theme,
+      cardStyle: "cream",
+    };
+  }
+
   if (kind === "bouquet") {
     const bouquet = source.bouquet;
     const allowedFlowerTypes = new Set(["rose", "peony", "tulip", "daisy", "lily", "sunflower", "anemone", "lavender"]);
@@ -291,6 +322,7 @@ Deno.serve(async (req: Request) => {
       backgroundMode: backgroundMode === "image" ? "image" : "color",
       backgroundImage,
       floatingPhotos,
+      bouquet: attachedBouquet,
     };
 
     const { error } = await admin.from("letters").insert({ id, data: storedData });
