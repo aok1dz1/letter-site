@@ -404,7 +404,10 @@
     }
     if(!interactive) {
       node.style.cursor='default';
+      node.removeAttribute('role');
       node.setAttribute('tabindex','-1');
+      node.setAttribute('aria-hidden','true');
+      node.style.pointerEvents='none';
     }
     return node;
   }
@@ -481,7 +484,7 @@
     $('bouquetBuilderFields').hidden = !isBouquet;
     if ($('editorIntro')) $('editorIntro').hidden = isAttached;
     if ($('letterCoreFields')) $('letterCoreFields').hidden = isAttached;
-    if ($('nonBouquetVisualSettings')) $('nonBouquetVisualSettings').hidden = isAttached;
+    if ($('nonBouquetVisualSettings')) $('nonBouquetVisualSettings').hidden = false;
     const settings = $('letterVisualSettings');
     if (settings) {
       settings.open = isAttached || settings.open;
@@ -1115,4 +1118,15 @@
   window.renderBouquetRecipient=renderRecipient;
   if(window.pendingBouquetData?.kind==='bouquet')renderRecipient(window.pendingBouquetData);
   if(window.letterData?.kind!=='bouquet' && window.letterData?.bouquet)renderLetterBouquet(window.letterData.bouquet);
+  let bouquetResizeFrame=0;
+  window.addEventListener('resize',()=>{
+    if(bouquetResizeFrame)cancelAnimationFrame(bouquetResizeFrame);
+    bouquetResizeFrame=requestAnimationFrame(()=>{
+      bouquetResizeFrame=0;
+      renderLetterPreviewBouquet();
+      if(window.letterData?.kind!=='bouquet' && window.letterData?.bouquet && !$('recipientView')?.hidden) {
+        renderLetterBouquet(window.letterData.bouquet);
+      }
+    });
+  },{passive:true});
 })();
