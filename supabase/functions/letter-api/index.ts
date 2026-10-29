@@ -4,9 +4,9 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const MEDIA_BUCKET = "letter-media";
 const JSON_LIMIT = 4_500_000;
 const MAX_PHOTO_COUNT = 15;
-const MAX_BACKGROUND_CHARS = 300_000;
-const MAX_PHOTO_CHARS = 700_000;
-const MAX_MEDIA_UPLOAD_CHARS = 650_000;
+const MAX_BACKGROUND_CHARS = 1_350_000;
+const MAX_PHOTO_CHARS = 1_350_000;
+const MAX_MEDIA_UPLOAD_CHARS = 1_350_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
