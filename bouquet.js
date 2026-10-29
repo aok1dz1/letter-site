@@ -611,14 +611,14 @@
     if(!lr.width||!lr.height||!er.width||!er.height)return;
     const cx=er.left+er.width/2-lr.left, top=er.top-lr.top;
     const decorPositions={
-      petals:[[-.43,.58],[.42,.62],[-.34,.86],[.36,.88]],
-      ribbon:[[.37,.25]],
-      postcard:[[-.42,.33],[.42,.34]],
-      eucalyptus:[[-.39,.5],[.39,.52]],
-      ruscus:[[-.40,.4],[.40,.43]],
-      gypsophila:[[-.34,.35],[.34,.38]],
-      olive:[[-.39,.68],[.39,.67]],
-      salal:[[-.35,.55],[.35,.56]]
+      petals:[[-.58,.10],[.58,.15],[-.54,.72],[.55,.80]],
+      ribbon:[[.58,-.06]],
+      postcard:[[-.60,.28],[.60,.31]],
+      eucalyptus:[[-.57,.28],[.57,.30]],
+      ruscus:[[-.59,.42],[.59,.44]],
+      gypsophila:[[-.56,.20],[.56,.22]],
+      olive:[[-.59,.66],[.59,.65]],
+      salal:[[-.56,.52],[.56,.55]]
     };
     const used={};
     (Array.isArray(decorations)?decorations:[]).filter(k=>decorPositions[k]).forEach(kind=>{
