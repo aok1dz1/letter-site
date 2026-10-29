@@ -1602,7 +1602,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   }
 
     // Preview editor interactions
-  function updatePreview() { paintPreview(getData()); renderPhotoPlacementStage(); }
+  function updatePreview() { paintPreview(getData()); }
   ['recipient','headerText','title','message','signature','theme','backgroundMode'].forEach(id => {
     $(id)?.addEventListener('input', updatePreview);
     $(id)?.addEventListener('change', updatePreview);
@@ -1708,7 +1708,16 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   ['photoCrop','photoFrame','photoSize'].forEach(id => {
     $(id)?.addEventListener('change', updateSelectedPhotoStyle);
   });
-  $('photoRotation')?.addEventListener('input', updateSelectedPhotoStyle);
+  $('photoRotation')?.addEventListener('input', () => {
+    const photo = selectedPersonalPhotos[selectedPhotoIndex];
+    if (!photo) return;
+    const normalized = normalizePhoto(photo, selectedPhotoIndex);
+    normalized.rotation = Number($('photoRotation').value);
+    selectedPersonalPhotos[selectedPhotoIndex] = normalized;
+    setText('photoRotationOutput', (normalized.rotation > 0 ? '+' : '') + normalized.rotation + '°');
+    const node = $('photoPlacementLayer')?.querySelector('[data-photo-index="' + selectedPhotoIndex + '"]');
+    if (node) node.style.setProperty('--photo-tilt', normalized.rotation + 'deg');
+  });
   setupPhotoPlacementDragging();
 
   previewEnvelope?.addEventListener('click', () => openLetter(previewEnvelope));
