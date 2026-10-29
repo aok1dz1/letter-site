@@ -1735,6 +1735,60 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     }
   });
 
+  async function uploadPendingMedia(data, onProgress) {
+    const pending = [];
+    const isInlineImage = value => typeof value === 'string' && /^data:image\/(?:webp|jpeg|png);base64,/.test(value);
+    if (data.backgroundMode === 'image' && isInlineImage(data.backgroundImage)) {
+      pending.push({ key: 'background', kind: 'background', src: data.backgroundImage });
+    }
+    (data.floatingPhotos || []).forEach((photo, index) => {
+      if (photo && isInlineImage(photo.src)) {
+        pending.push({ key: 'photo-' + (index + 1), kind: 'photo', index, src: photo.src });
+      }
+    });
+    if (!pending.length) return data;
+
+    let completed = 0;
+    const batchSize = 3;
+    for (let start = 0; start < pending.length; start += batchSize) {
+      const batch = pending.slice(start, start + batchSize);
+      if (typeof onProgress === 'function') onProgress(completed, pending.length);
+      const response = await fetch(LETTER_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_PUBLIC_KEY },
+        body: JSON.stringify({
+          action: 'upload-media',
+          images: batch.map(item => ({ key: item.key, src: item.src }))
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(result.items) || result.items.length !== batch.length) {
+        throw new Error(result.error || 'Не удалось загрузить фотографии. Попробуй повторить.');
+      }
+      const uploaded = new Map(result.items.map(item => [item.key, item.url]));
+      for (const item of batch) {
+        const url = uploaded.get(item.key);
+        if (typeof url !== 'string' || !url.startsWith(PUBLIC_MEDIA_PREFIX)) {
+          throw new Error('Сервис вернул некорректный адрес изображения. Попробуй повторить.');
+        }
+        if (item.kind === 'background') {
+          data.backgroundImage = url;
+          selectedBackgroundImage = url;
+        } else {
+          data.floatingPhotos[item.index] = { ...data.floatingPhotos[item.index], src: url };
+          if (selectedPersonalPhotos[item.index]) {
+            selectedPersonalPhotos[item.index] = { ...selectedPersonalPhotos[item.index], src: url };
+          }
+        }
+        completed++;
+        if (typeof onProgress === 'function') onProgress(completed, pending.length);
+      }
+    }
+    renderBackgroundPreview();
+    renderPhotoPreviews();
+    return data;
+  }
+
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const data = getData();
@@ -1759,6 +1813,11 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     $('copyLink').disabled = true;
     $('copyLink').textContent = 'Сохранение…';
     try {
+      await uploadPendingMedia(data, (done, total) => {
+        $('shareUrl').value = 'Загружаю фото в хорошем качестве: ' + done + ' из ' + total + '…';
+        $('imageStatus').textContent = 'Загружаю фотографии отдельно от письма, чтобы ссылка оставалась короткой…';
+      });
+      $('shareUrl').value = 'Сохраняю письмо…';
       const response = await fetch(LETTER_API_URL, {
         method: 'POST',
         headers: {
