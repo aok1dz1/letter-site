@@ -894,7 +894,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     return 'raw_' + bytesToUrlBase64(raw);
   }
 
-  function safeImageData(value, maxLength = 700000) {
+  function safeImageData(value, maxLength = 1350000) {
     if (typeof value !== 'string' || value.length > maxLength) return '';
     if (value.startsWith(PUBLIC_MEDIA_PREFIX) && value.length < 600) return value;
     const supported = value.startsWith('data:image/webp;base64,') ||
@@ -928,12 +928,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         signature: String(data.signature || '').slice(0, 100),
         theme: ['rose','blush','berry','lavender','sage','peach','sky','champagne','midnight'].includes(data.theme) ? data.theme : 'rose',
         backgroundMode: data.backgroundMode === 'image' ? 'image' : 'color',
-        backgroundImage: safeImageData(data.backgroundImage, 700000),
+        backgroundImage: safeImageData(data.backgroundImage, 1350000),
         floatingPhotos: Array.isArray(data.floatingPhotos)
           ? data.floatingPhotos.slice(0, 15).map((photo, index) => {
               if (typeof photo === 'string') return safeImageData(photo, 220000);
               if (!photo || typeof photo !== 'object') return null;
-              const src = safeImageData(photo.src, 700000);
+              const src = safeImageData(photo.src, 1350000);
               if (!src) return null;
               const normalized = normalizePhoto({ ...photo, src }, index);
               return normalized;
@@ -989,14 +989,16 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         if (!result.startsWith('data:image/webp;')) result = canvas.toDataURL('image/jpeg', currentQuality);
         if (result.length <= maxDataUrlChars) return result;
 
-        if (sideLimit > 1050) {
-          sideLimit = Math.max(1050, Math.round(sideLimit * .88));
-        } else if (sideLimit > 850) {
-          sideLimit = Math.max(850, Math.round(sideLimit * .90));
+        if (sideLimit > 1500) {
+          sideLimit = Math.max(1500, Math.round(sideLimit * .90));
+        } else if (currentQuality > .84) {
+          currentQuality = Math.max(.84, currentQuality - .02);
+        } else if (sideLimit > 1000) {
+          sideLimit = Math.max(1000, Math.round(sideLimit * .90));
         } else if (currentQuality > qualityFloor) {
-          currentQuality = Math.max(qualityFloor, currentQuality - .025);
-        } else if (sideLimit > 640) {
-          sideLimit = Math.max(640, Math.round(sideLimit * .9));
+          currentQuality = Math.max(qualityFloor, currentQuality - .02);
+        } else if (sideLimit > 800) {
+          sideLimit = Math.max(800, Math.round(sideLimit * .90));
         } else {
           throw new Error('Фото слишком большое даже после оптимизации. Попробуй файл поменьше.');
         }
@@ -1059,7 +1061,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   function normalizePhoto(photo, index = 0) {
     const src = typeof photo === 'string' ? photo : (photo && typeof photo.src === 'string' ? photo.src : '');
-    const validSrc = safeImageData(src, 700000);
+    const validSrc = safeImageData(src, 1350000);
     const fallback = DEFAULT_PHOTO_POSITIONS[index % DEFAULT_PHOTO_POSITIONS.length];
     return {
       src: validSrc,
@@ -1653,7 +1655,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (!file) return;
     $('imageStatus').textContent = 'Обрабатываю фоновое фото…';
     try {
-      selectedBackgroundImage = await compressImageFile(file, 2400, 0.92, 600000);
+      selectedBackgroundImage = await compressImageFile(file, 2400, 0.93, 1300000);
       $('backgroundMode').value = 'image';
       syncBackgroundControls();
       renderBackgroundPreview();
@@ -1682,7 +1684,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       // More pixels and higher initial WebP quality; the API stores images separately,
       // so the shared URL remains short even when many photos are used.
       const encodedPhotos = await mapWithConcurrency(limited, 2,
-        file => compressImageFile(file, 2200, 0.92, 600000),
+        file => compressImageFile(file, 2400, 0.93, 1300000),
         (done,total) => { $('imageStatus').textContent = 'Обрабатываю фотографии: ' + done + ' из ' + total + '…'; }
       );
       const appended = encodedPhotos.map((src, batchIndex) => {
