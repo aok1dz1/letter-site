@@ -5,7 +5,8 @@ const MEDIA_BUCKET = "letter-media";
 const JSON_LIMIT = 4_500_000;
 const MAX_PHOTO_COUNT = 15;
 const MAX_BACKGROUND_CHARS = 300_000;
-const MAX_PHOTO_CHARS = 220_000;
+const MAX_PHOTO_CHARS = 700_000;
+const MAX_MEDIA_UPLOAD_CHARS = 650_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,7 +91,7 @@ async function sha256Hex(value: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function requestRateLimit(req: Request): Promise<boolean> {
+async function requestRateLimit(req: Request, maxAttempts = 12): Promise<boolean> {
   const forwarded = req.headers.get("x-forwarded-for") || "";
   const address = req.headers.get("cf-connecting-ip") ||
     req.headers.get("x-real-ip") ||
@@ -99,7 +100,7 @@ async function requestRateLimit(req: Request): Promise<boolean> {
   const key = (await sha256Hex("letter-site-rate-v1:" + address)).slice(0, 48);
   const { data, error } = await admin.rpc("consume_letter_rate_limit", {
     p_ip_hash: key,
-    p_max_attempts: 12,
+    p_max_attempts: maxAttempts,
   });
   if (error) throw new Error("Rate limiter unavailable");
   return data === true;
@@ -161,6 +162,45 @@ Deno.serve(async (req: Request) => {
     body = JSON.parse(raw);
   } catch (_) {
     return json(400, { error: "Invalid JSON payload." });
+  }
+
+  if (body?.action === "upload-media") {
+    const images = body?.images;
+    if (!Array.isArray(images) || images.length < 1 || images.length > 3) {
+      return json(400, { error: "Upload between one and three images per batch." });
+    }
+    const validImages: Array<{ key: string; src: string }> = [];
+    for (const item of images) {
+      const key = typeof item?.key === "string" ? item.key : "";
+      if (!/^[a-z0-9-]{1,32}$/i.test(key)) return json(400, { error: "Invalid image key." });
+      const parsed = dataUrlToBytes(item?.src, MAX_MEDIA_UPLOAD_CHARS);
+      if (!parsed) return json(400, { error: "Invalid or oversized image. Try adding fewer images at once." });
+      validImages.push({ key, src: item.src });
+    }
+    let allowedUpload = false;
+    try { allowedUpload = await requestRateLimit(req, 40); } catch (error) {
+      console.error("Image upload rate limit failed", String(error));
+      return json(503, { error: "The image service is temporarily unavailable." });
+    }
+    if (!allowedUpload) return json(429, { error: "Too many image uploads. Try again later." });
+
+    const uploadId = randomId();
+    const uploadedPaths: string[] = [];
+    try {
+      const items = [];
+      for (let index = 0; index < validImages.length; index++) {
+        const item = validImages[index];
+        const url = await uploadImage(uploadId, item.key + "-" + index, item.src, MAX_MEDIA_UPLOAD_CHARS, uploadedPaths);
+        items.push({ key: item.key, url });
+      }
+      return json(201, { items });
+    } catch (error) {
+      if (uploadedPaths.length) {
+        try { await admin.storage.from(MEDIA_BUCKET).remove(uploadedPaths); } catch (_) { /* best-effort cleanup */ }
+      }
+      console.error("Image batch upload failed", error instanceof Error ? error.message : String(error));
+      return json(500, { error: "Unable to upload the images. Please retry this batch." });
+    }
   }
 
   const source = body?.data;
