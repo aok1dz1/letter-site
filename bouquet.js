@@ -703,7 +703,10 @@
       const node=stage.querySelector('[data-flower-id="'+current.id+'"]');
       if(node){node.style.left=bloom.x+'%';node.style.top=bloom.y+'%';}
       const previewNode=$('letterPreviewBouquetFlowers')?.querySelector('[data-flower-id="'+current.id+'"]');
-      if(previewNode){previewNode.style.left=bloom.x+'%';previewNode.style.top=bloom.y+'%';}
+      if(previewNode) {
+        const mapped=mapFlowersToEnvelope([bloom],'letterPreviewBouquetLayer','envelope')[0];
+        previewNode.style.left=mapped.x+'%';previewNode.style.top=mapped.y+'%';
+      }
     });
     const end=event=>{
       if(!letterBouquetDrag||(event&&letterBouquetDrag.pointerId!==event.pointerId))return;
@@ -828,29 +831,49 @@
   document.querySelectorAll('[data-add-letter-flower]').forEach(button=>button.addEventListener('click',()=>addLetterFlower(button.dataset.addLetterFlower)));
   $('letterBouquetGreenery')?.addEventListener('change',event=>{letterBouquetState.greenery=event.target.value;renderLetterBouquetEditor();});
   $('letterBouquetTheme')?.addEventListener('change',event=>{letterBouquetState.theme=event.target.value;renderLetterBouquetEditor();});
+  function syncAttachedFlowerNode(bloom) {
+    if(!bloom)return;
+    const stageNode=$('letterBouquetEditorFlowers')?.querySelector('[data-flower-id="'+bloom.id+'"]');
+    if(stageNode) {
+      stageNode.style.setProperty('--flower-scale',String(bloom.scale));
+      stageNode.style.setProperty('--flower-rotation',bloom.rotation+'deg');
+      stageNode.style.setProperty('--flower-flip',bloom.flip?-1:1);
+      stageNode.style.zIndex=String(Number.isFinite(Number(bloom.z))?Number(bloom.z):bloom.y);
+    }
+    const previewNode=$('letterPreviewBouquetFlowers')?.querySelector('[data-flower-id="'+bloom.id+'"]');
+    if(previewNode) {
+      const mapped=mapFlowersToEnvelope([bloom],'letterPreviewBouquetLayer','envelope')[0];
+      previewNode.style.left=mapped.x+'%';previewNode.style.top=mapped.y+'%';
+      previewNode.style.setProperty('--flower-scale',String(bloom.scale));
+      previewNode.style.setProperty('--flower-rotation',bloom.rotation+'deg');
+      previewNode.style.setProperty('--flower-flip',bloom.flip?-1:1);
+      previewNode.style.zIndex=String(Number.isFinite(Number(bloom.z))?Number(bloom.z):bloom.y);
+    }
+  }
+
   $('letterBouquetFlowerScale')?.addEventListener('input',event=>{
     const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
     bloom.scale=Number(event.target.value)/100;
     $('letterBouquetScaleOut').textContent=event.target.value+'%';
-    renderLetterBouquetEditor();
+    syncAttachedFlowerNode(bloom);
   });
   $('letterBouquetFlowerRotation')?.addEventListener('input',event=>{
     const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
     bloom.rotation=Number(event.target.value);
     $('letterBouquetRotationOut').textContent=event.target.value+'°';
-    renderLetterBouquetEditor();
+    syncAttachedFlowerNode(bloom);
   });
   $('letterBouquetFlip')?.addEventListener('click',()=>{
     const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
-    bloom.flip=!bloom.flip;renderLetterBouquetEditor();
+    bloom.flip=!bloom.flip;syncAttachedFlowerNode(bloom);
   });
   $('letterBouquetLayerUp')?.addEventListener('click',()=>{
     const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
-    bloom.z=Math.min(100,Number(bloom.z||bloom.y)+5);renderLetterBouquetEditor();
+    bloom.z=Math.min(100,Number(bloom.z??bloom.y)+5);syncAttachedFlowerNode(bloom);
   });
   $('letterBouquetLayerDown')?.addEventListener('click',()=>{
     const bloom=letterBouquetState.flowers.find(b=>b.id===letterBouquetState.selectedId);if(!bloom)return;
-    bloom.z=Math.max(0,Number(bloom.z||bloom.y)-5);renderLetterBouquetEditor();
+    bloom.z=Math.max(0,Number(bloom.z??bloom.y)-5);syncAttachedFlowerNode(bloom);
   });
   $('removeLetterBouquetFlower')?.addEventListener('click',()=>{
     const id=letterBouquetState.selectedId;
