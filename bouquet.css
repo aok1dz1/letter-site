@@ -313,3 +313,21 @@
 .letter-preview-decor.decor-gypsophila{width:94px;height:170px;background:radial-gradient(circle at 18% 19%,#fffaf0 0 4px,transparent 5px),radial-gradient(circle at 39% 12%,#f4e6dd 0 4px,transparent 5px),radial-gradient(circle at 56% 22%,#fffaf4 0 5px,transparent 6px),radial-gradient(circle at 76% 17%,#efe1d8 0 4px,transparent 5px),radial-gradient(circle at 28% 38%,#fffaf1 0 4px,transparent 5px),radial-gradient(circle at 63% 41%,#fffaf1 0 4px,transparent 5px),radial-gradient(circle at 82% 49%,#f2e3da 0 4px,transparent 5px),radial-gradient(circle at 44% 60%,#fffaf1 0 4px,transparent 5px),repeating-linear-gradient(78deg,transparent 0 26px,#8aa17c 27px 28px,transparent 29px 40px);opacity:.92}
 .letter-preview-decor.decor-olive{width:76px;height:165px;background:repeating-linear-gradient(122deg,transparent 0 16px,#97a98a 17px 19px,transparent 20px 32px),linear-gradient(105deg,transparent 49%,#778c6c 50% 51%,transparent 52%);opacity:.9}
 .letter-preview-decor.decor-salal{width:74px;height:150px;background:radial-gradient(ellipse at 36% 20%,#9bb28c 0 8px,transparent 9px),radial-gradient(ellipse at 65% 34%,#6f8b62 0 8px,transparent 9px),radial-gradient(ellipse at 35% 48%,#83a073 0 8px,transparent 9px),radial-gradient(ellipse at 64% 62%,#a8bb99 0 8px,transparent 9px),linear-gradient(105deg,transparent 49%,#69865d 50% 51%,transparent 52%);opacity:.9}
+
+
+/* Recipient flowers are decoration, never draggable; only personal photo cards capture pointer input. */
+.letter-bouquet-live,
+.letter-bouquet-live .bouquet-greenery-layer,
+.letter-bouquet-live .bouquet-flower-layer,
+.letter-bouquet-live .letter-preview-bouquet-decor,
+.letter-bouquet-live .bouquet-flower-node{pointer-events:none!important}
+.letter-bouquet-live .bouquet-flower-node{cursor:default!important;user-select:none;-webkit-user-select:none}
+.letter-bouquet-live .bouquet-flower-node:active{cursor:default!important}
+.letter-bouquet-live .bouquet-leaf{pointer-events:none!important}
+.floating-photos{z-index:7}
+.floating-photo-frame,.photo-stage-item{will-change:transform,left,top}
+.photo-stage-item img,.floating-photo-image{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+@media(max-width:720px){
+ .letter-bouquet-live .bouquet-flower-node{width:clamp(52px,11vw,100px)}
+ .letter-preview-bouquet-layer .bouquet-flower-node{width:clamp(78px,17%,132px)}
+}
