@@ -315,17 +315,22 @@
   ];
   let letterBouquetState = {
     enabled:false,
+    /* Balanced default arch: stems tuck behind the envelope, flowers frame its upper corners. */
     flowers:[
-      {id:'letter-bloom-1',type:'rose',x:18,y:64,rotation:-7,scale:.9,z:10},
-      {id:'letter-bloom-2',type:'peony',x:33,y:57,rotation:3,scale:1,z:20},
-      {id:'letter-bloom-3',type:'ranunculus',x:67,y:57,rotation:8,scale:.92,z:18},
-      {id:'letter-bloom-4',type:'tulip',x:81,y:62,rotation:-8,scale:.82,z:15},
-      {id:'letter-bloom-5',type:'lily',x:50,y:69,rotation:6,scale:.86,z:12}
+      {id:'letter-bloom-1',type:'rose',x:20,y:62,rotation:-8,scale:.84,z:4},
+      {id:'letter-bloom-2',type:'peony',x:27,y:56,rotation:5,scale:.94,z:6},
+      {id:'letter-bloom-3',type:'ranunculus',x:35,y:51,rotation:-4,scale:.92,z:8},
+      {id:'letter-bloom-4',type:'tulip',x:43,y:47,rotation:6,scale:.82,z:9},
+      {id:'letter-bloom-5',type:'peony',x:50,y:46,rotation:-3,scale:1.02,z:10},
+      {id:'letter-bloom-6',type:'lily',x:57,y:47,rotation:-6,scale:.86,z:9},
+      {id:'letter-bloom-7',type:'rose',x:65,y:51,rotation:7,scale:.92,z:8},
+      {id:'letter-bloom-8',type:'ranunculus',x:73,y:56,rotation:-5,scale:.9,z:6},
+      {id:'letter-bloom-9',type:'gypsophila',x:80,y:62,rotation:5,scale:.78,z:4}
     ],
     greenery:'eucalyptus',
     theme:'rose',
     decorations:['eucalyptus','gypsophila'],
-    selectedId:'letter-bloom-2'
+    selectedId:'letter-bloom-5'
   };
   function normalizeBloom(raw,index=0) {
     const slot=defaultSlot(index);
@@ -557,6 +562,68 @@
     }
   }
 
+  function mapFlowersToEnvelope(flowers, layerId, envelopeId) {
+    const layer=$(layerId), envelope=$(envelopeId);
+    if(!layer||!envelope)return flowers.map(b=>({...b}));
+    const lr=layer.getBoundingClientRect(), er=envelope.getBoundingClientRect();
+    if(!lr.width||!lr.height||!er.width||!er.height)return flowers.map(b=>({...b}));
+    const cx=er.left+er.width/2-lr.left;
+    const cy=er.top+er.height/2-lr.top;
+    return flowers.map(b=>{
+      /* Editor coordinates are compressed into an envelope-sized scene so the bouquet
+         stays balanced on wide desktops, portrait phones and tablets alike. */
+      const x=cx+((b.x-50)/50)*er.width*.50;
+      const y=cy-er.height*.30+((b.y-62)/24)*er.height*.22;
+      return {...b,x:Math.max(2,Math.min(98,x/lr.width*100)),y:Math.max(2,Math.min(98,y/lr.height*100))};
+    });
+  }
+
+  function renderGreeneryAroundEnvelope(layerId, kind, envelopeId) {
+    const layer=$(layerId), envelope=$(envelopeId);
+    renderGreenery(layerId,kind);
+    if(!layer||!envelope)return;
+    const lr=layer.getBoundingClientRect(), er=envelope.getBoundingClientRect();
+    if(!lr.width||!lr.height||!er.width||!er.height)return;
+    const cx=er.left+er.width/2-lr.left, top=er.top-lr.top;
+    layer.querySelectorAll('.bouquet-leaf').forEach((leaf,index)=>{
+      const p=GREENERY_LEAVES[index%GREENERY_LEAVES.length];
+      const x=cx+((p[0]-50)/40)*er.width*.43;
+      const y=top+((p[1]-24)/50)*er.height*.82;
+      leaf.style.left=Math.max(1,Math.min(99,x/lr.width*100))+'%';
+      leaf.style.top=Math.max(1,Math.min(99,y/lr.height*100))+'%';
+    });
+  }
+
+  function renderAttachedDecor(layerId, decorations, envelopeId) {
+    const layer=$(layerId), envelope=$(envelopeId);
+    if(!layer)return;
+    layer.replaceChildren();
+    if(!envelope)return;
+    const lr=layer.getBoundingClientRect(),er=envelope.getBoundingClientRect();
+    if(!lr.width||!lr.height||!er.width||!er.height)return;
+    const cx=er.left+er.width/2-lr.left, top=er.top-lr.top;
+    const decorPositions={
+      petals:[[-.43,.58],[.42,.62],[-.34,.86],[.36,.88]],
+      ribbon:[[.37,.25]],
+      postcard:[[-.42,.33],[.42,.34]],
+      eucalyptus:[[-.39,.5],[.39,.52]],
+      ruscus:[[-.40,.4],[.40,.43]],
+      gypsophila:[[-.34,.35],[.34,.38]],
+      olive:[[-.39,.68],[.39,.67]],
+      salal:[[-.35,.55],[.35,.56]]
+    };
+    const used={};
+    (Array.isArray(decorations)?decorations:[]).filter(k=>decorPositions[k]).forEach(kind=>{
+      const number=used[kind]||0;used[kind]=number+1;
+      const pos=decorPositions[kind][Math.min(number,decorPositions[kind].length-1)];
+      const item=document.createElement('span');
+      item.className='letter-preview-decor decor-'+kind;
+      item.style.left=(cx+pos[0]*er.width)/lr.width*100+'%';
+      item.style.top=(top+pos[1]*er.height)/lr.height*100+'%';
+      layer.append(item);
+    });
+  }
+
   function renderLetterPreviewBouquet() {
     const layer=$('letterPreviewBouquetLayer');
     if(!layer)return;
@@ -564,21 +631,10 @@
     layer.hidden=!enabled;
     if(!enabled)return;
     setTheme(layer,letterBouquetState.theme);
-    renderGreenery('letterPreviewBouquetGreenery',letterBouquetState.greenery);
-    renderFlowers('letterPreviewBouquetFlowers',letterBouquetState.flowers,null,false);
-    const decor=$('letterPreviewBouquetDecor');
-    if(decor) {
-      decor.replaceChildren();
-      letterBouquetState.decorations.forEach((kind,index)=>{
-        if(['eucalyptus','ruscus','gypsophila','olive','salal','petals','ribbon','postcard'].includes(kind)) {
-          const item=document.createElement('span');
-          item.className='letter-preview-decor decor-'+kind;
-          item.style.left=([9,84,16,80,24,76,13,88][index%8])+'%';
-          item.style.top=([69,72,78,82,86,88,76,80][index%8])+'%';
-          decor.append(item);
-        }
-      });
-    }
+    renderGreeneryAroundEnvelope('letterPreviewBouquetGreenery',letterBouquetState.greenery,'envelope');
+    const previewFlowers=mapFlowersToEnvelope(letterBouquetState.flowers,'letterPreviewBouquetLayer','envelope');
+    renderFlowers('letterPreviewBouquetFlowers',previewFlowers,null,false);
+    renderAttachedDecor('letterPreviewBouquetDecor',letterBouquetState.decorations,'envelope');
   }
 
   function setAttachedFlowerSelected(id) {
@@ -677,18 +733,18 @@
     if(!bouquet)return;
     attachedRecipientId=recipientId || new URLSearchParams(window.location.search).get('l') || '';
     const savedPalette=THEMES[bouquet.theme]?bouquet.theme:'rose';
-    attachedRecipientFlowers=bouquet.flowers.slice(0,15).map((b,i)=>normalizeBloom(b,i));
-    if(attachedRecipientId) {
-      try {
-        const saved=JSON.parse(localStorage.getItem('letter-bouquet-layout:'+attachedRecipientId)||'null');
-        if(Array.isArray(saved))attachedRecipientFlowers=attachedRecipientFlowers.map((b,i)=>saved[i]?({...b,x:clamp(saved[i].x,8,92,b.x),y:clamp(saved[i].y,20,86,b.y)}):b);
-      } catch(_){}
-    }
+    /* Never restore recipient-side drag positions: the author controls composition,
+       while the recipient may move only the personal photographs. */
+    attachedRecipientFlowers=mapFlowersToEnvelope(
+      bouquet.flowers.slice(0,15).map((b,i)=>normalizeBloom(b,i)),
+      'letterBouquetLayer','recipientEnvelope'
+    );
     setTheme(layer,savedPalette);
-    renderGreenery('letterBouquetLiveGreenery',['eucalyptus','fern','olive','willow','ruscus','gypsophila','salal'].includes(bouquet.greenery)?bouquet.greenery:'eucalyptus');
-    renderFlowers('letterBouquetLiveFlowers',attachedRecipientFlowers,null,true);
-    renderAttachedDecor('letterBouquetLiveDecor',Array.isArray(bouquet.decorations)?bouquet.decorations:[]);
-    setupAttachedRecipientDrag();
+    renderGreeneryAroundEnvelope('letterBouquetLiveGreenery',
+      ['eucalyptus','fern','olive','willow','ruscus','gypsophila','salal'].includes(bouquet.greenery)?bouquet.greenery:'eucalyptus',
+      'recipientEnvelope');
+    renderFlowers('letterBouquetLiveFlowers',attachedRecipientFlowers,null,false);
+    renderAttachedDecor('letterBouquetLiveDecor',Array.isArray(bouquet.decorations)?bouquet.decorations:[],'recipientEnvelope');
   }
 
   function setupAttachedRecipientDrag() {
