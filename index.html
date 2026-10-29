@@ -784,6 +784,15 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (el) el.textContent = value || '';
   }
 
+  function getPreviewData() {
+    return {
+      headerText: $('headerText')?.value.trim() || 'ПИСЬМО ДЛЯ ТЕБЯ',
+      title: fields.title?.value.trim() || 'Несколько важных слов',
+      message: fields.message?.value.trim() || '',
+      theme: fields.theme?.value || 'rose'
+    };
+  }
+
   function paintPreview(data) {
     setText('previewHeader', data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ');
     setText('peekHeader', data.headerText || 'ПИСЬМО ДЛЯ ТЕБЯ');
@@ -1415,7 +1424,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     setText('photoRotationOutput', (normalized.rotation > 0 ? '+' : '') + normalized.rotation + '°');
     renderPhotoPreviews();
     renderPhotoPlacementStage();
-    paintPreview(getData());
+    paintPreview(getPreviewData());
   }
 
   function setupPhotoPlacementDragging() {
@@ -1602,7 +1611,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   }
 
     // Preview editor interactions
-  function updatePreview() { paintPreview(getData()); }
+  function updatePreview() { paintPreview(getPreviewData()); }
   ['recipient','headerText','title','message','signature','theme','backgroundMode'].forEach(id => {
     $(id)?.addEventListener('input', updatePreview);
     $(id)?.addEventListener('change', updatePreview);
