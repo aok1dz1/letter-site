@@ -749,6 +749,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
   let selectedPersonalPhotos = [];
   let selectedPhotoIndex = 0;
   let draggedPhotoIndex = -1;
+  let draggedPhotoNode = null;
   let opening = false;
   let opened = false;
   let activeEnvelope = null;
@@ -884,7 +885,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     return 'raw_' + bytesToUrlBase64(raw);
   }
 
-  function safeImageData(value, maxLength = 30000) {
+  function safeImageData(value, maxLength = 700000) {
     if (typeof value !== 'string' || value.length > maxLength) return '';
     if (value.startsWith(PUBLIC_MEDIA_PREFIX) && value.length < 600) return value;
     const supported = value.startsWith('data:image/webp;base64,') ||
@@ -918,12 +919,12 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
         signature: String(data.signature || '').slice(0, 100),
         theme: ['rose','blush','berry','lavender','sage','peach','sky','champagne','midnight'].includes(data.theme) ? data.theme : 'rose',
         backgroundMode: data.backgroundMode === 'image' ? 'image' : 'color',
-        backgroundImage: safeImageData(data.backgroundImage, 320000),
+        backgroundImage: safeImageData(data.backgroundImage, 700000),
         floatingPhotos: Array.isArray(data.floatingPhotos)
           ? data.floatingPhotos.slice(0, 15).map((photo, index) => {
               if (typeof photo === 'string') return safeImageData(photo, 220000);
               if (!photo || typeof photo !== 'object') return null;
-              const src = safeImageData(photo.src, 220000);
+              const src = safeImageData(photo.src, 700000);
               if (!src) return null;
               const normalized = normalizePhoto({ ...photo, src }, index);
               return normalized;
@@ -933,7 +934,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     } catch (_) { return null; }
   }
 
-  async function compressImageFile(file, maxSide, quality, maxDataUrlChars = 170000) {
+  async function compressImageFile(file, maxSide, quality, maxDataUrlChars = 600000) {
     if (!file || !file.type || !file.type.startsWith('image/')) {
       throw new Error('Выбери файл изображения.');
     }
@@ -941,7 +942,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     let revokeUrl = '';
     try {
       if ('createImageBitmap' in window) {
-        source = await createImageBitmap(file);
+        source = await createImageBitmap(file, { imageOrientation: 'from-image' });
       } else {
         revokeUrl = URL.createObjectURL(file);
         source = await new Promise((resolve, reject) => {
@@ -951,44 +952,68 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
           image.src = revokeUrl;
         });
       }
-
       const originalWidth = source.width || source.naturalWidth;
       const originalHeight = source.height || source.naturalHeight;
       if (!originalWidth || !originalHeight) throw new Error('В изображении не удалось определить размер.');
 
-      let sideLimit = maxSide;
-      let currentQuality = quality;
-      for (let attempt = 0; attempt < 15; attempt++) {
+      /* Preserve detail first: only lower pixel dimensions while keeping high quality.
+         Quality is reduced gently only after the image is already reasonably sized. */
+      let sideLimit = Math.max(720, maxSide);
+      let currentQuality = Math.max(.84, Math.min(.94, quality));
+      const qualityFloor = .80;
+      for (let attempt = 0; attempt < 22; attempt++) {
         const scale = Math.min(1, sideLimit / Math.max(originalWidth, originalHeight));
+        const width = Math.max(1, Math.round(originalWidth * scale));
+        const height = Math.max(1, Math.round(originalHeight * scale));
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(originalWidth * scale));
-        canvas.height = Math.max(1, Math.round(originalHeight * scale));
+        canvas.width = width;
+        canvas.height = height;
         const context = canvas.getContext('2d', { alpha: false });
         if (!context) throw new Error('Не удалось обработать изображение.');
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
         context.fillStyle = '#fff8fa';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(source, 0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 0, width, height);
+        context.drawImage(source, 0, 0, width, height);
 
         let result = canvas.toDataURL('image/webp', currentQuality);
-        if (!result.startsWith('data:image/webp;')) {
-          result = canvas.toDataURL('image/jpeg', currentQuality);
-        }
+        if (!result.startsWith('data:image/webp;')) result = canvas.toDataURL('image/jpeg', currentQuality);
         if (result.length <= maxDataUrlChars) return result;
 
-        if (currentQuality > 0.39) {
-          currentQuality = Math.max(0.39, currentQuality - 0.08);
-        } else if (sideLimit > 240) {
-          sideLimit = Math.max(240, Math.floor(sideLimit * 0.78));
-          currentQuality = quality;
+        if (sideLimit > 1050) {
+          sideLimit = Math.max(1050, Math.round(sideLimit * .88));
+        } else if (sideLimit > 850) {
+          sideLimit = Math.max(850, Math.round(sideLimit * .90));
+        } else if (currentQuality > qualityFloor) {
+          currentQuality = Math.max(qualityFloor, currentQuality - .025);
+        } else if (sideLimit > 640) {
+          sideLimit = Math.max(640, Math.round(sideLimit * .9));
         } else {
-          currentQuality = Math.max(0.25, currentQuality - 0.04);
+          throw new Error('Фото слишком большое даже после оптимизации. Попробуй файл поменьше.');
         }
       }
-      throw new Error('Изображение слишком сложное для загрузки. Попробуй другое фото или заранее уменьши его размер.');
+      throw new Error('Не удалось оптимизировать изображение без чрезмерной потери качества.');
     } finally {
       if (source && typeof source.close === 'function') source.close();
       if (revokeUrl) URL.revokeObjectURL(revokeUrl);
     }
+  }
+
+  async function mapWithConcurrency(items, concurrency, mapper, onProgress) {
+    const results = new Array(items.length);
+    let nextIndex = 0;
+    let completed = 0;
+    const workerCount = Math.min(Math.max(1, concurrency), items.length);
+    await Promise.all(Array.from({ length: workerCount }, async () => {
+      while (true) {
+        const index = nextIndex++;
+        if (index >= items.length) return;
+        results[index] = await mapper(items[index], index);
+        completed++;
+        if (typeof onProgress === 'function') onProgress(completed, items.length);
+      }
+    }));
+    return results;
   }
 
   const LEGACY_PHOTO_POSITIONS = [
@@ -1025,7 +1050,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   function normalizePhoto(photo, index = 0) {
     const src = typeof photo === 'string' ? photo : (photo && typeof photo.src === 'string' ? photo.src : '');
-    const validSrc = safeImageData(src, 220000);
+    const validSrc = safeImageData(src, 700000);
     const fallback = DEFAULT_PHOTO_POSITIONS[index % DEFAULT_PHOTO_POSITIONS.length];
     return {
       src: validSrc,
@@ -1139,7 +1164,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     const layer = $('floatingPhotos');
     if (!layer) return;
     layer.replaceChildren();
-    const validPhotos = Array.isArray(photos) ? photos.map(normalizePhoto).filter(photo => photo.src).slice(0, 6) : [];
+    const validPhotos = Array.isArray(photos) ? photos.map(normalizePhoto).filter(photo => photo.src).slice(0, 15) : [];
     validPhotos.forEach((photo, index) => {
       const defaultCandidates = [
         LEGACY_PHOTO_POSITIONS[index],
@@ -1395,19 +1420,29 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
 
   function setupPhotoPlacementDragging() {
     const stage = $('photoPlacementStage');
-    if (!stage) return;
+    if (!stage || stage.dataset.dragReady === '1') return;
+    stage.dataset.dragReady = '1';
     stage.addEventListener('pointerdown', (event) => {
       const target = event.target.closest('[data-photo-index]');
       if (!target) return;
+      const index = Number(target.dataset.photoIndex);
+      if (!Number.isInteger(index) || !selectedPersonalPhotos[index]) return;
       event.preventDefault();
-      draggedPhotoIndex = Number(target.dataset.photoIndex);
-      selectedPhotoIndex = draggedPhotoIndex;
-      stage.setPointerCapture(event.pointerId);
-      renderPhotoPreviews();
-      renderPhotoPlacementStage();
+      draggedPhotoIndex = index;
+      draggedPhotoNode = target;
+      selectedPhotoIndex = index;
+      draggedPhotoNode.setPointerCapture?.(event.pointerId);
+      stage.querySelectorAll('[data-photo-index]').forEach(node => {
+        node.classList.toggle('is-selected', Number(node.dataset.photoIndex) === index);
+      });
+      $('personalPhotoPreviews')?.querySelectorAll('.personal-photo-thumb').forEach((node, i) => {
+        node.classList.toggle('is-selected', i === index);
+      });
+      syncPhotoEditorControls();
     });
     stage.addEventListener('pointermove', (event) => {
-      if (draggedPhotoIndex < 0 || !(event.buttons & 1 || event.pointerType === 'touch')) return;
+      if (draggedPhotoIndex < 0 || !draggedPhotoNode) return;
+      if (!(event.buttons & 1 || event.pointerType === 'touch' || event.pointerType === 'pen')) return;
       const photo = selectedPersonalPhotos[draggedPhotoIndex];
       if (!photo) return;
       const rect = stage.getBoundingClientRect();
@@ -1415,9 +1450,15 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
       normalized.x = Math.max(7, Math.min(93, ((event.clientX - rect.left) / rect.width) * 100));
       normalized.y = Math.max(12, Math.min(88, ((event.clientY - rect.top) / rect.height) * 100));
       selectedPersonalPhotos[draggedPhotoIndex] = normalized;
-      renderPhotoPlacementStage();
+      draggedPhotoNode.style.left = normalized.x + '%';
+      draggedPhotoNode.style.top = normalized.y + '%';
     });
-    const stop = () => { draggedPhotoIndex = -1; };
+    const stop = () => {
+      if (draggedPhotoIndex < 0) return;
+      draggedPhotoIndex = -1;
+      draggedPhotoNode = null;
+      renderPhotoPreviews();
+    };
     stage.addEventListener('pointerup', stop);
     stage.addEventListener('pointercancel', stop);
     stage.addEventListener('lostpointercapture', stop);
@@ -1603,7 +1644,7 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     if (!file) return;
     $('imageStatus').textContent = 'Обрабатываю фоновое фото…';
     try {
-      selectedBackgroundImage = await compressImageFile(file, 1800, 0.82, 300000);
+      selectedBackgroundImage = await compressImageFile(file, 2400, 0.92, 600000);
       $('backgroundMode').value = 'image';
       syncBackgroundControls();
       renderBackgroundPreview();
@@ -1631,9 +1672,10 @@ input:focus,textarea:focus,select:focus{border-color:#d97c9b;box-shadow:0 0 0 3p
     try {
       // More pixels and higher initial WebP quality; the API stores images separately,
       // so the shared URL remains short even when many photos are used.
-      const encodedPhotos = await Promise.all(limited.map(file =>
-        compressImageFile(file, 1100, 0.84, 220000)
-      ));
+      const encodedPhotos = await mapWithConcurrency(limited, 2,
+        file => compressImageFile(file, 2200, 0.92, 600000),
+        (done,total) => { $('imageStatus').textContent = 'Обрабатываю фотографии: ' + done + ' из ' + total + '…'; }
+      );
       const appended = encodedPhotos.map((src, batchIndex) => {
         const index = startingCount + batchIndex;
         const pos = DEFAULT_PHOTO_POSITIONS[index] || DEFAULT_PHOTO_POSITIONS[DEFAULT_PHOTO_POSITIONS.length - 1];
