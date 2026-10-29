@@ -575,8 +575,13 @@
     return flowers.map(b=>{
       /* Editor coordinates are compressed into an envelope-sized scene so the bouquet
          stays balanced on wide desktops, portrait phones and tablets alike. */
-      const x=cx+((b.x-50)/50)*er.width*.50;
-      const y=cy-er.height*.30+((b.y-62)/24)*er.height*.22;
+      const isRecipient = layerId === 'letterBouquetLayer';
+      const nodeWidth = isRecipient
+        ? Math.max(52,Math.min(100,window.innerWidth*.11))
+        : Math.max(78,Math.min(132,lr.width*.17));
+      const nodeHeight=nodeWidth*1.8;
+      const x=cx+((b.x-50)/50)*er.width*.72;
+      const y=er.top+nodeHeight*.26-8+((b.y-54)/18)*nodeHeight*.12;
       return {...b,x:Math.max(2,Math.min(98,x/lr.width*100)),y:Math.max(2,Math.min(98,y/lr.height*100))};
     });
   }
@@ -590,8 +595,8 @@
     const cx=er.left+er.width/2-lr.left, top=er.top-lr.top;
     layer.querySelectorAll('.bouquet-leaf').forEach((leaf,index)=>{
       const p=GREENERY_LEAVES[index%GREENERY_LEAVES.length];
-      const x=cx+((p[0]-50)/40)*er.width*.43;
-      const y=top+((p[1]-24)/50)*er.height*.82;
+      const x=cx+((p[0]-50)/40)*er.width*.52;
+      const y=top-er.height*.18+((p[1]-24)/50)*er.height*.72;
       leaf.style.left=Math.max(1,Math.min(99,x/lr.width*100))+'%';
       leaf.style.top=Math.max(1,Math.min(99,y/lr.height*100))+'%';
     });
